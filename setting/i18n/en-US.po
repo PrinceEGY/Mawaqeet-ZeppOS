@@ -1,2 +1,41 @@
 msgid "example"
 msgstr "This is an example in app-side"
+
+msgid "prayer_times_settings"
+msgstr "Prayer Times Settings"
+
+msgid "location_settings"
+msgstr "Location Settings"
+
+msgid "location_settings_desc"
+msgstr "Configure your location for accurate prayer times"
+
+msgid "location_settings_coming_soon"
+msgstr "Location settings will be available soon"
+
+msgid "notification_settings"
+msgstr "Prayer Notifications"
+
+msgid "notification_settings_desc"
+msgstr "Set up prayer time alerts and reminders"
+
+msgid "notification_settings_coming_soon"
+msgstr "Notification settings will be available soon"
+
+msgid "view_options"
+msgstr "Display Options"
+
+msgid "view_options_desc"
+msgstr "Customize how prayer times are displayed"
+
+msgid "view_options_coming_soon"
+msgstr "Display options will be available soon"
+
+msgid "calculation_method"
+msgstr "Calculation Method"
+
+msgid "calculation_method_desc"
+msgstr "Choose how prayer times are calculated"
+
+msgid "calculation_method_coming_soon"
+msgstr "Calculation method settings will be available soon"
