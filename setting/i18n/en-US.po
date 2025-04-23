@@ -7,8 +7,11 @@ msgstr "Prayer Times Settings"
 msgid "location_settings"
 msgstr "Location Settings"
 
-msgid "location_settings_desc"
-msgstr "Configure your location for accurate prayer times"
+msgid "loc_select_country"
+msgstr "Select Country"
+
+msgid "loc_select_city"
+msgstr "Select City"
 
 msgid "location_settings_coming_soon"
 msgstr "Location settings will be available soon"
@@ -39,3 +42,51 @@ msgstr "Choose how prayer times are calculated"
 
 msgid "calculation_method_coming_soon"
 msgstr "Calculation method settings will be available soon"
+
+msgid "current_location"
+msgstr "Current Location"
+
+msgid "no_location_selected"
+msgstr "No location selected"
+
+msgid "current_selection"
+msgstr "Current Selection"
+
+msgid "back"
+msgstr "Back"
+
+msgid "back_to_countries"
+msgstr "Back to Countries"
+
+msgid "last_update"
+msgstr "Prayer Times Updated"
+
+msgid "never_updated"
+msgstr "Never updated"
+
+msgid "update_now"
+msgstr "Update"
+
+msgid "just_now"
+msgstr "Just now"
+
+msgid "minute_ago"
+msgstr "minute ago"
+
+msgid "minutes_ago"
+msgstr "minutes ago"
+
+msgid "hour_ago"
+msgstr "hour ago"
+
+msgid "hours_ago"
+msgstr "hours ago"
+
+msgid "day_ago"
+msgstr "day ago"
+
+msgid "days_ago"
+msgstr "days ago"
+
+msgid "prayer_update_clarification"
+msgstr "The app fetches prayer times for the year ahead, So you don't need to update often."

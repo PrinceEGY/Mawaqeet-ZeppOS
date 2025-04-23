@@ -1,33 +1,25 @@
 import { gettext } from "i18n";
+import { Theme } from "../../utils/theme";
+import { AppBar } from "../../components/app_bar";
+import { TEXT_STYLES, LAYOUT_STYLES, SPACING } from "../../utils/styles";
 
-// Export the notification settings UI component
 export function notificationSettingsPage(navigateBackCallback) {
-  return Section(
-    {
-      marginTop: "4px",
-      padding: "4px",
-    },
-    [
-      // Header with back button
-      View({ padding: "12px 0", flexDirection: "row", alignItems: "center" }, [
-        Button({
-          style: { marginRight: "8px" },
-          label: "←",
-          onClick: () => {
-            navigateBackCallback();
-          },
-        }),
-        Text(
-          { fontSize: "20px", fontWeight: "bold" },
-          gettext("notification_settings")
-        ),
-      ]),
+  return Section({ style: LAYOUT_STYLES.mainContainer }, [
+    AppBar({
+      title: gettext("notification_settings"),
+      onBack: navigateBackCallback,
+      showBackButton: true,
+    }),
 
-      // Notification settings content
-      Text(
-        { padding: "16px", textAlign: "center" },
-        gettext("notification_settings_coming_soon")
-      ),
-    ]
-  );
+    // Notification settings content
+    Text(
+      {
+        style: {
+          ...TEXT_STYLES.normal,
+          padding: SPACING.lg,
+        },
+      },
+      gettext("notification_settings_coming_soon")
+    ),
+  ]);
 }

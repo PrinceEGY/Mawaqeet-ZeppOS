@@ -5,8 +5,18 @@ import { viewSettingsPage } from "./pages/view/index";
 import { calculationSettingsPage } from "./pages/calculation/index";
 import { GeoService } from "../shared/geo_data.js";
 import { DEFAULT_LOCATION } from "./utils/constants.js";
-import { MenuButton } from "./utils/menu_button.js";
-import { Spacer } from "./utils/spacer.js";
+import { MenuButton } from "./components/menu_button.js";
+import { Spacer } from "./components/spacer.js";
+import { Theme } from "./utils/theme.js";
+import { AppBar } from "./components/app_bar.js";
+import { Panel } from "./components/panel.js";
+import {
+  TEXT_STYLES,
+  BUTTON_STYLES,
+  LAYOUT_STYLES,
+  SPACING,
+} from "./utils/styles.js";
+import { getTimeAgo } from "./utils/helpers.js";
 
 AppSettingsPage({
   onInit() {
@@ -63,6 +73,20 @@ AppSettingsPage({
     }
   },
 
+  // Handle manual update action
+  handleManualUpdate(props) {
+    console.log("Manual update triggered");
+
+    // Set the current timestamp
+    const currentTime = new Date().getTime();
+    props.settingsStorage.setItem(
+      "lastPrayerTimesUpdate",
+      currentTime.toString()
+    );
+
+    // Additional logic for updating prayer times can be added here
+  },
+
   build(props) {
     // Initialize defaults if needed
     this.initializeDefaultLocation(props);
@@ -86,11 +110,91 @@ AppSettingsPage({
     return (pages[navState.currentPage] || pages.main)();
   },
 
+  // Create location information panel
+  createLocationPanel(currentLocation) {
+    return [
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.heading,
+            marginBottom: SPACING.xs,
+          },
+        },
+        gettext("current_location")
+      ),
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.normal,
+            marginBottom: SPACING.md,
+          },
+        },
+        currentLocation
+          ? `${currentLocation.country}, ${currentLocation.city}`
+          : gettext("no_location_selected")
+      ),
+    ];
+  },
+
+  // Create update information panel
+  createUpdatePanel(lastUpdateText, props) {
+    return [
+      // Separator line
+      View({
+        style: {
+          ...LAYOUT_STYLES.separator,
+          marginBottom: SPACING.md,
+        },
+      }),
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.subheading,
+            marginBottom: SPACING.xs,
+          },
+        },
+        gettext("last_update")
+      ),
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.normal,
+            marginBottom: SPACING.xs,
+          },
+        },
+        lastUpdateText || gettext("never_updated")
+      ),
+      // Add explanatory text about update process
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.small,
+            marginBottom: SPACING.md,
+          },
+        },
+        gettext("prayer_update_clarification")
+      ),
+      // Manual update button
+      Button({
+        label: gettext("update_now"),
+        style: {
+          ...BUTTON_STYLES.primary,
+          width: "80%",
+        },
+        onClick: () => this.handleManualUpdate(props),
+      }),
+    ];
+  },
+
   renderMainMenu(props) {
     // Get current location
     const currentLocation = props.settingsStorage.getItem("selectedLocation")
       ? JSON.parse(props.settingsStorage.getItem("selectedLocation"))
       : null;
+
+    // Get last update time
+    const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
+    const lastUpdateText = getTimeAgo(lastUpdate);
 
     // Define menu items for cleaner rendering
     const menuItems = [
@@ -112,62 +216,34 @@ AppSettingsPage({
       },
     ];
 
-    return Section(
-      {
-        style: {
-          color: "white",
-          backgroundColor: "black",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          overflowY: "auto",
-          overflowX: "auto",
-        },
-      },
-      [
-        // Title bar section
-        View(
-          {
-            style: {
-              padding: "16px",
-              backgroundColor: "#202020",
-              width: "100%",
-              margin: 0,
-            },
-          },
-          [
-            Text(
-              {
-                style: {
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                },
-              },
-              gettext("prayer_times_settings")
-            ),
-          ]
-        ),
+    return Section({ style: LAYOUT_STYLES.mainContainer }, [
+      // Title bar section
+      AppBar({
+        title: gettext("prayer_times_settings"),
+        showBackButton: false,
+      }),
 
-        Spacer({ height: "16px" }),
+      Spacer({ height: SPACING.sm }),
 
-        // Main menu list with navigation options
-        View(
-          {
-            style: {
-              padding: "0 16px",
-              backgroundColor: "#202020",
-            },
-          },
-          menuItems.map((item) =>
-            MenuButton({
-              label: item.label,
-              onClick: () => this.navigateTo(item.page, props),
-            })
-          )
+      // Panel showing current location and last update time
+      Panel({
+        children: [
+          ...this.createLocationPanel(currentLocation),
+          ...this.createUpdatePanel(lastUpdateText, props),
+        ],
+      }),
+
+      Spacer({ height: SPACING.sm }),
+
+      // Panel for menu items
+      Panel({
+        children: menuItems.map((item) =>
+          MenuButton({
+            label: item.label,
+            onClick: () => this.navigateTo(item.page, props),
+          })
         ),
-      ]
-    );
+      }),
+    ]);
   },
 });

@@ -1,33 +1,25 @@
 import { gettext } from "i18n";
+import { Theme } from "../../utils/theme";
+import { AppBar } from "../../components/app_bar";
+import { TEXT_STYLES, LAYOUT_STYLES, SPACING } from "../../utils/styles";
 
-// Export the calculation settings UI component
 export function calculationSettingsPage(navigateBackCallback) {
-  return Section(
-    {
-      marginTop: "4px",
-      padding: "4px",
-    },
-    [
-      // Header with back button
-      View({ padding: "12px 0", flexDirection: "row", alignItems: "center" }, [
-        Button({
-          style: { marginRight: "8px" },
-          label: "←",
-          onClick: () => {
-            navigateBackCallback();
-          },
-        }),
-        Text(
-          { fontSize: "20px", fontWeight: "bold" },
-          gettext("calculation_method")
-        ),
-      ]),
+  return Section({ style: LAYOUT_STYLES.mainContainer }, [
+    AppBar({
+      title: gettext("calculation_method"),
+      onBack: navigateBackCallback,
+      showBackButton: true,
+    }),
 
-      // Calculation settings content
-      Text(
-        { padding: "16px", textAlign: "center" },
-        gettext("calculation_method_coming_soon")
-      ),
-    ]
-  );
+    // Calculation settings content
+    Text(
+      {
+        style: {
+          ...TEXT_STYLES.normal,
+          padding: SPACING.lg,
+        },
+      },
+      gettext("calculation_method_coming_soon")
+    ),
+  ]);
 }

@@ -1,16 +1,10 @@
 import { gettext } from "i18n";
 import { GeoService } from "../../../shared/geo_data";
+import { Theme } from "../../utils/theme";
+import { AppBar } from "../../components/app_bar";
 
 export function locationSettingsPage(onBack, props) {
   // Extract common UI elements
-  const createHeader = (title) => {
-    return View({ padding: "12px 0" }, [
-      Text(
-        { fontSize: "20px", fontWeight: "bold", textAlign: "center" },
-        title
-      ),
-    ]);
-  };
 
   const createButtonList = (items, onClick) => {
     return View(
@@ -18,6 +12,10 @@ export function locationSettingsPage(onBack, props) {
       items.map((item) =>
         View({ padding: "4px 0" }, [
           Button({
+            style: {
+              backgroundColor: Theme.bgSecondaryColor,
+              color: Theme.textPrimaryColor,
+            },
             label: typeof item === "string" ? item : item.city,
             onClick: () => onClick(item),
           }),
@@ -61,14 +59,18 @@ export function locationSettingsPage(onBack, props) {
 
   // Helper functions to render different screens
   const renderCountrySelection = (locationState, currentLocation) => {
-    return Section({}, [
-      createHeader(gettext("select_country")),
+    return Section({ backgroundColor: Theme.bgPrimaryColor }, [
+      AppBar({
+        title: gettext("loc_select_country"),
+        onBack: onBack,
+        showBackButton: true,
+      }),
 
       // Show current selection if exists
       currentLocation &&
         View({ padding: "8px 0", textAlign: "center" }, [
           Text(
-            { fontSize: "16px", color: "#666" },
+            { fontSize: "16px", color: Theme.dividerColor },
             `${gettext("current_selection")}: ${currentLocation.country}, ${
               currentLocation.city
             }`
@@ -81,22 +83,22 @@ export function locationSettingsPage(onBack, props) {
         locationState.step = "city";
         saveLocationState(locationState);
       }),
-
-      // Back button
-      View({ padding: "16px 0" }, [
-        Button({
-          label: gettext("back"),
-          onClick: onBack,
-        }),
-      ]),
     ]);
   };
 
   const renderCitySelection = (locationState, currentLocation) => {
-    return Section({}, [
-      createHeader(
-        `${locationState.selectedCountry} - ${gettext("select_city")}`
-      ),
+    return Section({ backgroundColor: Theme.bgPrimaryColor }, [
+      AppBar({
+        title: `${locationState.selectedCountry} | ${gettext(
+          "loc_select_city"
+        )}`,
+        onBack: () => {
+          locationState.step = "country";
+          locationState.selectedCity = null;
+          saveLocationState(locationState);
+        },
+        showBackButton: true,
+      }),
 
       // List of cities
       createButtonList(
@@ -116,9 +118,12 @@ export function locationSettingsPage(onBack, props) {
         }
       ),
 
-      // Back button only (Submit button removed)
       View({ padding: "16px 0" }, [
         Button({
+          style: {
+            backgroundColor: Theme.bgSecondaryColor,
+            color: Theme.textPrimaryColor,
+          },
           label: gettext("back_to_countries"),
           onClick: () => {
             locationState.step = "country";
