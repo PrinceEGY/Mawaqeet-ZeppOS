@@ -3,99 +3,87 @@ import { locationSettingsPage } from "./pages/location/index";
 import { notificationSettingsPage } from "./pages/notification/index";
 import { viewSettingsPage } from "./pages/view/index";
 import { calculationSettingsPage } from "./pages/calculation/index";
-import { GEO_DATA } from "../shared/geo_data.js";
+import { GeoService } from "../shared/geo_data.js";
+import { DEFAULT_LOCATION } from "./utils/constants.js";
 import { MenuButton } from "./utils/menu_button.js";
 import { Spacer } from "./utils/spacer.js";
 
 AppSettingsPage({
   onInit() {
     console.log("Settings page initialized");
+  },
 
-    // Initialize location with default (Egypt, Cairo) if not set
-    this.initializeDefaultLocation();
+  // Helper functions for state management
+  getNavState(props) {
+    return props.settingsStorage.getItem("navState")
+      ? JSON.parse(props.settingsStorage.getItem("navState"))
+      : { currentPage: "main", history: [] };
+  },
+
+  saveNavState(props, navState) {
+    props.settingsStorage.setItem("navState", JSON.stringify(navState));
   },
 
   initializeDefaultLocation(props) {
     if (!props.settingsStorage.getItem("selectedLocation")) {
-      // Find Egypt/Cairo in GEO_DATA
-      const defaultLocation = GEO_DATA.find(
-        (item) => item.country === "Egypt" && item.city === "Cairo"
-      );
+      const defaultLocation = GeoService.getCityByName(DEFAULT_LOCATION.city);
 
       if (defaultLocation) {
         props.settingsStorage.setItem(
           "selectedLocation",
           JSON.stringify({
-            country: "Egypt",
-            city: "Cairo",
-            latitude: defaultLocation.latitude,
-            longitude: defaultLocation.longitude,
+            country: defaultLocation.country,
+            city: defaultLocation.city,
+            latitude: defaultLocation.lat,
+            longitude: defaultLocation.lng,
           })
         );
-        console.log("Default location set to Egypt, Cairo");
+        console.log(`Default location set to ${DEFAULT_LOCATION.city}`);
       } else {
-        console.log("Default location (Egypt, Cairo) not found in GEO_DATA");
+        console.log(
+          `Default location (${DEFAULT_LOCATION.city}) not found in GEO_DATA`
+        );
       }
     }
   },
 
   // Navigation helper methods
   navigateTo(page, props) {
-    const navState = props.settingsStorage.getItem("navState")
-      ? JSON.parse(props.settingsStorage.getItem("navState"))
-      : { currentPage: "main", history: [] };
-
+    const navState = this.getNavState(props);
     navState.history.push(navState.currentPage);
     navState.currentPage = page;
-
-    props.settingsStorage.setItem("navState", JSON.stringify(navState));
+    this.saveNavState(props, navState);
   },
 
   navigateBack(props) {
-    const navState = props.settingsStorage.getItem("navState")
-      ? JSON.parse(props.settingsStorage.getItem("navState"))
-      : { currentPage: "main", history: [] };
-
+    const navState = this.getNavState(props);
     if (navState.history.length > 0) {
       navState.currentPage = navState.history.pop();
-      props.settingsStorage.setItem("navState", JSON.stringify(navState));
+      this.saveNavState(props, navState);
     }
   },
 
   build(props) {
     // Initialize defaults if needed
-    if (!props.settingsStorage.getItem("selectedLocation")) {
-      this.initializeDefaultLocation(props);
-    }
-
-    // Initialize nav state if it doesn't exist
-    if (!props.settingsStorage.getItem("navState")) {
-      props.settingsStorage.setItem(
-        "navState",
-        JSON.stringify({
-          currentPage: "main",
-          history: [],
-        })
-      );
-    }
+    this.initializeDefaultLocation(props);
 
     // Get the current navigation state
-    const navState = JSON.parse(props.settingsStorage.getItem("navState"));
+    const navState = this.getNavState(props);
 
     // Render the appropriate page based on the navigation state
-    switch (navState.currentPage) {
-      case "location":
-        return locationSettingsPage(() => this.navigateBack(props), props);
-      case "notification":
-        return notificationSettingsPage(() => this.navigateBack(props));
-      case "view":
-        return viewSettingsPage(() => this.navigateBack(props));
-      case "calculation":
-        return calculationSettingsPage(() => this.navigateBack(props));
-      default:
-        // Main menu
-        return this.renderMainMenu(props);
-    }
+    const pages = {
+      location: () =>
+        locationSettingsPage(() => this.navigateBack(props), props),
+      notification: () =>
+        notificationSettingsPage(() => this.navigateBack(props)),
+      view: () => viewSettingsPage(() => this.navigateBack(props)),
+      calculation: () =>
+        calculationSettingsPage(() => this.navigateBack(props)),
+      main: () => this.renderMainMenu(props),
+    };
+
+    // Use the page renderer function or default to main menu
+    return (pages[navState.currentPage] || pages.main)();
   },
 
   renderMainMenu(props) {
@@ -103,6 +91,26 @@ AppSettingsPage({
     const currentLocation = props.settingsStorage.getItem("selectedLocation")
       ? JSON.parse(props.settingsStorage.getItem("selectedLocation"))
       : null;
+
+    // Define menu items for cleaner rendering
+    const menuItems = [
+      {
+        label: gettext("location_settings"),
+        page: "location",
+      },
+      {
+        label: gettext("notification_settings"),
+        page: "notification",
+      },
+      {
+        label: gettext("view_options"),
+        page: "view",
+      },
+      {
+        label: gettext("calculation_method"),
+        page: "calculation",
+      },
+    ];
 
     return Section(
       {
@@ -152,31 +160,12 @@ AppSettingsPage({
               backgroundColor: "#202020",
             },
           },
-          [
-            // Location settings option
+          menuItems.map((item) =>
             MenuButton({
-              label: gettext("location_settings"),
-              onClick: () => this.navigateTo("location", props),
-            }),
-
-            // Notification settings option
-            MenuButton({
-              label: gettext("notification_settings"),
-              onClick: () => this.navigateTo("notification", props),
-            }),
-
-            // View options
-            MenuButton({
-              label: gettext("view_options"),
-              onClick: () => this.navigateTo("view", props),
-            }),
-
-            // Calculation method option
-            MenuButton({
-              label: gettext("calculation_method"),
-              onClick: () => this.navigateTo("calculation", props),
-            }),
-          ]
+              label: item.label,
+              onClick: () => this.navigateTo(item.page, props),
+            })
+          )
         ),
       ]
     );

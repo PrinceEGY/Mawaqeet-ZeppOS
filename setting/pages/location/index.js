@@ -1,50 +1,86 @@
 import { gettext } from "i18n";
-import { GEO_DATA } from "../../../shared/geo_data.js";
+import { GeoService } from "../../../shared/geo_data";
 
 export function locationSettingsPage(onBack, props) {
-  // Helper functions to render different screens
-  const renderCountrySelection = (props, locationState, currentLocation) => {
-    // Extract unique countries from GEO_DATA
-    const countries = [...new Set(GEO_DATA.map((item) => item.country))].sort();
-
-    return Section({}, [
-      View({ padding: "12px 0" }, [
-        Text(
-          { fontSize: "20px", fontWeight: "bold", textAlign: "center" },
-          gettext("select_country")
-        ),
-
-        // Show current selection if exists
-        currentLocation &&
-          View({ padding: "8px 0", textAlign: "center" }, [
-            Text(
-              { fontSize: "16px", color: "#666" },
-              `${gettext("current_selection")}: ${currentLocation.country}, ${
-                currentLocation.city
-              }`
-            ),
-          ]),
-      ]),
-
-      // List of countries as a vertical list
-      View(
-        { padding: "8px 0" },
-        countries.map((country) =>
-          View({ padding: "4px 0" }, [
-            Button({
-              label: country,
-              onClick: () => {
-                locationState.selectedCountry = country;
-                locationState.step = "city";
-                props.settingsStorage.setItem(
-                  "locationState",
-                  JSON.stringify(locationState)
-                );
-              },
-            }),
-          ])
-        )
+  // Extract common UI elements
+  const createHeader = (title) => {
+    return View({ padding: "12px 0" }, [
+      Text(
+        { fontSize: "20px", fontWeight: "bold", textAlign: "center" },
+        title
       ),
+    ]);
+  };
+
+  const createButtonList = (items, onClick) => {
+    return View(
+      { padding: "8px 0" },
+      items.map((item) =>
+        View({ padding: "4px 0" }, [
+          Button({
+            label: typeof item === "string" ? item : item.city,
+            onClick: () => onClick(item),
+          }),
+        ])
+      )
+    );
+  };
+
+  // Manage location state
+  const getLocationState = () => {
+    return props.settingsStorage.getItem("locationState")
+      ? JSON.parse(props.settingsStorage.getItem("locationState"))
+      : {
+          step: "country",
+          selectedCountry: null,
+          selectedCity: null,
+        };
+  };
+
+  const saveLocationState = (state) => {
+    props.settingsStorage.setItem("locationState", JSON.stringify(state));
+  };
+
+  const getCurrentLocation = () => {
+    return props.settingsStorage.getItem("selectedLocation")
+      ? JSON.parse(props.settingsStorage.getItem("selectedLocation"))
+      : null;
+  };
+
+  const saveSelectedLocation = (city) => {
+    props.settingsStorage.setItem(
+      "selectedLocation",
+      JSON.stringify({
+        country: city.country,
+        city: city.city,
+        latitude: city.lat,
+        longitude: city.lng,
+      })
+    );
+  };
+
+  // Helper functions to render different screens
+  const renderCountrySelection = (locationState, currentLocation) => {
+    return Section({}, [
+      createHeader(gettext("select_country")),
+
+      // Show current selection if exists
+      currentLocation &&
+        View({ padding: "8px 0", textAlign: "center" }, [
+          Text(
+            { fontSize: "16px", color: "#666" },
+            `${gettext("current_selection")}: ${currentLocation.country}, ${
+              currentLocation.city
+            }`
+          ),
+        ]),
+
+      // List of countries
+      createButtonList(GeoService.COUNTRIES, (country) => {
+        locationState.selectedCountry = country;
+        locationState.step = "city";
+        saveLocationState(locationState);
+      }),
 
       // Back button
       View({ padding: "16px 0" }, [
@@ -56,113 +92,54 @@ export function locationSettingsPage(onBack, props) {
     ]);
   };
 
-  const renderCitySelection = (props, locationState, currentLocation) => {
-    // Filter cities based on selected country
-    const cities = GEO_DATA.filter(
-      (item) => item.country === locationState.selectedCountry
-    )
-      .map((item) => item.city)
-      .sort();
-
+  const renderCitySelection = (locationState, currentLocation) => {
     return Section({}, [
-      View({ padding: "12px 0" }, [
-        Text(
-          { fontSize: "20px", fontWeight: "bold", textAlign: "center" },
-          `${locationState.selectedCountry} - ${gettext("select_city")}`
-        ),
-      ]),
-
-      // List of cities as a vertical list
-      View(
-        { padding: "8px 0" },
-        cities.map((city) =>
-          View({ padding: "4px 0" }, [
-            Button({
-              label: city,
-              onClick: () => {
-                locationState.selectedCity = city;
-                props.settingsStorage.setItem(
-                  "locationState",
-                  JSON.stringify(locationState)
-                );
-
-                // Get lat/long data for the selected city
-                const selectedLocation = GEO_DATA.find(
-                  (item) =>
-                    item.country === locationState.selectedCountry &&
-                    item.city === city
-                );
-
-                // Save the selected location
-                props.settingsStorage.setItem(
-                  "selectedLocation",
-                  JSON.stringify({
-                    country: locationState.selectedCountry,
-                    city: locationState.selectedCity,
-                    latitude: selectedLocation.latitude,
-                    longitude: selectedLocation.longitude,
-                  })
-                );
-              },
-            }),
-          ])
-        )
+      createHeader(
+        `${locationState.selectedCountry} - ${gettext("select_city")}`
       ),
 
-      // Submit and Back buttons
-      View({ padding: "16px 0" }, [
-        locationState.selectedCity &&
-          Button({
-            label: gettext("submit"),
-            onClick: () => {
-              // Reset location state
-              props.settingsStorage.setItem(
-                "locationState",
-                JSON.stringify({
-                  step: "country",
-                  selectedCountry: null,
-                  selectedCity: null,
-                })
-              );
-              onBack();
-            },
-          }),
+      // List of cities
+      createButtonList(
+        GeoService.getCitiesByCountry(locationState.selectedCountry),
+        (city) => {
+          locationState.selectedCity = city;
+          saveLocationState(locationState);
+          saveSelectedLocation(city);
 
+          // Reset location state and return to main menu immediately
+          saveLocationState({
+            step: "country",
+            selectedCountry: null,
+            selectedCity: null,
+          });
+          onBack();
+        }
+      ),
+
+      // Back button only (Submit button removed)
+      View({ padding: "16px 0" }, [
         Button({
           label: gettext("back_to_countries"),
           onClick: () => {
             locationState.step = "country";
             locationState.selectedCity = null;
-            props.settingsStorage.setItem(
-              "locationState",
-              JSON.stringify(locationState)
-            );
+            saveLocationState(locationState);
           },
         }),
       ]),
     ]);
   };
 
-  // Get or initialize location state
-  const locationState = props.settingsStorage.getItem("locationState")
-    ? JSON.parse(props.settingsStorage.getItem("locationState"))
-    : {
-        step: "country",
-        selectedCountry: null,
-        selectedCity: null,
-      };
-
-  // Get current selected location if any
-  const currentLocation = props.settingsStorage.getItem("selectedLocation")
-    ? JSON.parse(props.settingsStorage.getItem("selectedLocation"))
-    : null;
+  // Get states
+  const locationState = getLocationState();
+  const currentLocation = getCurrentLocation();
 
   console.log("Location settings page initialized");
 
   // Render based on current step
-  if (locationState.step === "country") {
-    return renderCountrySelection(props, locationState, currentLocation);
-  } else if (locationState.step === "city") {
-    return renderCitySelection(props, locationState, currentLocation);
+  if (locationState.step === "city") {
+    return renderCitySelection(locationState, currentLocation);
+  } else {
+    return renderCountrySelection(locationState, currentLocation);
   }
 }
