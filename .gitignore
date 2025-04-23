@@ -136,3 +136,13 @@ dist
 .pnp.*
 
 .vscode
+
+.DS_Store
+node_modules/**
+dist/*
+npm-debug.log
+
+yarn.lock
+package-lock.json
+selenium-debug.log
+.idea
