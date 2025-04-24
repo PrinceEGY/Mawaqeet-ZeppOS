@@ -1,8 +1,9 @@
 import { ARROW_ICON } from "../utils/icons";
 import { Theme } from "../utils/theme";
+import { SPACING } from "../utils/styles";
 
 export function MenuButton(options) {
-  const { label, onClick } = options;
+  const { label, onClick, showArrow = true } = options;
 
   return Button({
     style: {
@@ -11,7 +12,7 @@ export function MenuButton(options) {
       width: "100%",
       borderBottom: `1px solid ${Theme.dividerColor}`,
       borderRadius: 0,
-      padding: "12px 8px",
+      padding: `${SPACING.md} ${SPACING.sm}`,
       fontWeight: "normal",
       fontSize: "16px",
     },
@@ -27,14 +28,15 @@ export function MenuButton(options) {
       },
       [
         Text({}, label),
-        View({
-          style: {
-            width: "32px",
-            height: "32px",
-            backgroundImage: ARROW_ICON,
-            backgroundRepeat: "no-repeat",
-          },
-        }),
+        showArrow &&
+          View({
+            style: {
+              width: "32px",
+              height: "32px",
+              backgroundImage: ARROW_ICON,
+              backgroundRepeat: "no-repeat",
+            },
+          }),
       ]
     ),
     onClick,

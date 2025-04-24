@@ -1,11 +1,12 @@
 import { Theme } from "../utils/theme";
 import { BACK_BTN_ICON } from "../utils/icons";
+import { SPACING } from "../utils/styles";
 
 export function AppBar({ title, onBack, showBackButton = true }) {
   return View(
     {
       style: {
-        padding: "16px",
+        padding: SPACING.lg,
         backgroundColor: Theme.bgSecondaryColor,
         width: "100%",
         margin: 0,
@@ -22,10 +23,10 @@ export function AppBar({ title, onBack, showBackButton = true }) {
       showBackButton &&
         Button({
           style: {
-            marginRight: "8px",
+            marginRight: SPACING.sm,
             backgroundColor: Theme.bgSecondaryColor,
             color: Theme.textPrimaryColor,
-            padding: "4px 8px",
+            padding: `${SPACING.xs} ${SPACING.sm}`,
             minWidth: "32px",
             boxShadow: "none",
           },

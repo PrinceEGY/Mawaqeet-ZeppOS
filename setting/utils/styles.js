@@ -19,7 +19,7 @@ export const TEXT_STYLES = {
   small: {
     fontSize: "12px",
     textAlign: "center",
-    color: Theme.textSecondaryColor || "#888",
+    color: Theme.textSecondaryColor,
     width: "100%",
     display: "block",
     padding: "0 10px",

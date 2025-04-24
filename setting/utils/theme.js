@@ -8,6 +8,7 @@ export class Theme {
 
   // Text colors
   static textPrimaryColor = "#FFFFFF";
+  static textSecondaryColor = "#888888";
 
   // Accent colors
   static accentPrimaryColor = "#3E8EED";

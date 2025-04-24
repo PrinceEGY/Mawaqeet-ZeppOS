@@ -1,9 +1,10 @@
 import { Theme } from "../utils/theme";
+import { SPACING } from "../utils/styles";
 
 export function Panel({
   children,
   margin = "0px",
-  padding = "12px",
+  padding = SPACING.md,
   style = {},
 }) {
   return View(

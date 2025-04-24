@@ -1,29 +1,18 @@
 import { gettext } from "i18n";
 import { GeoService } from "../../../shared/geo_data";
-import { Theme } from "../../utils/theme";
 import { AppBar } from "../../components/app_bar";
+import { Panel } from "../../components/panel";
+import { Spacer } from "../../components/spacer";
+import { MenuButton } from "../../components/menu_button";
+import {
+  TEXT_STYLES,
+  LAYOUT_STYLES,
+  BUTTON_STYLES,
+  SPACING,
+} from "../../utils/styles";
+import { Theme } from "../../utils/theme";
 
 export function locationSettingsPage(onBack, props) {
-  // Extract common UI elements
-
-  const createButtonList = (items, onClick) => {
-    return View(
-      { padding: "8px 0" },
-      items.map((item) =>
-        View({ padding: "4px 0" }, [
-          Button({
-            style: {
-              backgroundColor: Theme.bgSecondaryColor,
-              color: Theme.textPrimaryColor,
-            },
-            label: typeof item === "string" ? item : item.city,
-            onClick: () => onClick(item),
-          }),
-        ])
-      )
-    );
-  };
-
   // Manage location state
   const getLocationState = () => {
     return props.settingsStorage.getItem("locationState")
@@ -59,35 +48,111 @@ export function locationSettingsPage(onBack, props) {
 
   // Helper functions to render different screens
   const renderCountrySelection = (locationState, currentLocation) => {
-    return Section({ backgroundColor: Theme.bgPrimaryColor }, [
+    return Section({ style: LAYOUT_STYLES.mainContainer }, [
       AppBar({
         title: gettext("loc_select_country"),
         onBack: onBack,
         showBackButton: true,
       }),
 
+      Spacer({ height: SPACING.sm }),
+
       // Show current selection if exists
       currentLocation &&
-        View({ padding: "8px 0", textAlign: "center" }, [
-          Text(
-            { fontSize: "16px", color: Theme.dividerColor },
-            `${gettext("current_selection")}: ${currentLocation.country}, ${
-              currentLocation.city
-            }`
-          ),
-        ]),
+        Panel({
+          children: [
+            Text(
+              {
+                style: {
+                  ...TEXT_STYLES.heading,
+                  marginBottom: SPACING.xs,
+                },
+              },
+              gettext("current_location")
+            ),
+            Text(
+              {
+                style: TEXT_STYLES.normal,
+                marginBottom: SPACING.md,
+              },
+              `${currentLocation.country}, ${currentLocation.city}`
+            ),
+
+            // Add separator within the same panel
+            View({
+              style: {
+                ...LAYOUT_STYLES.separator,
+                margin: `${SPACING.md} 0`,
+              },
+            }),
+
+            // GPS location section in the same panel
+            Text(
+              {
+                style: {
+                  ...TEXT_STYLES.subheading,
+                  marginBottom: SPACING.xs,
+                },
+              },
+              gettext("use_gps_location")
+            ),
+            Text(
+              {
+                style: {
+                  ...TEXT_STYLES.small,
+                  marginBottom: SPACING.sm,
+                  color: Theme.textPrimaryColor,
+                },
+              },
+              gettext("update_using_device_gps")
+            ),
+            Button({
+              label: gettext("gps_check"),
+              style: {
+                ...BUTTON_STYLES.primary,
+                width: "80%",
+              },
+              onClick: () => {
+                // Empty handler for now - will implement GPS location update later
+                console.log("GPS location update requested");
+              },
+            }),
+          ],
+        }),
+
+      currentLocation && Spacer({ height: SPACING.sm }),
+
+      // Add subtitle for manual selection
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.subheading,
+            padding: `${SPACING.md}`,
+            textAlign: "left",
+          },
+        },
+        gettext("select_manually")
+      ),
 
       // List of countries
-      createButtonList(GeoService.COUNTRIES, (country) => {
-        locationState.selectedCountry = country;
-        locationState.step = "city";
-        saveLocationState(locationState);
+      Panel({
+        children: GeoService.COUNTRIES.map((country) =>
+          MenuButton({
+            label: country,
+            showArrow: true,
+            onClick: () => {
+              locationState.selectedCountry = country;
+              locationState.step = "city";
+              saveLocationState(locationState);
+            },
+          })
+        ),
       }),
     ]);
   };
 
   const renderCitySelection = (locationState, currentLocation) => {
-    return Section({ backgroundColor: Theme.bgPrimaryColor }, [
+    return Section({ style: LAYOUT_STYLES.mainContainer }, [
       AppBar({
         title: `${locationState.selectedCountry} | ${gettext(
           "loc_select_city"
@@ -100,38 +165,32 @@ export function locationSettingsPage(onBack, props) {
         showBackButton: true,
       }),
 
-      // List of cities
-      createButtonList(
-        GeoService.getCitiesByCountry(locationState.selectedCountry),
-        (city) => {
-          locationState.selectedCity = city;
-          saveLocationState(locationState);
-          saveSelectedLocation(city);
+      Spacer({ height: SPACING.sm }),
 
-          // Reset location state and return to main menu immediately
-          saveLocationState({
-            step: "country",
-            selectedCountry: null,
-            selectedCity: null,
-          });
-          onBack();
-        }
-      ),
+      // List of cities without arrow icons
+      Panel({
+        children: [
+          ...GeoService.getCitiesByCountry(locationState.selectedCountry).map(
+            (city) =>
+              MenuButton({
+                label: city.city,
+                showArrow: false,
+                onClick: () => {
+                  locationState.selectedCity = city;
+                  saveLocationState(locationState);
+                  saveSelectedLocation(city);
 
-      View({ padding: "16px 0" }, [
-        Button({
-          style: {
-            backgroundColor: Theme.bgSecondaryColor,
-            color: Theme.textPrimaryColor,
-          },
-          label: gettext("back_to_countries"),
-          onClick: () => {
-            locationState.step = "country";
-            locationState.selectedCity = null;
-            saveLocationState(locationState);
-          },
-        }),
-      ]),
+                  // Reset location state
+                  saveLocationState({
+                    step: "country",
+                    selectedCountry: null,
+                    selectedCity: null,
+                  });
+                },
+              })
+          ),
+        ],
+      }),
     ]);
   };
 

@@ -8,7 +8,7 @@ msgid "location_settings"
 msgstr "Location Settings"
 
 msgid "loc_select_country"
-msgstr "Select Country"
+msgstr "Location Settings"
 
 msgid "loc_select_city"
 msgstr "Select City"
@@ -90,3 +90,15 @@ msgstr "days ago"
 
 msgid "prayer_update_clarification"
 msgstr "The app fetches prayer times for the year ahead, So you don't need to update often."
+
+msgid "use_gps_location"
+msgstr "Use GPS Location"
+
+msgid "update_using_device_gps"
+msgstr "Update using device's GPS coordinates"
+
+msgid "gps_check"
+msgstr "GPS Check"
+
+msgid "select_manually"
+msgstr "Select Manually:"
