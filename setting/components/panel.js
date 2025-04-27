@@ -3,7 +3,7 @@ import { SPACING } from "../utils/styles";
 
 export function Panel({
   children,
-  margin = "0px",
+  margin = SPACING.sm,
   padding = SPACING.md,
   style = {},
 }) {

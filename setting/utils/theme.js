@@ -1,6 +1,3 @@
-/**
- * Theme class that defines the color palette for the application
- */
 export class Theme {
   // Background colors
   static bgPrimaryColor = "#000000";
