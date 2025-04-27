@@ -16,23 +16,8 @@ msgstr "Select City"
 msgid "location_settings_coming_soon"
 msgstr "Location settings will be available soon"
 
-msgid "notification_settings"
-msgstr "Prayer Notifications"
-
-msgid "notification_settings_desc"
-msgstr "Set up prayer time alerts and reminders"
-
-msgid "notification_settings_coming_soon"
-msgstr "Notification settings will be available soon"
-
-msgid "view_options"
-msgstr "Display Options"
-
-msgid "view_options_desc"
-msgstr "Customize how prayer times are displayed"
-
-msgid "view_options_coming_soon"
-msgstr "Display options will be available soon"
+msgid "prayers_settings"
+msgstr "Prayers Settings"
 
 msgid "calculation_method"
 msgstr "Calculation Method"
@@ -115,5 +100,5 @@ msgstr "About"
 msgid "about_page_coming_soon"
 msgstr "Information about the Prayer Times app will be available soon"
 
-msgid "notification_description"
-msgstr "Enable or disable prayer time notifications on your watch. Toggle each prayer to control which alerts you receive."
+msgid "prayers_settings_description"
+msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."

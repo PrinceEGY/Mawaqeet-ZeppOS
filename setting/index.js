@@ -14,8 +14,7 @@ import { aboutPage } from "./pages/about/index";
 import { advancedSettingsPage } from "./pages/advanced/index";
 import { calculationSettingsPage } from "./pages/calculation/index";
 import { locationSettingsPage } from "./pages/location/index";
-import { notificationSettingsPage } from "./pages/notification/index";
-import { viewSettingsPage } from "./pages/view/index";
+import { prayersSettingsPage } from "./pages/prayers/index";
 import {
   BUTTON_STYLES,
   LAYOUT_STYLES,
@@ -109,13 +108,12 @@ AppSettingsPage({
     const pages = {
       location: () =>
         locationSettingsPage(() => this.navigateBack(props), props),
-      notification: () =>
-        notificationSettingsPage(() => this.navigateBack(props), props),
-      view: () => viewSettingsPage(() => this.navigateBack(props)),
+      prayers: () => prayersSettingsPage(() => this.navigateBack(props), props),
       calculation: () =>
-        calculationSettingsPage(() => this.navigateBack(props)),
-      advanced: () => advancedSettingsPage(() => this.navigateBack(props)),
-      about: () => aboutPage(() => this.navigateBack(props)),
+        calculationSettingsPage(() => this.navigateBack(props), props),
+      advanced: () =>
+        advancedSettingsPage(() => this.navigateBack(props), props),
+      about: () => aboutPage(() => this.navigateBack(props), props),
       main: () => this.renderMainMenu(props),
     };
 
@@ -206,30 +204,11 @@ AppSettingsPage({
     const lastUpdateText = getTimeAgo(lastUpdate);
 
     const menuItems = [
-      {
-        label: gettext("location_settings"),
-        page: "location",
-      },
-      {
-        label: gettext("notification_settings"),
-        page: "notification",
-      },
-      {
-        label: gettext("view_options"),
-        page: "view",
-      },
-      {
-        label: gettext("calculation_method"),
-        page: "calculation",
-      },
-      {
-        label: gettext("advanced_settings"),
-        page: "advanced",
-      },
-      {
-        label: gettext("about"),
-        page: "about",
-      },
+      { label: gettext("location_settings"), page: "location" },
+      { label: gettext("prayers_settings"), page: "prayers" },
+      { label: gettext("calculation_method"), page: "calculation" },
+      { label: gettext("advanced_settings"), page: "advanced" },
+      { label: gettext("about"), page: "about" },
     ];
 
     return Section({ style: LAYOUT_STYLES.mainContainer }, [
