@@ -10,6 +10,8 @@ import { AppBar } from "./components/app_bar.js";
 import { MenuButton } from "./components/menu_button.js";
 import { Panel } from "./components/panel.js";
 import { Spacer } from "./components/spacer.js";
+import { aboutPage } from "./pages/about/index";
+import { advancedSettingsPage } from "./pages/advanced/index";
 import { calculationSettingsPage } from "./pages/calculation/index";
 import { locationSettingsPage } from "./pages/location/index";
 import { notificationSettingsPage } from "./pages/notification/index";
@@ -86,11 +88,11 @@ AppSettingsPage({
       endDate: TWO_YEARS_AFTER,
     })
       .then((result) => {
-    const currentTime = new Date().getTime();
-    props.settingsStorage.setItem(
-      "lastPrayerTimesUpdate",
-      currentTime.toString()
-    );
+        const currentTime = new Date().getTime();
+        props.settingsStorage.setItem(
+          "lastPrayerTimesUpdate",
+          currentTime.toString()
+        );
         props.settingsStorage.setItem("prayerTimes", JSON.stringify(result));
       })
       .catch((error) => {
@@ -112,6 +114,8 @@ AppSettingsPage({
       view: () => viewSettingsPage(() => this.navigateBack(props)),
       calculation: () =>
         calculationSettingsPage(() => this.navigateBack(props)),
+      advanced: () => advancedSettingsPage(() => this.navigateBack(props)),
+      about: () => aboutPage(() => this.navigateBack(props)),
       main: () => this.renderMainMenu(props),
     };
 
@@ -119,7 +123,6 @@ AppSettingsPage({
     return (pages[navState.currentPage] || pages.main)();
   },
 
-  // Create location information panel
   createLocationPanel(currentLocation) {
     return [
       Text(
@@ -145,10 +148,8 @@ AppSettingsPage({
     ];
   },
 
-  // Create update information panel
   createUpdatePanel(lastUpdateText, props) {
     return [
-      // Separator line
       View({
         style: {
           ...LAYOUT_STYLES.separator,
@@ -173,7 +174,6 @@ AppSettingsPage({
         },
         lastUpdateText || gettext("never_updated")
       ),
-      // Add explanatory text about update process
       Text(
         {
           style: {
@@ -205,7 +205,6 @@ AppSettingsPage({
     const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
     const lastUpdateText = getTimeAgo(lastUpdate);
 
-    // Define menu items for cleaner rendering
     const menuItems = [
       {
         label: gettext("location_settings"),
@@ -223,10 +222,17 @@ AppSettingsPage({
         label: gettext("calculation_method"),
         page: "calculation",
       },
+      {
+        label: gettext("advanced_settings"),
+        page: "advanced",
+      },
+      {
+        label: gettext("about"),
+        page: "about",
+      },
     ];
 
     return Section({ style: LAYOUT_STYLES.mainContainer }, [
-      // Title bar section
       AppBar({
         title: gettext("prayer_times_settings"),
         showBackButton: false,
@@ -234,7 +240,6 @@ AppSettingsPage({
 
       Spacer({ height: SPACING.sm }),
 
-      // Panel showing current location and last update time
       Panel({
         children: [
           ...this.createLocationPanel(currentLocation),
@@ -244,7 +249,6 @@ AppSettingsPage({
 
       Spacer({ height: SPACING.sm }),
 
-      // Panel for menu items
       Panel({
         children: menuItems.map((item) =>
           MenuButton({

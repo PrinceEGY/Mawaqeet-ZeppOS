@@ -102,3 +102,18 @@ msgstr "GPS Check"
 
 msgid "select_manually"
 msgstr "Select Manually:"
+
+msgid "advanced_settings"
+msgstr "Advanced Settings"
+
+msgid "advanced_settings_coming_soon"
+msgstr "Advanced settings will be available soon"
+
+msgid "about"
+msgstr "About"
+
+msgid "about_page_coming_soon"
+msgstr "Information about the Prayer Times app will be available soon"
+
+msgid "notification_description"
+msgstr "Enable or disable prayer time notifications on your watch. Toggle each prayer to control which alerts you receive."
