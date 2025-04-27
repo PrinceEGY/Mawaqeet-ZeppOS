@@ -1,7 +1,3 @@
-export const DEFAULT_LOCATION = {
-  country: "Egypt",
-  city: "Cairo",
-};
 export const ALADHAN_URL = "https://api.aladhan.com/v1/calendar";
 
 export const TIMINGS_LIST = [
@@ -17,9 +13,29 @@ export const TIMINGS_LIST = [
 
 const currentDate = new Date();
 export const TWO_YEARS_BEFORE = new Date(
-  currentDate.setFullYear(currentDate.getFullYear() - 2)
+  new Date().setFullYear(currentDate.getFullYear() - 2)
 );
 
 export const TWO_YEARS_AFTER = new Date(
-  currentDate.setFullYear(currentDate.getFullYear() + 2)
+  new Date().setFullYear(currentDate.getFullYear() + 2)
 );
+
+export const DEFAULT_SETTINGS = {
+  // Location defaults
+  location: {
+    country: "Egypt",
+    city: "Cairo",
+  },
+
+  // Prayer settings defaults
+  display: {
+    fajr: true,
+    sunrise: true,
+    dhuhr: true,
+    asr: true,
+    maghrib: true,
+    isha: true,
+    midnight: false,
+    lastthird: false,
+  },
+};

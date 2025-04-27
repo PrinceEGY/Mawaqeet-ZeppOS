@@ -1,6 +1,6 @@
 import { gettext } from "i18n";
 import {
-  DEFAULT_LOCATION,
+  DEFAULT_SETTINGS,
   TWO_YEARS_AFTER,
   TWO_YEARS_BEFORE,
 } from "../shared/constants.js";
@@ -37,9 +37,12 @@ AppSettingsPage({
     props.settingsStorage.setItem("navState", JSON.stringify(navState));
   },
 
-  initializeDefaultLocation(props) {
+  initializeDefaultSettings(props) {
+    // Initialize location settings
     if (!props.settingsStorage.getItem("currentLocation")) {
-      const defaultLocation = GeoService.getCityByName(DEFAULT_LOCATION.city);
+      const defaultLocation = GeoService.getCityByName(
+        DEFAULT_SETTINGS.location.city
+      );
 
       if (defaultLocation) {
         props.settingsStorage.setItem(
@@ -51,13 +54,34 @@ AppSettingsPage({
             longitude: defaultLocation.longitude,
           })
         );
-        console.log(`Default location set to ${DEFAULT_LOCATION.city}`);
+        console.log(
+          `Default location set to ${DEFAULT_SETTINGS.location.city}`
+        );
       } else {
         console.log(
-          `Default location (${DEFAULT_LOCATION.city}) not found in GEO_DATA`
+          `Default location (${DEFAULT_SETTINGS.location.city}) not found in GEO_DATA`
         );
       }
     }
+
+    // Initialize prayer settings
+    Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
+      const displayKey = `display_${prayer}`;
+      if (!props.settingsStorage.getItem(displayKey)) {
+        props.settingsStorage.setItem(
+          displayKey,
+          DEFAULT_SETTINGS.display[prayer].toString()
+        );
+      }
+
+      const notifyKey = `notify_${prayer}`;
+      if (!props.settingsStorage.getItem(notifyKey)) {
+        props.settingsStorage.setItem(
+          notifyKey,
+          DEFAULT_SETTINGS.display[prayer].toString()
+        );
+      }
+    });
   },
 
   navigateTo(page, props) {
@@ -100,7 +124,7 @@ AppSettingsPage({
   },
 
   build(props) {
-    this.initializeDefaultLocation(props);
+    this.initializeDefaultSettings(props);
 
     const navState = this.getNavState(props);
 
