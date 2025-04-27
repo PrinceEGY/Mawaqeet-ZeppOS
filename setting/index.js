@@ -1,29 +1,31 @@
 import { gettext } from "i18n";
+import {
+  DEFAULT_LOCATION,
+  TWO_YEARS_AFTER,
+  TWO_YEARS_BEFORE,
+} from "../shared/constants.js";
+import { GeoService } from "../shared/geo-service.js";
+import { fetchExtendedPrayerTimes, getTimeAgo } from "../shared/helpers.js";
+import { AppBar } from "./components/app_bar.js";
+import { MenuButton } from "./components/menu_button.js";
+import { Panel } from "./components/panel.js";
+import { Spacer } from "./components/spacer.js";
+import { calculationSettingsPage } from "./pages/calculation/index";
 import { locationSettingsPage } from "./pages/location/index";
 import { notificationSettingsPage } from "./pages/notification/index";
 import { viewSettingsPage } from "./pages/view/index";
-import { calculationSettingsPage } from "./pages/calculation/index";
-import { GeoService } from "../shared/geo_data.js";
-import { DEFAULT_LOCATION } from "./utils/constants.js";
-import { MenuButton } from "./components/menu_button.js";
-import { Spacer } from "./components/spacer.js";
-import { Theme } from "./utils/theme.js";
-import { AppBar } from "./components/app_bar.js";
-import { Panel } from "./components/panel.js";
 import {
-  TEXT_STYLES,
   BUTTON_STYLES,
   LAYOUT_STYLES,
   SPACING,
+  TEXT_STYLES,
 } from "./utils/styles.js";
-import { getTimeAgo } from "./utils/helpers.js";
 
 AppSettingsPage({
   onInit() {
     console.log("Settings page initialized");
   },
 
-  // Helper functions for state management
   getNavState(props) {
     return props.settingsStorage.getItem("navState")
       ? JSON.parse(props.settingsStorage.getItem("navState"))
@@ -35,17 +37,17 @@ AppSettingsPage({
   },
 
   initializeDefaultLocation(props) {
-    if (!props.settingsStorage.getItem("selectedLocation")) {
+    if (!props.settingsStorage.getItem("currentLocation")) {
       const defaultLocation = GeoService.getCityByName(DEFAULT_LOCATION.city);
 
       if (defaultLocation) {
         props.settingsStorage.setItem(
-          "selectedLocation",
+          "currentLocation",
           JSON.stringify({
             country: defaultLocation.country,
             city: defaultLocation.city,
-            latitude: defaultLocation.lat,
-            longitude: defaultLocation.lng,
+            latitude: defaultLocation.latitude,
+            longitude: defaultLocation.longitude,
           })
         );
         console.log(`Default location set to ${DEFAULT_LOCATION.city}`);
@@ -57,7 +59,6 @@ AppSettingsPage({
     }
   },
 
-  // Navigation helper methods
   navigateTo(page, props) {
     const navState = this.getNavState(props);
     navState.history.push(navState.currentPage);
@@ -73,25 +74,33 @@ AppSettingsPage({
     }
   },
 
-  // Handle manual update action
   handleManualUpdate(props) {
-    console.log("Manual update triggered");
+    const currentLocation = JSON.parse(
+      props.settingsStorage.getItem("currentLocation")
+    );
 
-    // Set the current timestamp
+    fetchExtendedPrayerTimes({
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude,
+      startDate: TWO_YEARS_BEFORE,
+      endDate: TWO_YEARS_AFTER,
+    })
+      .then((result) => {
     const currentTime = new Date().getTime();
     props.settingsStorage.setItem(
       "lastPrayerTimesUpdate",
       currentTime.toString()
     );
-
-    // Additional logic for updating prayer times can be added here
+        props.settingsStorage.setItem("prayerTimes", JSON.stringify(result));
+      })
+      .catch((error) => {
+        console.error("Error fetching prayer times:", error);
+      });
   },
 
   build(props) {
-    // Initialize defaults if needed
     this.initializeDefaultLocation(props);
 
-    // Get the current navigation state
     const navState = this.getNavState(props);
 
     // Render the appropriate page based on the navigation state
@@ -99,7 +108,7 @@ AppSettingsPage({
       location: () =>
         locationSettingsPage(() => this.navigateBack(props), props),
       notification: () =>
-        notificationSettingsPage(() => this.navigateBack(props)),
+        notificationSettingsPage(() => this.navigateBack(props), props),
       view: () => viewSettingsPage(() => this.navigateBack(props)),
       calculation: () =>
         calculationSettingsPage(() => this.navigateBack(props)),
@@ -181,18 +190,18 @@ AppSettingsPage({
           ...BUTTON_STYLES.primary,
           width: "80%",
         },
-        onClick: () => this.handleManualUpdate(props),
+        onClick: () => {
+          this.handleManualUpdate(props);
+        },
       }),
     ];
   },
 
   renderMainMenu(props) {
-    // Get current location
-    const currentLocation = props.settingsStorage.getItem("selectedLocation")
-      ? JSON.parse(props.settingsStorage.getItem("selectedLocation"))
-      : null;
+    const currentLocation = JSON.parse(
+      props.settingsStorage.getItem("currentLocation")
+    );
 
-    // Get last update time
     const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
     const lastUpdateText = getTimeAgo(lastUpdate);
 
