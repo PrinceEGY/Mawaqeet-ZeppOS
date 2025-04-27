@@ -1,14 +1,14 @@
 import { gettext } from "i18n";
-import { GeoService } from "../../../shared/geo_data";
+import { GeoService } from "../../../shared/geo-service";
 import { AppBar } from "../../components/app_bar";
+import { MenuButton } from "../../components/menu_button";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
-import { MenuButton } from "../../components/menu_button";
 import {
-  TEXT_STYLES,
-  LAYOUT_STYLES,
   BUTTON_STYLES,
+  LAYOUT_STYLES,
   SPACING,
+  TEXT_STYLES,
 } from "../../utils/styles";
 import { Theme } from "../../utils/theme";
 
@@ -29,21 +29,20 @@ export function locationSettingsPage(onBack, props) {
   };
 
   const getCurrentLocation = () => {
-    return props.settingsStorage.getItem("selectedLocation")
-      ? JSON.parse(props.settingsStorage.getItem("selectedLocation"))
-      : null;
+    return JSON.parse(props.settingsStorage.getItem("currentLocation"));
   };
 
   const saveSelectedLocation = (city) => {
     props.settingsStorage.setItem(
-      "selectedLocation",
+      "currentLocation",
       JSON.stringify({
         country: city.country,
         city: city.city,
-        latitude: city.lat,
-        longitude: city.lng,
+        latitude: city.latitude,
+        longitude: city.longitude,
       })
     );
+    props.settingsStorage.setItem("lastPrayerTimesUpdate", null);
   };
 
   // Helper functions to render different screens
@@ -127,7 +126,7 @@ export function locationSettingsPage(onBack, props) {
         {
           style: {
             ...TEXT_STYLES.subheading,
-            padding: `${SPACING.md}`,
+            padding: `${SPACING.md} ${SPACING.md} 0px`,
             textAlign: "left",
           },
         },
