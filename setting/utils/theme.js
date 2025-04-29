@@ -8,7 +8,7 @@ export class Theme {
   static textSecondaryColor = "#888888";
 
   // Accent colors
-  static accentPrimaryColor = "#3E8EED";
+  static accentPrimaryColor = "#f50057";
 
   // Utility colors
   static dividerColor = "#444444";

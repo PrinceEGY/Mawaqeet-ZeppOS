@@ -52,7 +52,7 @@ export const LAYOUT_STYLES = {
   separator: {
     width: "100%",
     height: "1px",
-    backgroundColor: Theme.separatorColor || "#444",
+    backgroundColor: Theme.dividerColor,
   },
   mainContainer: {
     color: Theme.textPrimaryColor,
