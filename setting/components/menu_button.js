@@ -12,6 +12,7 @@ export function MenuButton(options) {
       width: "100%",
       borderBottom: `1px solid ${Theme.dividerColor}`,
       borderRadius: 0,
+      boxShadow: "none",
       padding: `${SPACING.md} ${SPACING.sm}`,
       fontWeight: "normal",
       fontSize: "16px",
