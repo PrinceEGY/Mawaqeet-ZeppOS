@@ -196,12 +196,7 @@ AppSettingsPage({
         gettext("current_location")
       ),
       Text(
-        {
-          style: {
-            ...TEXT_STYLES.normal,
-            marginBottom: SPACING.md,
-          },
-        },
+        { style: { ...TEXT_STYLES.normal } },
         currentLocation
           ? `${currentLocation.country}, ${currentLocation.city}`
           : gettext("no_location_selected")
@@ -209,62 +204,10 @@ AppSettingsPage({
     ];
   },
 
-  createUpdatePanel(lastUpdateText, props) {
-    return [
-      View({
-        style: {
-          ...LAYOUT_STYLES.separator,
-          marginBottom: SPACING.md,
-        },
-      }),
-      Text(
-        {
-          style: {
-            ...TEXT_STYLES.subheading,
-            marginBottom: SPACING.xs,
-          },
-        },
-        gettext("last_update")
-      ),
-      Text(
-        {
-          style: {
-            ...TEXT_STYLES.normal,
-            marginBottom: SPACING.xs,
-          },
-        },
-        lastUpdateText || gettext("never_updated")
-      ),
-      Text(
-        {
-          style: {
-            ...TEXT_STYLES.small,
-            marginBottom: SPACING.md,
-          },
-        },
-        gettext("prayer_update_clarification")
-      ),
-      // Manual update button
-      Button({
-        label: gettext("update_now"),
-        style: {
-          ...BUTTON_STYLES.primary,
-          width: "80%",
-        },
-        onClick: () => {
-          this.handleManualUpdate(props);
-        },
-      }),
-    ];
-  },
-
   renderMainMenu(props) {
     const currentLocation = JSON.parse(
       props.settingsStorage.getItem("currentLocation")
     );
-
-    const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
-    const lastUpdateText = getTimeAgo(lastUpdate);
 
     const menuItems = [
       { label: gettext("location_settings"), page: "location" },
@@ -280,13 +223,10 @@ AppSettingsPage({
         showBackButton: false,
       }),
 
-      Spacer({ height: SPACING.sm }),
+      Spacer({ height: SPACING.xs }),
 
       Panel({
-        children: [
-          ...this.createLocationPanel(currentLocation),
-          ...this.createUpdatePanel(lastUpdateText, props),
-        ],
+        children: [...this.createLocationPanel(currentLocation)],
       }),
 
       Spacer({ height: SPACING.sm }),
