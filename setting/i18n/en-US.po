@@ -2,7 +2,7 @@ msgid "example"
 msgstr "This is an example in app-side"
 
 msgid "prayer_times_settings"
-msgstr "Prayer Times Settings"
+msgstr "Mawaqeet Settings"
 
 msgid "location_settings"
 msgstr "Location Settings"
