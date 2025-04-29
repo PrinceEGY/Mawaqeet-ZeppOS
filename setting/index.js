@@ -180,7 +180,8 @@ AppSettingsPage({
     };
 
     // Use the page renderer function or default to main menu
-    return (pages[navState.currentPage] || pages.main)();
+    const renderPage = pages[navState.currentPage] || pages.main;
+    return renderPage();
   },
 
   createLocationPanel(currentLocation) {
