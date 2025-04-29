@@ -1,9 +1,5 @@
 import { gettext } from "i18n";
-import {
-  DEFAULT_SETTINGS,
-  TWO_YEARS_AFTER,
-  TWO_YEARS_BEFORE,
-} from "../shared/constants.js";
+import { DEFAULT_SETTINGS } from "../shared/constants.js";
 import { GeoService } from "../shared/geo-service.js";
 import { fetchExtendedPrayerTimes, getTimeAgo } from "../shared/helpers.js";
 import { AppBar } from "./components/app_bar.js";
@@ -46,6 +42,7 @@ AppSettingsPage({
     this.initializeCalculationMethod(props);
     this.initializeLocationSettings(props);
     this.initializePrayerSettings(props);
+    this.initializeFetchingSettings(props);
   },
 
   initializeLocationSettings(props) {
@@ -114,6 +111,38 @@ AppSettingsPage({
           JSON.stringify(parsedMethods)
         );
       });
+    }
+  },
+
+  initializeFetchingSettings(props) {
+    if (!props.settingsStorage.getItem("fetchingMonthsBefore")) {
+      props.settingsStorage.setItem(
+        "fetchingMonthsBefore",
+        DEFAULT_SETTINGS.fetching.monthsBefore.toString()
+      );
+      console.log(
+        `Default fetchingMonthsBefore set to ${DEFAULT_SETTINGS.fetching.monthsBefore}`
+      );
+    }
+
+    if (!props.settingsStorage.getItem("fetchingMonthsAfter")) {
+      props.settingsStorage.setItem(
+        "fetchingMonthsAfter",
+        DEFAULT_SETTINGS.fetching.monthsAfter.toString()
+      );
+      console.log(
+        `Default fetchingMonthsAfter set to ${DEFAULT_SETTINGS.fetching.monthsAfter}`
+      );
+    }
+
+    if (!props.settingsStorage.getItem("autoFetchDays")) {
+      props.settingsStorage.setItem(
+        "autoFetchDays",
+        DEFAULT_SETTINGS.fetching.autoFetchDays.toString()
+      );
+      console.log(
+        `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.autoFetchDays}`
+      );
     }
   },
 

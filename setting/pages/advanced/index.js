@@ -13,11 +13,7 @@ import {
   fetchExtendedPrayerTimes,
   getTimeAgo,
 } from "../../../shared/helpers.js";
-import {
-  TWO_YEARS_BEFORE,
-  TWO_YEARS_AFTER,
-} from "../../../shared/constants.js";
-import { NOTIFY_ICON } from "../../utils/icons.js";
+import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
 
 function handleManualUpdate(props) {
   const currentLocation = JSON.parse(
@@ -28,11 +24,20 @@ function handleManualUpdate(props) {
     props.settingsStorage.getItem("calculationMethod")
   );
 
+  const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
+  const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
+
+  const startDate = new Date();
+  startDate.setMonth(startDate.getMonth() - parseInt(monthsBefore));
+
+  const endDate = new Date();
+  endDate.setMonth(endDate.getMonth() + parseInt(monthsAfter));
+
   fetchExtendedPrayerTimes({
     latitude: currentLocation.latitude,
     longitude: currentLocation.longitude,
-    startDate: TWO_YEARS_BEFORE,
-    endDate: TWO_YEARS_AFTER,
+    startDate: startDate,
+    endDate: endDate,
     method: calculationMethod,
   })
     .then((result) => {
@@ -78,13 +83,87 @@ function createUpdatePanel(lastUpdateText, props) {
       gettext("prayer_update_clarification")
     ),
     Button({
-      label: gettext("update_now"),
+      label: gettext("manual_update"),
       style: {
         ...BUTTON_STYLES.primary,
         width: "80%",
       },
       onClick: () => {
         handleManualUpdate(props);
+      },
+    }),
+  ];
+}
+
+function InputRow({ label, value, onChange }) {
+  return TextInput({
+    label: label,
+    value: value,
+    labelStyle: {
+      color: Theme.textPrimaryColor,
+      marginBottom: `${SPACING.xs}`,
+    },
+    subStyle: {
+      borderRadius: "4px",
+      backgroundColor: "white",
+      color: "black",
+      padding: `${SPACING.sm} ${SPACING.md}`,
+      marginBottom: SPACING.md,
+    },
+    onChange: onChange,
+  });
+}
+
+function validateMonthsInput(value) {
+  const numValue = parseInt(value);
+
+  if (isNaN(numValue)) {
+    return DEFAULT_SETTINGS.fetching.monthsBefore.toString();
+  }
+
+  const { monthsMin, monthsMax } = DEFAULT_SETTINGS.fetching;
+  return Math.max(monthsMin, Math.min(monthsMax, numValue)).toString();
+}
+
+function createFetchWindowPanel(props) {
+  const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
+  const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
+
+  return [
+    Text(
+      {
+        style: {
+          ...TEXT_STYLES.subheading,
+          marginBottom: SPACING.xs,
+        },
+      },
+      gettext("fetch_window_size")
+    ),
+    Text(
+      {
+        style: {
+          ...TEXT_STYLES.small,
+          marginBottom: SPACING.md,
+        },
+      },
+      gettext("fetch_window_description")
+    ),
+
+    InputRow({
+      label: gettext("months_before"),
+      value: monthsBefore,
+      onChange: (value) => {
+        const validatedValue = validateMonthsInput(value);
+        props.settingsStorage.setItem("fetchingMonthsBefore", validatedValue);
+      },
+    }),
+
+    InputRow({
+      label: gettext("months_after"),
+      value: monthsAfter,
+      onChange: (value) => {
+        const validatedValue = validateMonthsInput(value);
+        props.settingsStorage.setItem("fetchingMonthsAfter", validatedValue);
       },
     }),
   ];
@@ -103,12 +182,21 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
     Spacer({ height: SPACING.sm }),
 
+    // Prayer times update panel
     Panel({
       children: createUpdatePanel(lastUpdateText, props),
     }),
 
-    Spacer({ height: SPACING.sm }),
+    Spacer({ height: SPACING.xs }),
 
+    // Fetch window size panel
+    Panel({
+      children: createFetchWindowPanel(props),
+    }),
+
+    Spacer({ height: SPACING.xs }),
+
+    // Reset settings panel
     Panel({
       children: [
         Text(

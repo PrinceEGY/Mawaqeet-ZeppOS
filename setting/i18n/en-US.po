@@ -49,8 +49,8 @@ msgstr "Prayer Times Updated"
 msgid "never_updated"
 msgstr "Never updated"
 
-msgid "update_now"
-msgstr "Update"
+msgid "manual_update"
+msgstr "Manual Update"
 
 msgid "just_now"
 msgstr "Just now"
@@ -74,7 +74,7 @@ msgid "days_ago"
 msgstr "days ago"
 
 msgid "prayer_update_clarification"
-msgstr "The app fetches prayer times for the year ahead, So you don't need to update often."
+msgstr "The app automatically fetches prayer times at regular intervals (see settings below), so you only need to update manually if necessary."
 
 msgid "use_gps_location"
 msgstr "Use GPS Location"
@@ -108,3 +108,16 @@ msgstr "Auto (Recommended)"
 
 msgid "calculation_method_auto_desc"
 msgstr "Automatically choose closest authority based on the location or co-ordinates"
+
+msgid "fetch_window_size"
+msgstr "Prayer Times Data Range"
+
+msgid "fetch_window_description"
+msgstr "Set how many months of prayer times data to fetch before and after the current date (range: 1-120 months)."
+
+msgid "months_before"
+msgstr "Months Before"
+
+msgid "months_after"
+msgstr "Months After"
+

@@ -13,15 +13,6 @@ export const TIMINGS_LIST = [
   { name: "lastthird", label: "Last Third" },
 ];
 
-const currentDate = new Date();
-export const TWO_YEARS_BEFORE = new Date(
-  new Date().setFullYear(currentDate.getFullYear() - 2)
-);
-
-export const TWO_YEARS_AFTER = new Date(
-  new Date().setFullYear(currentDate.getFullYear() + 2)
-);
-
 export const DEFAULT_SETTINGS = {
   // Location defaults
   location: {
@@ -43,4 +34,13 @@ export const DEFAULT_SETTINGS = {
 
   // Calculation method defaults
   calculationMethod: -1, // -1 means "auto"
+
+  // Fetching settings defaults
+  fetching: {
+    monthsMax: 120,
+    monthsMin: 1,
+    monthsBefore: 24,
+    monthsAfter: 24,
+    autoFetchDays: 7,
+  },
 };
