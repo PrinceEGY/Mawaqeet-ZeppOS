@@ -132,35 +132,6 @@ AppSettingsPage({
     }
   },
 
-  handleManualUpdate(props) {
-    const currentLocation = JSON.parse(
-      props.settingsStorage.getItem("currentLocation")
-    );
-
-    const calculationMethod = JSON.parse(
-      props.settingsStorage.getItem("calculationMethod")
-    );
-
-    fetchExtendedPrayerTimes({
-      latitude: currentLocation.latitude,
-      longitude: currentLocation.longitude,
-      startDate: TWO_YEARS_BEFORE,
-      endDate: TWO_YEARS_AFTER,
-      method: calculationMethod,
-    })
-      .then((result) => {
-        const currentTime = new Date().getTime();
-        props.settingsStorage.setItem(
-          "lastPrayerTimesUpdate",
-          currentTime.toString()
-        );
-        props.settingsStorage.setItem("prayerTimes", JSON.stringify(result));
-      })
-      .catch((error) => {
-        console.error("Error fetching prayer times:", error);
-      });
-  },
-
   build(props) {
     this.initializeDefaultSettings(props);
 
@@ -179,7 +150,6 @@ AppSettingsPage({
       main: () => this.renderMainMenu(props),
     };
 
-    // Use the page renderer function or default to main menu
     const renderPage = pages[navState.currentPage] || pages.main;
     return renderPage();
   },
@@ -229,7 +199,7 @@ AppSettingsPage({
         children: [...this.createLocationPanel(currentLocation)],
       }),
 
-      Spacer({ height: SPACING.sm }),
+      Spacer({ height: SPACING.xs }),
 
       Panel({
         children: menuItems.map((item) =>
