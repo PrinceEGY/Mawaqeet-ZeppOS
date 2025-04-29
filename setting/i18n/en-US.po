@@ -102,3 +102,9 @@ msgstr "Information about the Prayer Times app will be available soon"
 
 msgid "prayers_settings_description"
 msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."
+
+msgid "calculation_method_auto"
+msgstr "Auto (Recommended)"
+
+msgid "calculation_method_auto_desc"
+msgstr "Automatically choose closest authority based on the location or co-ordinates"

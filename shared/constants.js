@@ -1,5 +1,7 @@
 export const ALADHAN_URL = "https://api.aladhan.com/v1/calendar";
 
+export const ALADHAN_METHODS_URL = "https://api.aladhan.com/v1/methods";
+
 export const TIMINGS_LIST = [
   { name: "fajr", label: "Fajr" },
   { name: "sunrise", label: "Sunrise" },
@@ -38,4 +40,7 @@ export const DEFAULT_SETTINGS = {
     midnight: false,
     lastthird: false,
   },
+
+  // Calculation method defaults
+  calculationMethod: -1, // -1 means "auto"
 };

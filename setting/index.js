@@ -21,6 +21,10 @@ import {
   SPACING,
   TEXT_STYLES,
 } from "./utils/styles.js";
+import {
+  fetchCalculationMethods,
+  parseCalculationMethods,
+} from "../shared/helpers.js";
 
 AppSettingsPage({
   onInit() {
@@ -28,8 +32,9 @@ AppSettingsPage({
   },
 
   getNavState(props) {
-    return props.settingsStorage.getItem("navState")
-      ? JSON.parse(props.settingsStorage.getItem("navState"))
+    const navState = props.settingsStorage.getItem("navState");
+    return navState
+      ? JSON.parse(navState)
       : { currentPage: "main", history: [] };
   },
 
@@ -38,7 +43,12 @@ AppSettingsPage({
   },
 
   initializeDefaultSettings(props) {
-    // Initialize location settings
+    this.initializeCalculationMethod(props);
+    this.initializeLocationSettings(props);
+    this.initializePrayerSettings(props);
+  },
+
+  initializeLocationSettings(props) {
     if (!props.settingsStorage.getItem("currentLocation")) {
       const defaultLocation = GeoService.getCityByName(
         DEFAULT_SETTINGS.location.city
@@ -63,8 +73,9 @@ AppSettingsPage({
         );
       }
     }
+  },
 
-    // Initialize prayer settings
+  initializePrayerSettings(props) {
     Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
       const displayKey = `display_${prayer}`;
       if (!props.settingsStorage.getItem(displayKey)) {
@@ -82,6 +93,28 @@ AppSettingsPage({
         );
       }
     });
+  },
+
+  initializeCalculationMethod(props) {
+    if (!props.settingsStorage.getItem("calculationMethod")) {
+      props.settingsStorage.setItem(
+        "calculationMethod",
+        JSON.stringify(DEFAULT_SETTINGS.calculationMethod)
+      );
+      console.log(
+        `Default calculation method set to ${DEFAULT_SETTINGS.calculationMethod}`
+      );
+    }
+
+    if (!props.settingsStorage.getItem("calculationMethodsList")) {
+      fetchCalculationMethods().then(async (methods) => {
+        const parsedMethods = await parseCalculationMethods(methods);
+        props.settingsStorage.setItem(
+          "calculationMethodsList",
+          JSON.stringify(parsedMethods)
+        );
+      });
+    }
   },
 
   navigateTo(page, props) {
@@ -104,11 +137,16 @@ AppSettingsPage({
       props.settingsStorage.getItem("currentLocation")
     );
 
+    const calculationMethod = JSON.parse(
+      props.settingsStorage.getItem("calculationMethod")
+    );
+
     fetchExtendedPrayerTimes({
       latitude: currentLocation.latitude,
       longitude: currentLocation.longitude,
       startDate: TWO_YEARS_BEFORE,
       endDate: TWO_YEARS_AFTER,
+      method: calculationMethod,
     })
       .then((result) => {
         const currentTime = new Date().getTime();

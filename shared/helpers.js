@@ -1,5 +1,9 @@
 import { gettext } from "i18n";
-import { ALADHAN_URL } from "./constants";
+import {
+  ALADHAN_URL,
+  ALADHAN_METHODS_URL,
+  DEFAULT_SETTINGS,
+} from "./constants";
 
 export function getTimeAgo(timestamp) {
   if (!timestamp) return null;
@@ -82,9 +86,7 @@ export async function fetchPrayerTimes({
 
   const response = await fetch(URL, {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
+    headers: { Accept: "application/json" },
   });
 
   if (!response.ok) {
@@ -137,6 +139,8 @@ export async function fetchExtendedPrayerTimes({
       `Preparing to fetch prayer times from ${chunkStartStr} to ${chunkEndStr}`
     );
 
+    const methodParam = method && method !== -1 ? method : undefined; // Use method only if it's not "auto" (-1)
+
     const fetchPromise = fetchPrayerTimes({
       latitude: latitude,
       longitude: longitude,
@@ -144,7 +148,7 @@ export async function fetchExtendedPrayerTimes({
       endDate: chunkEndStr,
       iso8601: iso8601,
       timezonestring: timezonestring,
-      method: method,
+      method: methodParam,
     }).then((chunkData) => {
       console.log(`Received data for ${chunkStartStr} to ${chunkEndStr}`);
       return transformPrayerTimesData(chunkData.data);
@@ -163,6 +167,51 @@ export async function fetchExtendedPrayerTimes({
     const dateB = b.date_gr.split("-").reverse().join("-");
     return new Date(dateA) - new Date(dateB);
   });
-
   return allResults;
+}
+
+export async function fetchCalculationMethods() {
+  const response = await fetch(ALADHAN_METHODS_URL, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error(
+      `Fetching Calculation Methods Error (Status ${response.status}):`,
+      errorData.data
+    );
+    throw new Error(
+      `Fetching Calculation Methods (Status ${response.status}): ${errorData.data}`
+    );
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function parseCalculationMethods(data) {
+  const methods = [];
+
+  // Add "Auto" as the default option
+  methods.push({
+    id: -1,
+    label: "Auto",
+    name: gettext("calculation_method_auto"),
+    params: {},
+  });
+
+  Object.entries(data.data).forEach(([key, method]) => {
+    methods.push({
+      id: method.id,
+      label: key,
+      name: method.name,
+      params: method.params,
+    });
+  });
+
+  methods.pop(); // Remove the last method (unwanted custom method)
+
+  return methods;
 }
