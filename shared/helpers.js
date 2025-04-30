@@ -68,12 +68,12 @@ export async function fetchPrayerTimes({
   endDate,
   iso8601,
   timezonestring,
-  method,
+  calculationMethodId,
 }) {
   let URL = `${ALADHAN_URL}/from/${startDate}/to/${endDate}?latitude=${latitude}&longitude=${longitude}`;
 
-  if (method !== undefined) {
-    URL += `&method=${method}`;
+  if (calculationMethodId !== undefined) {
+    URL += `&method=${calculationMethodId}`;
   }
 
   if (timezonestring !== undefined) {
@@ -83,6 +83,8 @@ export async function fetchPrayerTimes({
   if (iso8601 !== undefined) {
     URL += `&iso8601=${iso8601}`;
   }
+
+  console.log(`Fetching prayer times from ${URL}`);
 
   const response = await fetch(URL, {
     method: "GET",
@@ -115,7 +117,7 @@ export async function fetchExtendedPrayerTimes({
   endDate,
   iso8601 = true,
   timezonestring,
-  method,
+  calculationMethodId,
   chunkMonths = 11,
 }) {
   const fromDate = new Date(startDate);
@@ -139,7 +141,10 @@ export async function fetchExtendedPrayerTimes({
       `Preparing to fetch prayer times from ${chunkStartStr} to ${chunkEndStr}`
     );
 
-    const methodParam = method && method !== -1 ? method : undefined; // Use method only if it's not "auto" (-1)
+    const methodParam =
+      calculationMethodId && calculationMethodId !== -1
+        ? calculationMethodId
+        : undefined; // Use method only if it's not "auto" (-1)
 
     const fetchPromise = fetchPrayerTimes({
       latitude: latitude,
@@ -148,7 +153,7 @@ export async function fetchExtendedPrayerTimes({
       endDate: chunkEndStr,
       iso8601: iso8601,
       timezonestring: timezonestring,
-      method: methodParam,
+      calculationMethodId: methodParam,
     }).then((chunkData) => {
       console.log(`Received data for ${chunkStartStr} to ${chunkEndStr}`);
       return transformPrayerTimesData(chunkData.data);
@@ -214,4 +219,41 @@ export async function parseCalculationMethods(data) {
   methods.pop(); // Remove the last method (unwanted custom method)
 
   return methods;
+}
+
+export async function fetchAndSavePrayerTimes({
+  storage,
+  location,
+  calculationMethodId,
+  monthsBefore,
+  monthsAfter,
+}) {
+  location = location || JSON.parse(storage.getItem("currentLocation"));
+  calculationMethodId =
+    calculationMethodId || JSON.parse(storage.getItem("calculationMethod")).id;
+  monthsBefore = monthsBefore || storage.getItem("fetchingMonthsBefore");
+  monthsAfter = monthsAfter || storage.getItem("fetchingMonthsAfter");
+
+  const startDate = new Date();
+  startDate.setMonth(startDate.getMonth() - parseInt(monthsBefore));
+
+  const endDate = new Date();
+  endDate.setMonth(endDate.getMonth() + parseInt(monthsAfter));
+
+  try {
+    const result = await fetchExtendedPrayerTimes({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      startDate: startDate,
+      endDate: endDate,
+      calculationMethodId: calculationMethodId,
+    });
+
+    const currentTime = new Date().getTime();
+    storage.setItem("lastPrayerTimesUpdate", currentTime.toString());
+    storage.setItem("prayerTimes", JSON.stringify(result));
+  } catch (error) {
+    console.error("Error fetching prayer times:", error);
+    throw error;
+  }
 }

@@ -12,46 +12,9 @@ import {
 import {
   fetchExtendedPrayerTimes,
   getTimeAgo,
+  fetchAndSavePrayerTimes,
 } from "../../../shared/helpers.js";
 import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
-
-function handleManualUpdate(props) {
-  const currentLocation = JSON.parse(
-    props.settingsStorage.getItem("currentLocation")
-  );
-
-  const calculationMethod = JSON.parse(
-    props.settingsStorage.getItem("calculationMethod")
-  );
-
-  const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
-  const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
-
-  const startDate = new Date();
-  startDate.setMonth(startDate.getMonth() - parseInt(monthsBefore));
-
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + parseInt(monthsAfter));
-
-  fetchExtendedPrayerTimes({
-    latitude: currentLocation.latitude,
-    longitude: currentLocation.longitude,
-    startDate: startDate,
-    endDate: endDate,
-    method: calculationMethod,
-  })
-    .then((result) => {
-      const currentTime = new Date().getTime();
-      props.settingsStorage.setItem(
-        "lastPrayerTimesUpdate",
-        currentTime.toString()
-      );
-      props.settingsStorage.setItem("prayerTimes", JSON.stringify(result));
-    })
-    .catch((error) => {
-      console.error("Error fetching prayer times:", error);
-    });
-}
 
 function createUpdatePanel(lastUpdateText, props) {
   return [
@@ -89,7 +52,7 @@ function createUpdatePanel(lastUpdateText, props) {
         width: "80%",
       },
       onClick: () => {
-        handleManualUpdate(props);
+        fetchAndSavePrayerTimes({ storage: props.settingsStorage });
       },
     }),
   ];
