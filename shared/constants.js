@@ -35,7 +35,12 @@ export const DEFAULT_SETTINGS = {
   },
 
   // Calculation method defaults
-  calculationMethod: -1, // -1 means "auto"
+  calculationMethod: {
+    id: -1,
+    label: "Auto",
+    name: gettext("calculation_method_auto"),
+    params: {},
+  },
 
   // Fetching settings defaults
   fetching: {
