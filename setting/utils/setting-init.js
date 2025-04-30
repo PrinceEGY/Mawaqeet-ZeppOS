@@ -4,13 +4,27 @@ import {
   fetchCalculationMethods,
   parseCalculationMethods,
 } from "../../shared/helpers.js";
+import { APP_CONFIG } from "../../app-config.js";
 
 export const SettingInitializer = {
-  initDefaultSettings(props) {
-    this.initCalculationMethod(props);
-    this.initLocationSettings(props);
-    this.initPrayerSettings(props);
-    this.initFetchingSettings(props);
+  isInitializing: false,
+
+  async initDefaultSettings(props) {
+    if (this.isInitializing) return;
+
+    this.isInitializing = true;
+
+    try {
+      this.initFetchingSettings(props);
+      this.initPrayerSettings(props);
+      this.initLocationSettings(props);
+      this.initAppInfo(props);
+      await this.initCalculationMethod(props);
+    } catch (error) {
+      console.error("Error during settings initialization:", error);
+    } finally {
+      this.isInitializing = false;
+    }
   },
 
   initLocationSettings(props) {
@@ -60,7 +74,7 @@ export const SettingInitializer = {
     });
   },
 
-  initCalculationMethod(props) {
+  async initCalculationMethod(props) {
     if (!props.settingsStorage.getItem("calculationMethod")) {
       props.settingsStorage.setItem(
         "calculationMethod",
@@ -74,13 +88,17 @@ export const SettingInitializer = {
     }
 
     if (!props.settingsStorage.getItem("calculationMethodsList")) {
-      fetchCalculationMethods().then(async (methods) => {
+      try {
+        const methods = await fetchCalculationMethods();
         const parsedMethods = await parseCalculationMethods(methods);
         props.settingsStorage.setItem(
           "calculationMethodsList",
           JSON.stringify(parsedMethods)
         );
-      });
+        console.log(`Calculation methods list has been set`);
+      } catch (error) {
+        console.error("Failed to fetch or parse calculation methods:", error);
+      }
     }
   },
 
@@ -113,6 +131,22 @@ export const SettingInitializer = {
       console.log(
         `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.automaticFetchInterval}`
       );
+    }
+  },
+
+  initAppInfo(props) {
+    if (!props.settingsStorage.getItem("appInfo")) {
+      const appInfo = {
+        appId: APP_CONFIG.app.appId,
+        appName: APP_CONFIG.app.appName,
+        version: APP_CONFIG.app.version.code,
+        vender: APP_CONFIG.app.vender,
+        description: APP_CONFIG.app.description,
+        permissions: APP_CONFIG.permissions,
+      };
+
+      props.settingsStorage.setItem("appInfo", JSON.stringify(appInfo));
+      console.log(`AppInfo set from app-config.js: ${JSON.stringify(appInfo)}`);
     }
   },
 };

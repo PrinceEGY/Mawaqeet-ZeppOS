@@ -12,10 +12,6 @@ import { SettingInitializer } from "./utils/setting-init.js";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 AppSettingsPage({
-  onInit() {
-    console.log("Settings page initialized");
-  },
-
   getNavState(props) {
     const navState = props.settingsStorage.getItem("navState");
     return navState
@@ -44,6 +40,7 @@ AppSettingsPage({
 
   build(props) {
     SettingInitializer.initDefaultSettings(props);
+
     const navState = this.getNavState(props);
 
     // Render the appropriate page based on the navigation state
