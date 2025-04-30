@@ -13,7 +13,6 @@ import {
 import { Theme } from "../../utils/theme";
 
 export function locationSettingsPage(onBack, props) {
-  // Manage location state
   const getLocationState = () => {
     return props.settingsStorage.getItem("locationState")
       ? JSON.parse(props.settingsStorage.getItem("locationState"))
@@ -45,7 +44,6 @@ export function locationSettingsPage(onBack, props) {
     props.settingsStorage.setItem("lastPrayerTimesUpdate", null);
   };
 
-  // Helper functions to render different screens
   const renderCountrySelection = (locationState, currentLocation) => {
     return Section({ style: LAYOUT_STYLES.mainContainer }, [
       AppBar({
@@ -56,7 +54,6 @@ export function locationSettingsPage(onBack, props) {
 
       Spacer({ height: SPACING.sm }),
 
-      // Show current selection if exists
       currentLocation &&
         Panel({
           children: [
@@ -77,7 +74,6 @@ export function locationSettingsPage(onBack, props) {
               `${currentLocation.country}, ${currentLocation.city}`
             ),
 
-            // Add separator within the same panel
             View({
               style: {
                 ...LAYOUT_STYLES.separator,
@@ -85,7 +81,6 @@ export function locationSettingsPage(onBack, props) {
               },
             }),
 
-            // GPS location section in the same panel
             Text(
               {
                 style: {
@@ -118,7 +113,6 @@ export function locationSettingsPage(onBack, props) {
 
       currentLocation && Spacer({ height: SPACING.sm }),
 
-      // Add subtitle for manual selection
       Text(
         {
           style: {
@@ -163,7 +157,6 @@ export function locationSettingsPage(onBack, props) {
 
       Spacer({ height: SPACING.sm }),
 
-      // List of cities without arrow icons
       Panel({
         children: [
           ...GeoService.getCitiesByCountry(locationState.selectedCountry).map(
@@ -176,7 +169,6 @@ export function locationSettingsPage(onBack, props) {
                   saveLocationState(locationState);
                   saveSelectedLocation(city);
 
-                  // Reset location state
                   saveLocationState({
                     step: "country",
                     selectedCountry: null,
@@ -190,13 +182,9 @@ export function locationSettingsPage(onBack, props) {
     ]);
   };
 
-  // Get states
   const locationState = getLocationState();
   const currentLocation = getCurrentLocation();
 
-  console.log("Location settings page initialized");
-
-  // Render based on current step
   if (locationState.step === "city") {
     return renderCitySelection(locationState, currentLocation);
   } else {

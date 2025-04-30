@@ -2,7 +2,7 @@ import { gettext } from "i18n";
 import { AppBar } from "../../components/app_bar";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "../../utils/styles";
 
-export function aboutPage(navigateBackCallback) {
+export function aboutPage(navigateBackCallback, props) {
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
     AppBar({
       title: gettext("about"),

@@ -94,6 +94,7 @@ function CalculationMethodRow({ method, isSelected, onClick }) {
                       color: isSelected
                         ? Theme.textPrimaryColor
                         : Theme.textSecondaryColor,
+                      lineHeight: "1.2",
                     },
                   },
                   descriptionText
