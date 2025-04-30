@@ -44,6 +44,7 @@ export const BUTTON_STYLES = {
     backgroundColor: Theme.accentPrimaryColor,
     color: Theme.textPrimaryColor,
     fontSize: "14px",
+    width: "80%",
   },
 };
 

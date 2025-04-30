@@ -107,10 +107,7 @@ export function locationSettingsPage(onBack, props) {
             ),
             Button({
               label: gettext("gps_check"),
-              style: {
-                ...BUTTON_STYLES.primary,
-                width: "80%",
-              },
+              style: { ...BUTTON_STYLES.primary },
               onClick: () => {
                 // Empty handler for now - will implement GPS location update later
                 console.log("GPS location update requested");

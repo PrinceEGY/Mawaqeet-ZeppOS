@@ -47,10 +47,7 @@ function createUpdatePanel(lastUpdateText, props) {
     ),
     Button({
       label: gettext("manual_update"),
-      style: {
-        ...BUTTON_STYLES.primary,
-        width: "80%",
-      },
+      style: { ...BUTTON_STYLES.primary },
       onClick: () => {
         fetchAndSavePrayerTimes({ storage: props.settingsStorage });
       },
