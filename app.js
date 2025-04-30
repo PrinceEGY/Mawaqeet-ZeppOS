@@ -3,11 +3,11 @@ import { BaseApp } from "@zeppos/zml/base-app";
 App(
   BaseApp({
     globalData: {},
-    onCreate(options) {
-      console.log("app on create invoke");
+    onCreate() {
+      this.request(); // Initiate request to open connection with the app side
     },
 
-    onDestroy(options) {
+    onDestroy() {
       console.log("app on destroy invoke");
     },
   })
