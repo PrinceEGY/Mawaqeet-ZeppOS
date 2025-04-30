@@ -1,20 +1,19 @@
 import { gettext } from "i18n";
-import { Theme } from "../../utils/theme";
+import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
+import {
+  fetchAndSavePrayerTimes,
+  getTimeAgo,
+} from "../../../shared/helpers.js";
 import { AppBar } from "../../components/app_bar";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
 import {
-  TEXT_STYLES,
+  BUTTON_STYLES,
   LAYOUT_STYLES,
   SPACING,
-  BUTTON_STYLES,
+  TEXT_STYLES,
 } from "../../utils/styles";
-import {
-  fetchExtendedPrayerTimes,
-  getTimeAgo,
-  fetchAndSavePrayerTimes,
-} from "../../../shared/helpers.js";
-import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
+import { Theme } from "../../utils/theme";
 
 function createUpdatePanel(lastUpdateText, props) {
   return [
@@ -216,16 +215,11 @@ export function advancedSettingsPage(navigateBackCallback, props) {
               marginBottom: SPACING.md,
             },
           },
-          gettext("reset_all_settings")
+          gettext("reset_default_settings")
         ),
         Button({
-          label: gettext("reset_settings"),
-          style: {
-            backgroundColor: Theme.bgSecondaryColor,
-            color: Theme.textPrimaryColor,
-            padding: `${SPACING.sm} ${SPACING.md}`,
-            borderRadius: "4px",
-          },
+          label: gettext("reset_settings_btn"),
+          style: { ...BUTTON_STYLES.primary },
           onClick: () => {
             props.settingsStorage.clear();
             console.log("Settings reset to default.");

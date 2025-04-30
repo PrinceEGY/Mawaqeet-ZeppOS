@@ -129,3 +129,9 @@ msgstr "Set how often the app automatically fetches new prayer times (in days)."
 
 msgid "days_between_updates"
 msgstr "Days Between Updates"
+
+msgid "reset_default_settings"
+msgstr "Reset Default Settings"
+
+msgid "reset_settings_btn"
+msgstr "Reset"
