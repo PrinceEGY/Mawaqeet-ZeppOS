@@ -1,9 +1,5 @@
 import { gettext } from "i18n";
-import {
-  ALADHAN_URL,
-  ALADHAN_METHODS_URL,
-  DEFAULT_SETTINGS,
-} from "./constants";
+import { ALADHAN_URL, ALADHAN_METHODS_URL } from "./constants";
 
 export function getTimeAgo(timestamp) {
   if (!timestamp) return null;
@@ -220,7 +216,6 @@ export async function parseCalculationMethods(data) {
 
   return methods;
 }
-
 export async function fetchAndSavePrayerTimes({
   storage,
   location,
@@ -228,32 +223,62 @@ export async function fetchAndSavePrayerTimes({
   monthsBefore,
   monthsAfter,
 }) {
-  location = location || JSON.parse(storage.getItem("currentLocation"));
-  calculationMethodId =
-    calculationMethodId || JSON.parse(storage.getItem("calculationMethod")).id;
-  monthsBefore = monthsBefore || storage.getItem("fetchingMonthsBefore");
-  monthsAfter = monthsAfter || storage.getItem("fetchingMonthsAfter");
+  function getStorageItem(key) {
+    const itemStr = storage.getItem(key);
+    if (!itemStr) {
+      console.error(`${key} not found in storage`);
+      throw new Error(`Missing ${key}`);
+    }
+    try {
+      return JSON.parse(itemStr);
+    } catch (error) {
+      console.error(
+        `Failed to parse ${key} from storage. Value: ${itemStr}`,
+        error
+      );
+      throw new Error(`Invalid ${key} format in storage`);
+    }
+  }
 
-  const startDate = new Date();
-  startDate.setMonth(startDate.getMonth() - parseInt(monthsBefore));
+  const resolvedLocation = location ?? getStorageItem("currentLocation");
+  const resolvedCalculationMethodId =
+    calculationMethodId ?? getStorageItem("calculationMethod").id;
+  const resolvedMonthsBefore =
+    monthsBefore ?? getStorageItem("fetchingMonthsBefore");
+  const resolvedMonthsAfter =
+    monthsAfter ?? getStorageItem("fetchingMonthsAfter");
 
-  const endDate = new Date();
-  endDate.setMonth(endDate.getMonth() + parseInt(monthsAfter));
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setMonth(today.getMonth() - resolvedMonthsBefore);
+
+  const endDate = new Date(today);
+  endDate.setMonth(today.getMonth() + resolvedMonthsAfter);
 
   try {
-    const result = await fetchExtendedPrayerTimes({
-      latitude: location.latitude,
-      longitude: location.longitude,
+    console.log(
+      `Fetching prayer times from ${formatDate(startDate)} to ${formatDate(
+        endDate
+      )}`
+    );
+    const prayerTimesData = await fetchExtendedPrayerTimes({
+      latitude: resolvedLocation.latitude,
+      longitude: resolvedLocation.longitude,
       startDate: startDate,
       endDate: endDate,
-      calculationMethodId: calculationMethodId,
+      calculationMethodId: resolvedCalculationMethodId,
     });
 
     const currentTime = new Date().getTime();
     storage.setItem("lastPrayerTimesUpdate", currentTime.toString());
-    storage.setItem("prayerTimes", JSON.stringify(result));
+    storage.setItem("prayerTimes", JSON.stringify(prayerTimesData));
+    console.log(
+      `Successfully fetched and saved prayer times. Last update: ${new Date(
+        currentTime
+      ).toLocaleString()}`
+    );
   } catch (error) {
-    console.error("Error fetching prayer times:", error);
+    console.error("Error fetching and saving prayer times:", error);
     throw error;
   }
 }
