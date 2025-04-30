@@ -13,7 +13,7 @@ import {
   SPACING,
   TEXT_STYLES,
 } from "../../utils/styles";
-import { Theme } from "../../utils/theme";
+import { Input } from "../../components/input";
 
 function createUpdatePanel(lastUpdateText, props) {
   return [
@@ -54,25 +54,6 @@ function createUpdatePanel(lastUpdateText, props) {
   ];
 }
 
-function InputRow({ label, value, onChange }) {
-  return TextInput({
-    label: label,
-    value: value,
-    labelStyle: {
-      color: Theme.textPrimaryColor,
-      marginBottom: `${SPACING.xs}`,
-    },
-    subStyle: {
-      borderRadius: "4px",
-      backgroundColor: "white",
-      color: "black",
-      padding: `${SPACING.sm} ${SPACING.md}`,
-      marginBottom: SPACING.md,
-    },
-    onChange: onChange,
-  });
-}
-
 function validateMonthsInput(value) {
   const numValue = parseInt(value);
 
@@ -99,7 +80,6 @@ function validateFetchIntervalInput(value) {
 function createFetchWindowPanel(props) {
   const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
   const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
-  const autoFetchDays = props.settingsStorage.getItem("autoFetchDays");
 
   return [
     Text(
@@ -121,7 +101,7 @@ function createFetchWindowPanel(props) {
       gettext("fetch_window_description")
     ),
 
-    InputRow({
+    Input({
       label: gettext("months_before"),
       value: monthsBefore,
       onChange: (value) => {
@@ -130,7 +110,7 @@ function createFetchWindowPanel(props) {
       },
     }),
 
-    InputRow({
+    Input({
       label: gettext("months_after"),
       value: monthsAfter,
       onChange: (value) => {
@@ -164,7 +144,7 @@ function createAutoFetchPanel(props) {
       gettext("auto_fetch_interval_description")
     ),
 
-    InputRow({
+    Input({
       label: gettext("days_between_updates"),
       value: autoFetchDays,
       onChange: (value) => {
