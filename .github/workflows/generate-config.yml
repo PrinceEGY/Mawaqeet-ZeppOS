@@ -28,7 +28,7 @@ jobs:
 
       - name: Check for changes
         id: git-check
-        run: echo "::set-output name=modified::$(git status --porcelain | grep 'app-config.js' || echo '')"
+        run: echo "modified=$(git status --porcelain | grep 'app-config.js' || echo '')" >> $GITHUB_OUTPUT
 
       - name: Commit and push changes
         if: steps.git-check.outputs.modified
