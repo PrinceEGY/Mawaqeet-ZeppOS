@@ -1,7 +1,4 @@
 import { gettext } from "i18n";
-import { DEFAULT_SETTINGS } from "../shared/constants.js";
-import { GeoService } from "../shared/geo-service.js";
-import { fetchExtendedPrayerTimes, getTimeAgo } from "../shared/helpers.js";
 import { AppBar } from "./components/app_bar.js";
 import { MenuButton } from "./components/menu_button.js";
 import { Panel } from "./components/panel.js";
@@ -11,16 +8,8 @@ import { advancedSettingsPage } from "./pages/advanced/index";
 import { calculationSettingsPage } from "./pages/calculation/index";
 import { locationSettingsPage } from "./pages/location/index";
 import { prayersSettingsPage } from "./pages/prayers/index";
-import {
-  BUTTON_STYLES,
-  LAYOUT_STYLES,
-  SPACING,
-  TEXT_STYLES,
-} from "./utils/styles.js";
-import {
-  fetchCalculationMethods,
-  parseCalculationMethods,
-} from "../shared/helpers.js";
+import { SettingInitializer } from "./utils/setting-init.js";
+import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 AppSettingsPage({
   onInit() {
@@ -36,114 +25,6 @@ AppSettingsPage({
 
   saveNavState(props, navState) {
     props.settingsStorage.setItem("navState", JSON.stringify(navState));
-  },
-
-  initializeDefaultSettings(props) {
-    this.initializeCalculationMethod(props);
-    this.initializeLocationSettings(props);
-    this.initializePrayerSettings(props);
-    this.initializeFetchingSettings(props);
-  },
-
-  initializeLocationSettings(props) {
-    if (!props.settingsStorage.getItem("currentLocation")) {
-      const defaultLocation = GeoService.getCityByName(
-        DEFAULT_SETTINGS.location.city
-      );
-
-      if (defaultLocation) {
-        props.settingsStorage.setItem(
-          "currentLocation",
-          JSON.stringify({
-            country: defaultLocation.country,
-            city: defaultLocation.city,
-            latitude: defaultLocation.latitude,
-            longitude: defaultLocation.longitude,
-          })
-        );
-        console.log(
-          `Default location set to ${DEFAULT_SETTINGS.location.city}`
-        );
-      } else {
-        console.log(
-          `Default location (${DEFAULT_SETTINGS.location.city}) not found in GEO_DATA`
-        );
-      }
-    }
-  },
-
-  initializePrayerSettings(props) {
-    Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
-      const displayKey = `display_${prayer}`;
-      if (!props.settingsStorage.getItem(displayKey)) {
-        props.settingsStorage.setItem(
-          displayKey,
-          DEFAULT_SETTINGS.display[prayer].toString()
-        );
-      }
-
-      const notifyKey = `notify_${prayer}`;
-      if (!props.settingsStorage.getItem(notifyKey)) {
-        props.settingsStorage.setItem(
-          notifyKey,
-          DEFAULT_SETTINGS.display[prayer].toString()
-        );
-      }
-    });
-  },
-
-  initializeCalculationMethod(props) {
-    if (!props.settingsStorage.getItem("calculationMethod")) {
-      props.settingsStorage.setItem(
-        "calculationMethod",
-        JSON.stringify(DEFAULT_SETTINGS.calculationMethod)
-      );
-      console.log(
-        `Default calculation method set to ${DEFAULT_SETTINGS.calculationMethod}`
-      );
-    }
-
-    if (!props.settingsStorage.getItem("calculationMethodsList")) {
-      fetchCalculationMethods().then(async (methods) => {
-        const parsedMethods = await parseCalculationMethods(methods);
-        props.settingsStorage.setItem(
-          "calculationMethodsList",
-          JSON.stringify(parsedMethods)
-        );
-      });
-    }
-  },
-
-  initializeFetchingSettings(props) {
-    if (!props.settingsStorage.getItem("fetchingMonthsBefore")) {
-      props.settingsStorage.setItem(
-        "fetchingMonthsBefore",
-        DEFAULT_SETTINGS.fetching.monthsBefore.toString()
-      );
-      console.log(
-        `Default fetchingMonthsBefore set to ${DEFAULT_SETTINGS.fetching.monthsBefore}`
-      );
-    }
-
-    if (!props.settingsStorage.getItem("fetchingMonthsAfter")) {
-      props.settingsStorage.setItem(
-        "fetchingMonthsAfter",
-        DEFAULT_SETTINGS.fetching.monthsAfter.toString()
-      );
-      console.log(
-        `Default fetchingMonthsAfter set to ${DEFAULT_SETTINGS.fetching.monthsAfter}`
-      );
-    }
-
-    if (!props.settingsStorage.getItem("autoFetchDays")) {
-      props.settingsStorage.setItem(
-        "autoFetchDays",
-        DEFAULT_SETTINGS.fetching.autoFetchDays.toString()
-      );
-      console.log(
-        `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.autoFetchDays}`
-      );
-    }
   },
 
   navigateTo(page, props) {
@@ -162,8 +43,7 @@ AppSettingsPage({
   },
 
   build(props) {
-    this.initializeDefaultSettings(props);
-
+    SettingInitializer.initDefaultSettings(props);
     const navState = this.getNavState(props);
 
     // Render the appropriate page based on the navigation state
