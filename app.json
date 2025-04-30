@@ -9,8 +9,8 @@
       "name": "1.0.0"
     },
     "icon": "icon.png",
-    "vender": "zepp",
-    "description": "empty application"
+    "vender": "Ahmed Mohsen (PrinceEGY)",
+    "description": "Mawaqeet is a prayer time application that provides accurate prayer times based on your location."
   },
   "permissions": [
     "data:os.device.info",
