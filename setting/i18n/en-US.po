@@ -121,3 +121,11 @@ msgstr "Months Before"
 msgid "months_after"
 msgstr "Months After"
 
+msgid "auto_fetch_interval"
+msgstr "Automatic Update Interval"
+
+msgid "auto_fetch_interval_description"
+msgstr "Set how often the app automatically fetches new prayer times (in days)."
+
+msgid "days_between_updates"
+msgstr "Days Between Updates"

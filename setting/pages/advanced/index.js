@@ -125,9 +125,22 @@ function validateMonthsInput(value) {
   return Math.max(monthsMin, Math.min(monthsMax, numValue)).toString();
 }
 
+function validateFetchIntervalInput(value) {
+  const numValue = parseInt(value);
+
+  if (isNaN(numValue)) {
+    return DEFAULT_SETTINGS.fetching.automaticFetchInterval.toString();
+  }
+
+  const { monthsMax } = DEFAULT_SETTINGS.fetching;
+  const maxDays = monthsMax * 30 - 1;
+  return Math.max(1, Math.min(maxDays, numValue)).toString();
+}
+
 function createFetchWindowPanel(props) {
   const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
   const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
+  const autoFetchDays = props.settingsStorage.getItem("autoFetchDays");
 
   return [
     Text(
@@ -169,6 +182,40 @@ function createFetchWindowPanel(props) {
   ];
 }
 
+function createAutoFetchPanel(props) {
+  const autoFetchDays = props.settingsStorage.getItem("autoFetchDays");
+
+  return [
+    Text(
+      {
+        style: {
+          ...TEXT_STYLES.subheading,
+          marginBottom: SPACING.xs,
+        },
+      },
+      gettext("auto_fetch_interval")
+    ),
+    Text(
+      {
+        style: {
+          ...TEXT_STYLES.small,
+          marginBottom: SPACING.md,
+        },
+      },
+      gettext("auto_fetch_interval_description")
+    ),
+
+    InputRow({
+      label: gettext("days_between_updates"),
+      value: autoFetchDays,
+      onChange: (value) => {
+        const validatedValue = validateFetchIntervalInput(value);
+        props.settingsStorage.setItem("autoFetchDays", validatedValue);
+      },
+    }),
+  ];
+}
+
 export function advancedSettingsPage(navigateBackCallback, props) {
   const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
   const lastUpdateText = getTimeAgo(lastUpdate);
@@ -182,21 +229,24 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
     Spacer({ height: SPACING.sm }),
 
-    // Prayer times update panel
     Panel({
       children: createUpdatePanel(lastUpdateText, props),
     }),
 
     Spacer({ height: SPACING.xs }),
 
-    // Fetch window size panel
     Panel({
       children: createFetchWindowPanel(props),
     }),
 
     Spacer({ height: SPACING.xs }),
 
-    // Reset settings panel
+    Panel({
+      children: createAutoFetchPanel(props),
+    }),
+
+    Spacer({ height: SPACING.xs }),
+
     Panel({
       children: [
         Text(

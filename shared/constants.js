@@ -1,3 +1,5 @@
+import { gettext } from "i18n";
+
 export const ALADHAN_URL = "https://api.aladhan.com/v1/calendar";
 
 export const ALADHAN_METHODS_URL = "https://api.aladhan.com/v1/methods";
@@ -41,6 +43,6 @@ export const DEFAULT_SETTINGS = {
     monthsMin: 1,
     monthsBefore: 24,
     monthsAfter: 24,
-    autoFetchDays: 7,
+    automaticFetchInterval: 7,
   },
 };
