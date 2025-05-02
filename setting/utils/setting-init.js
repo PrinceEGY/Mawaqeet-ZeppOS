@@ -139,9 +139,10 @@ export const SettingInitializer = {
       const appInfo = {
         appId: APP_CONFIG.app.appId,
         appName: APP_CONFIG.app.appName,
-        version: APP_CONFIG.app.version.code,
+        version: APP_CONFIG.app.version.name,
         vender: APP_CONFIG.app.vender,
         description: APP_CONFIG.app.description,
+        homepage: APP_CONFIG.app.homepage,
         permissions: APP_CONFIG.permissions,
       };
 

@@ -97,8 +97,17 @@ msgstr "Advanced settings will be available soon"
 msgid "about"
 msgstr "About"
 
-msgid "about_page_coming_soon"
-msgstr "Information about the Prayer Times app will be available soon"
+msgid "version"
+msgstr "Version"
+
+msgid "developer"
+msgstr "Developer"
+
+msgid "description"
+msgstr "Description"
+
+msgid "homepage"
+msgstr "Source code"
 
 msgid "prayers_settings_description"
 msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."
