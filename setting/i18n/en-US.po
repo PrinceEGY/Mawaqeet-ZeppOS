@@ -85,8 +85,26 @@ msgstr "Update using device's GPS coordinates"
 msgid "gps_check"
 msgstr "GPS Check"
 
+msgid "gps_location_limitation"
+msgstr "GPS location updates are only available in the watch app due to settings app limitations."
+
+msgid "enter_coordinates_manually"
+msgstr "Enter Coordinates Manually:"
+
+msgid "latitude"
+msgstr "Latitude"
+
+msgid "longitude"
+msgstr "Longitude"
+
+msgid "save_coordinates"
+msgstr "Save Coordinates"
+
+msgid "coordinates_range_info"
+msgstr "Latitude: -90 to 90, Longitude: -180 to 180"
+
 msgid "select_manually"
-msgstr "Select Manually:"
+msgstr "Select Location Manually:"
 
 msgid "advanced_settings"
 msgstr "Advanced Settings"
