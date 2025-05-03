@@ -8,6 +8,7 @@ import { AppBar } from "../../components/app_bar";
 import { Input } from "../../components/input";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
+import { SettingInitializer } from "../../utils/setting-init.js";
 import {
   BUTTON_STYLES,
   LAYOUT_STYLES,
@@ -224,6 +225,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("reset_settings_btn"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
+            SettingInitializer.resetSessionFlag();
             props.settingsStorage.clear();
             console.log("Settings reset to default.");
           },

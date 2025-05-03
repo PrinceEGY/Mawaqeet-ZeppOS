@@ -8,18 +8,29 @@ import {
 
 export const SettingInitializer = {
   isInitializing: false,
+  __initDoneThisSession: false,
+
+  resetSessionFlag() {
+    this.__initDoneThisSession = false;
+  },
 
   async initDefaultSettings(props) {
-    if (this.isInitializing) return;
+    if (this.isInitializing || this.__initDoneThisSession) return;
 
     this.isInitializing = true;
 
     try {
+      props.settingsStorage.setItem(
+        "navState",
+        JSON.stringify({ currentPage: "main", history: [] })
+      );
+
       this.initFetchingSettings(props);
       this.initPrayerSettings(props);
       this.initLocationSettings(props);
       this.initAppInfo(props);
       await this.initCalculationMethod(props);
+      this.__initDoneThisSession = true;
     } catch (error) {
       console.error("Error during settings initialization:", error);
     } finally {
@@ -87,7 +98,20 @@ export const SettingInitializer = {
       );
     }
 
-    if (!props.settingsStorage.getItem("calculationMethodsList")) {
+    const now = Date.now();
+    const lastFetch = parseInt(
+      props.settingsStorage.getItem("lastCalculationMethodsUpdate") || "0"
+    );
+    const autoFetchDays = parseInt(
+      props.settingsStorage.getItem("autoFetchDays")
+    );
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const interval = autoFetchDays * msPerDay;
+
+    if (
+      !props.settingsStorage.getItem("calculationMethodsList") ||
+      now - lastFetch > interval
+    ) {
       try {
         const methods = await fetchCalculationMethods();
         const parsedMethods = await parseCalculationMethods(methods);
@@ -95,7 +119,11 @@ export const SettingInitializer = {
           "calculationMethodsList",
           JSON.stringify(parsedMethods)
         );
-        console.log(`Calculation methods list has been set`);
+        props.settingsStorage.setItem(
+          "lastCalculationMethodsUpdate",
+          now.toString()
+        );
+        console.log(`Calculation methods list has been set/refreshed`);
       } catch (error) {
         console.error("Failed to fetch or parse calculation methods:", error);
       }
@@ -135,19 +163,17 @@ export const SettingInitializer = {
   },
 
   initAppInfo(props) {
-    if (!props.settingsStorage.getItem("appInfo")) {
-      const appInfo = {
-        appId: APP_CONFIG.app.appId,
-        appName: APP_CONFIG.app.appName,
-        version: APP_CONFIG.app.version.name,
-        vender: APP_CONFIG.app.vender,
-        description: APP_CONFIG.app.description,
-        homepage: APP_CONFIG.app.homepage,
-        permissions: APP_CONFIG.permissions,
-      };
+    const appInfo = {
+      appId: APP_CONFIG.app.appId,
+      appName: APP_CONFIG.app.appName,
+      version: APP_CONFIG.app.version.name,
+      vender: APP_CONFIG.app.vender,
+      description: APP_CONFIG.app.description,
+      homepage: APP_CONFIG.app.homepage,
+      permissions: APP_CONFIG.permissions,
+    };
 
-      props.settingsStorage.setItem("appInfo", JSON.stringify(appInfo));
-      console.log(`AppInfo set from app-config.js: ${JSON.stringify(appInfo)}`);
-    }
+    props.settingsStorage.setItem("appInfo", JSON.stringify(appInfo));
+    console.log(`AppInfo set from app-config.js: ${JSON.stringify(appInfo)}`);
   },
 };
