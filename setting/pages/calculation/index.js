@@ -1,6 +1,7 @@
 import { gettext } from "i18n";
 import { AppBar } from "../../components/app_bar";
 import { Panel } from "../../components/panel";
+import { Spacer } from "../../components/spacer";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "../../utils/styles";
 import { Theme } from "../../utils/theme";
 
@@ -20,18 +21,29 @@ export function calculationSettingsPage(navigateBackCallback, props) {
     Spacer({ height: SPACING.sm }),
 
     Panel({
-      children: methods.map((method) =>
-        buildCalcMethodRow({
-          method: method,
-          isSelected: method.id === selectedMethodId,
-          onClick: () => {
-            props.settingsStorage.setItem(
-              "calculationMethod",
-              JSON.stringify(method)
-            );
+      children: [
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              marginBottom: SPACING.md,
+            },
           },
-        })
-      ),
+          gettext("calc_method_page_desc")
+        ),
+        ...methods.map((method) =>
+          buildCalcMethodRow({
+            method: method,
+            isSelected: method.id === selectedMethodId,
+            onClick: () => {
+              props.settingsStorage.setItem(
+                "calculationMethod",
+                JSON.stringify(method)
+              );
+            },
+          })
+        ),
+      ],
     }),
   ]);
 

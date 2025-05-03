@@ -98,7 +98,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
               marginBottom: SPACING.md,
             },
           },
-          gettext("prayer_update_clarification")
+          gettext("prayer_update_desc")
         ),
         Button({
           label: gettext("manual_update"),
@@ -133,7 +133,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
               marginBottom: SPACING.md,
             },
           },
-          gettext("fetch_window_description")
+          gettext("fetch_window_desc")
         ),
 
         Input({
@@ -184,7 +184,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
               marginBottom: SPACING.md,
             },
           },
-          gettext("auto_fetch_interval_description")
+          gettext("auto_fetch_interval_desc")
         ),
 
         Input({
@@ -206,10 +206,19 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           {
             style: {
               ...TEXT_STYLES.subheading,
-              marginBottom: SPACING.md,
+              marginBottom: SPACING.xs,
             },
           },
           gettext("reset_default_settings")
+        ),
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              marginBottom: SPACING.md,
+            },
+          },
+          gettext("calc_method_page_desc")
         ),
         Button({
           label: gettext("reset_settings_btn"),

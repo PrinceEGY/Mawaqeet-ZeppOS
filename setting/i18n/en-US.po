@@ -1,20 +1,12 @@
 msgid "example"
 msgstr "This is an example in app-side"
 
+# General Settings
 msgid "prayer_times_settings"
 msgstr "Mawaqeet Settings"
 
 msgid "location_settings"
 msgstr "Location Settings"
-
-msgid "loc_select_country"
-msgstr "Location Settings"
-
-msgid "loc_select_city"
-msgstr "Select City"
-
-msgid "location_settings_coming_soon"
-msgstr "Location settings will be available soon"
 
 msgid "prayers_settings"
 msgstr "Prayers Settings"
@@ -22,11 +14,18 @@ msgstr "Prayers Settings"
 msgid "calculation_method"
 msgstr "Calculation Method"
 
-msgid "calculation_method_desc"
-msgstr "Choose how prayer times are calculated"
+msgid "advanced_settings"
+msgstr "Advanced Settings"
 
-msgid "calculation_method_coming_soon"
-msgstr "Calculation method settings will be available soon"
+msgid "about"
+msgstr "About"
+
+# Location Settings
+msgid "loc_select_country"
+msgstr "Location Settings"
+
+msgid "loc_select_city"
+msgstr "Select City"
 
 msgid "current_location"
 msgstr "Current Location"
@@ -34,17 +33,42 @@ msgstr "Current Location"
 msgid "no_location_selected"
 msgstr "No location selected"
 
-msgid "current_selection"
-msgstr "Current Selection"
+msgid "use_gps_location"
+msgstr "Use GPS Location"
 
-msgid "back"
-msgstr "Back"
+msgid "update_using_device_gps"
+msgstr "Update using the device's GPS coordinates"
 
-msgid "back_to_countries"
-msgstr "Back to Countries"
+msgid "gps_check"
+msgstr "GPS Check"
+
+msgid "gps_location_limitation"
+msgstr "GPS location updates are only available in the watch app due to settings app limitations."
+
+msgid "enter_coordinates_manually"
+msgstr "Enter Coordinates Manually"
+
+msgid "latitude"
+msgstr "Latitude"
+
+msgid "longitude"
+msgstr "Longitude"
+
+msgid "save_coordinates"
+msgstr "Save Coordinates"
+
+msgid "coordinates_range_info"
+msgstr "Latitude: -90 to 90, Longitude: -180 to 180"
+
+msgid "select_manually"
+msgstr "Select Location Manually"
+
+# Prayer Settings
+msgid "prayers_settings_description"
+msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."
 
 msgid "last_update"
-msgstr "Prayer Times Updated"
+msgstr "Last Prayer Times Update"
 
 msgid "never_updated"
 msgstr "Never updated"
@@ -73,73 +97,24 @@ msgstr "day ago"
 msgid "days_ago"
 msgstr "days ago"
 
-msgid "prayer_update_clarification"
+msgid "prayer_update_desc"
 msgstr "The app automatically fetches prayer times at regular intervals (see settings below), so you only need to update manually if necessary."
 
-msgid "use_gps_location"
-msgstr "Use GPS Location"
-
-msgid "update_using_device_gps"
-msgstr "Update using device's GPS coordinates"
-
-msgid "gps_check"
-msgstr "GPS Check"
-
-msgid "gps_location_limitation"
-msgstr "GPS location updates are only available in the watch app due to settings app limitations."
-
-msgid "enter_coordinates_manually"
-msgstr "Enter Coordinates Manually:"
-
-msgid "latitude"
-msgstr "Latitude"
-
-msgid "longitude"
-msgstr "Longitude"
-
-msgid "save_coordinates"
-msgstr "Save Coordinates"
-
-msgid "coordinates_range_info"
-msgstr "Latitude: -90 to 90, Longitude: -180 to 180"
-
-msgid "select_manually"
-msgstr "Select Location Manually:"
-
-msgid "advanced_settings"
-msgstr "Advanced Settings"
-
-msgid "advanced_settings_coming_soon"
-msgstr "Advanced settings will be available soon"
-
-msgid "about"
-msgstr "About"
-
-msgid "version"
-msgstr "Version"
-
-msgid "developer"
-msgstr "Developer"
-
-msgid "description"
-msgstr "Description"
-
-msgid "homepage"
-msgstr "Source code"
-
-msgid "prayers_settings_description"
-msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."
-
+# Calculation Method
 msgid "calculation_method_auto"
 msgstr "Auto (Recommended)"
 
 msgid "calculation_method_auto_desc"
-msgstr "Automatically choose closest authority based on the location or co-ordinates"
+msgstr "Automatically selects the best calculation method based on your location."
 
+msgid "calc_method_page_desc"
+msgstr "Select the calculation method for determining prayer times. If you don't want a specific calculation method, leave it as 'Auto'"
+
+# Fetching Settings
 msgid "fetch_window_size"
 msgstr "Prayer Times Data Range"
 
-msgid "fetch_window_description"
+msgid "fetch_window_desc"
 msgstr "Set how many months of prayer times data to fetch before and after the current date (range: 1-120 months)."
 
 msgid "months_before"
@@ -151,14 +126,31 @@ msgstr "Months After"
 msgid "auto_fetch_interval"
 msgstr "Automatic Update Interval"
 
-msgid "auto_fetch_interval_description"
-msgstr "Set how often the app automatically fetches new prayer times (in days)."
+msgid "auto_fetch_interval_desc"
+msgstr "Set how often the app fetches new prayer times automatically (in days)."
 
 msgid "days_between_updates"
 msgstr "Days Between Updates"
 
+# Reset Settings
 msgid "reset_default_settings"
-msgstr "Reset Default Settings"
+msgstr "Reset to Default Settings"
 
 msgid "reset_settings_btn"
 msgstr "Reset"
+
+msgid "reset_settings_desc"
+msgstr "This will restore all application settings to their original defaults. This cannot be undone."
+
+# About
+msgid "version"
+msgstr "Version"
+
+msgid "developer"
+msgstr "Developer"
+
+msgid "description"
+msgstr "Description"
+
+msgid "homepage"
+msgstr "Source Code"
