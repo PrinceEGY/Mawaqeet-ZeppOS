@@ -16,7 +16,7 @@ export function aboutPage(navigateBackCallback, props) {
       showBackButton: true,
     }),
 
-    Spacer({ height: SPACING.md }),
+    Spacer({ height: SPACING.sm }),
 
     Panel({
       children: [

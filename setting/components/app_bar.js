@@ -1,6 +1,6 @@
-import { Theme } from "../utils/theme";
 import { BACK_BTN_ICON } from "../utils/icons";
 import { SPACING } from "../utils/styles";
+import { Theme } from "../utils/theme";
 
 export function AppBar({ title, onBack, showBackButton = true }) {
   return View(
@@ -19,7 +19,6 @@ export function AppBar({ title, onBack, showBackButton = true }) {
       },
     },
     [
-      // Only render back button if showBackButton is true
       showBackButton &&
         Button({
           style: {

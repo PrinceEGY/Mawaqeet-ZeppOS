@@ -1,10 +1,10 @@
+import { APP_CONFIG } from "../../app-config.js";
 import { DEFAULT_SETTINGS } from "../../shared/constants.js";
 import { GeoService } from "../../shared/geo-service.js";
 import {
   fetchCalculationMethods,
   parseCalculationMethods,
 } from "../../shared/helpers.js";
-import { APP_CONFIG } from "../../app-config.js";
 
 export const SettingInitializer = {
   isInitializing: false,

@@ -17,6 +17,7 @@ export function calculationSettingsPage(navigateBackCallback, props) {
       onBack: navigateBackCallback,
       showBackButton: true,
     }),
+    Spacer({ height: SPACING.sm }),
 
     Panel({
       children: methods.map((method) =>

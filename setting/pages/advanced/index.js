@@ -5,6 +5,7 @@ import {
   getTimeAgo,
 } from "../../../shared/helpers.js";
 import { AppBar } from "../../components/app_bar";
+import { Input } from "../../components/input";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
 import {
@@ -13,7 +14,6 @@ import {
   SPACING,
   TEXT_STYLES,
 } from "../../utils/styles";
-import { Input } from "../../components/input";
 
 export function advancedSettingsPage(navigateBackCallback, props) {
   const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");

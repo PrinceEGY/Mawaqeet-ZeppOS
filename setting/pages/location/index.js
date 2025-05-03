@@ -13,7 +13,7 @@ import {
 } from "../../utils/styles";
 import { Theme } from "../../utils/theme";
 
-export function locationSettingsPage(onBack, props) {
+export function locationSettingsPage(navigateBackCallback, props) {
   const locationPageState = getLocationState();
   const currentLocation = getCurrentLocation();
 
@@ -23,6 +23,7 @@ export function locationSettingsPage(onBack, props) {
     return renderCitySelection();
   }
 
+  // --- Helper Methods ---
   function getLocationState() {
     return props.settingsStorage.getItem("locationPageState")
       ? JSON.parse(props.settingsStorage.getItem("locationPageState"))
@@ -248,11 +249,11 @@ export function locationSettingsPage(onBack, props) {
     return Section({ style: LAYOUT_STYLES.mainContainer }, [
       AppBar({
         title: gettext("loc_select_country"),
-        onBack: onBack,
+        onBack: navigateBackCallback,
         showBackButton: true,
       }),
 
-      Spacer({ height: SPACING.xs }),
+      Spacer({ height: SPACING.sm }),
 
       Panel({
         children: [buildCurrentLocationPanel(), buildGpsLocationPanel()],

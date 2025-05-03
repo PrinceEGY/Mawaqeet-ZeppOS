@@ -16,21 +16,22 @@ export function prayersSettingsPage(navigateBackCallback, props) {
       showBackButton: true,
     }),
 
-    Spacer({ height: SPACING.md }),
-
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.small,
-          padding: `0 ${SPACING.lg}`,
-          marginBottom: SPACING.md,
-        },
-      },
-      gettext("prayers_settings_description")
-    ),
+    Spacer({ height: SPACING.sm }),
 
     Panel({
-      children: TIMINGS_LIST.map((prayer) => buildPrayerRow(prayer)),
+      children: [
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              padding: `0 ${SPACING.lg}`,
+              marginBottom: SPACING.md,
+            },
+          },
+          gettext("prayers_settings_description")
+        ),
+        ...TIMINGS_LIST.map((prayer) => buildPrayerRow(prayer)),
+      ],
     }),
   ]);
 
