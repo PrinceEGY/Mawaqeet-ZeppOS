@@ -12,6 +12,28 @@ import { SettingInitializer } from "./utils/setting-init.js";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 AppSettingsPage({
+  build(props) {
+    SettingInitializer.initDefaultSettings(props);
+    const navState = this.getNavState(props);
+
+    // Render the appropriate page based on the navigation state
+    const pages = {
+      location: () =>
+        locationSettingsPage(() => this.navigateBack(props), props),
+      prayers: () => prayersSettingsPage(() => this.navigateBack(props), props),
+      calculation: () =>
+        calculationSettingsPage(() => this.navigateBack(props), props),
+      advanced: () =>
+        advancedSettingsPage(() => this.navigateBack(props), props),
+      about: () => aboutPage(() => this.navigateBack(props), props),
+      main: () => this.renderMainMenu(props),
+    };
+
+    const renderPage = pages[navState.currentPage] || pages.main;
+    return renderPage();
+  },
+
+  // --- Helper Methods ---
   getNavState(props) {
     const navState = props.settingsStorage.getItem("navState");
     return navState
@@ -38,28 +60,7 @@ AppSettingsPage({
     }
   },
 
-  build(props) {
-    SettingInitializer.initDefaultSettings(props);
-
-    const navState = this.getNavState(props);
-
-    // Render the appropriate page based on the navigation state
-    const pages = {
-      location: () =>
-        locationSettingsPage(() => this.navigateBack(props), props),
-      prayers: () => prayersSettingsPage(() => this.navigateBack(props), props),
-      calculation: () =>
-        calculationSettingsPage(() => this.navigateBack(props), props),
-      advanced: () =>
-        advancedSettingsPage(() => this.navigateBack(props), props),
-      about: () => aboutPage(() => this.navigateBack(props), props),
-      main: () => this.renderMainMenu(props),
-    };
-
-    const renderPage = pages[navState.currentPage] || pages.main;
-    return renderPage();
-  },
-
+  // --- Build Methods ---
   createLocationPanel(currentLocation) {
     return [
       Text(

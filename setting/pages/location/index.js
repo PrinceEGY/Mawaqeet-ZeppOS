@@ -1,10 +1,10 @@
 import { gettext } from "i18n";
 import { GeoService } from "../../../shared/geo-service";
 import { AppBar } from "../../components/app_bar";
+import { Input } from "../../components/input";
 import { MenuButton } from "../../components/menu_button";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
-import { Input } from "../../components/input";
 import {
   BUTTON_STYLES,
   LAYOUT_STYLES,

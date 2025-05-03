@@ -15,146 +15,6 @@ import {
 } from "../../utils/styles";
 import { Input } from "../../components/input";
 
-function createUpdatePanel(lastUpdateText, props) {
-  return [
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.subheading,
-          marginBottom: SPACING.xs,
-        },
-      },
-      gettext("last_update")
-    ),
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.normal,
-          marginBottom: SPACING.xs,
-        },
-      },
-      lastUpdateText || gettext("never_updated")
-    ),
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.small,
-          marginBottom: SPACING.md,
-        },
-      },
-      gettext("prayer_update_clarification")
-    ),
-    Button({
-      label: gettext("manual_update"),
-      style: { ...BUTTON_STYLES.primary },
-      onClick: () => {
-        fetchAndSavePrayerTimes({ storage: props.settingsStorage });
-      },
-    }),
-  ];
-}
-
-function validateMonthsInput(value) {
-  const numValue = parseInt(value);
-
-  if (isNaN(numValue)) {
-    return DEFAULT_SETTINGS.fetching.monthsBefore.toString();
-  }
-
-  const { monthsMin, monthsMax } = DEFAULT_SETTINGS.fetching;
-  return Math.max(monthsMin, Math.min(monthsMax, numValue)).toString();
-}
-
-function validateFetchIntervalInput(value) {
-  const numValue = parseInt(value);
-
-  if (isNaN(numValue)) {
-    return DEFAULT_SETTINGS.fetching.automaticFetchInterval.toString();
-  }
-
-  const { monthsMax } = DEFAULT_SETTINGS.fetching;
-  const maxDays = monthsMax * 30 - 1;
-  return Math.max(1, Math.min(maxDays, numValue)).toString();
-}
-
-function createFetchWindowPanel(props) {
-  const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
-  const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
-
-  return [
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.subheading,
-          marginBottom: SPACING.xs,
-        },
-      },
-      gettext("fetch_window_size")
-    ),
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.small,
-          marginBottom: SPACING.md,
-        },
-      },
-      gettext("fetch_window_description")
-    ),
-
-    Input({
-      label: gettext("months_before"),
-      value: monthsBefore,
-      onChange: (value) => {
-        const validatedValue = validateMonthsInput(value);
-        props.settingsStorage.setItem("fetchingMonthsBefore", validatedValue);
-      },
-    }),
-
-    Input({
-      label: gettext("months_after"),
-      value: monthsAfter,
-      onChange: (value) => {
-        const validatedValue = validateMonthsInput(value);
-        props.settingsStorage.setItem("fetchingMonthsAfter", validatedValue);
-      },
-    }),
-  ];
-}
-
-function createAutoFetchPanel(props) {
-  const autoFetchDays = props.settingsStorage.getItem("autoFetchDays");
-
-  return [
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.subheading,
-          marginBottom: SPACING.xs,
-        },
-      },
-      gettext("auto_fetch_interval")
-    ),
-    Text(
-      {
-        style: {
-          ...TEXT_STYLES.small,
-          marginBottom: SPACING.md,
-        },
-      },
-      gettext("auto_fetch_interval_description")
-    ),
-
-    Input({
-      label: gettext("days_between_updates"),
-      value: autoFetchDays,
-      onChange: (value) => {
-        const validatedValue = validateFetchIntervalInput(value);
-        props.settingsStorage.setItem("autoFetchDays", validatedValue);
-      },
-    }),
-  ];
-}
-
 export function advancedSettingsPage(navigateBackCallback, props) {
   const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
   const lastUpdateText = getTimeAgo(lastUpdate);
@@ -168,25 +28,179 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
     Spacer({ height: SPACING.sm }),
 
-    Panel({
-      children: createUpdatePanel(lastUpdateText, props),
-    }),
+    buildUpdatePanel(lastUpdateText, props),
 
     Spacer({ height: SPACING.xs }),
 
-    Panel({
-      children: createFetchWindowPanel(props),
-    }),
+    buildFetchWindowPanel(props),
 
     Spacer({ height: SPACING.xs }),
 
-    Panel({
-      children: createAutoFetchPanel(props),
-    }),
+    buildAutoFetchPanel(props),
 
     Spacer({ height: SPACING.xs }),
 
-    Panel({
+    buildResetSettingsPanel(props),
+
+    Spacer({ height: SPACING.md }),
+  ]);
+
+  // --- Helper Methods ---
+  function validateMonthsInput(value) {
+    const numValue = parseInt(value);
+
+    if (isNaN(numValue)) {
+      return DEFAULT_SETTINGS.fetching.monthsBefore.toString();
+    }
+
+    const { monthsMin, monthsMax } = DEFAULT_SETTINGS.fetching;
+    return Math.max(monthsMin, Math.min(monthsMax, numValue)).toString();
+  }
+
+  function validateFetchIntervalInput(value) {
+    const numValue = parseInt(value);
+
+    if (isNaN(numValue)) {
+      return DEFAULT_SETTINGS.fetching.automaticFetchInterval.toString();
+    }
+
+    const { monthsMax } = DEFAULT_SETTINGS.fetching;
+    const maxDays = monthsMax * 30 - 1;
+    return Math.max(1, Math.min(maxDays, numValue)).toString();
+  }
+
+  // --- Build Methods ---
+  function buildUpdatePanel(lastUpdateText, props) {
+    return Panel({
+      children: [
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.subheading,
+              marginBottom: SPACING.xs,
+            },
+          },
+          gettext("last_update")
+        ),
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.normal,
+              marginBottom: SPACING.xs,
+            },
+          },
+          lastUpdateText || gettext("never_updated")
+        ),
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              marginBottom: SPACING.md,
+            },
+          },
+          gettext("prayer_update_clarification")
+        ),
+        Button({
+          label: gettext("manual_update"),
+          style: { ...BUTTON_STYLES.primary },
+          onClick: () => {
+            fetchAndSavePrayerTimes({ storage: props.settingsStorage });
+          },
+        }),
+      ],
+    });
+  }
+
+  function buildFetchWindowPanel(props) {
+    const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
+    const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
+
+    return Panel({
+      children: [
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.subheading,
+              marginBottom: SPACING.xs,
+            },
+          },
+          gettext("fetch_window_size")
+        ),
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              marginBottom: SPACING.md,
+            },
+          },
+          gettext("fetch_window_description")
+        ),
+
+        Input({
+          label: gettext("months_before"),
+          value: monthsBefore,
+          onChange: (value) => {
+            const validatedValue = validateMonthsInput(value);
+            props.settingsStorage.setItem(
+              "fetchingMonthsBefore",
+              validatedValue
+            );
+          },
+        }),
+
+        Input({
+          label: gettext("months_after"),
+          value: monthsAfter,
+          onChange: (value) => {
+            const validatedValue = validateMonthsInput(value);
+            props.settingsStorage.setItem(
+              "fetchingMonthsAfter",
+              validatedValue
+            );
+          },
+        }),
+      ],
+    });
+  }
+
+  function buildAutoFetchPanel(props) {
+    const autoFetchDays = props.settingsStorage.getItem("autoFetchDays");
+
+    return Panel({
+      children: [
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.subheading,
+              marginBottom: SPACING.xs,
+            },
+          },
+          gettext("auto_fetch_interval")
+        ),
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              marginBottom: SPACING.md,
+            },
+          },
+          gettext("auto_fetch_interval_description")
+        ),
+
+        Input({
+          label: gettext("days_between_updates"),
+          value: autoFetchDays,
+          onChange: (value) => {
+            const validatedValue = validateFetchIntervalInput(value);
+            props.settingsStorage.setItem("autoFetchDays", validatedValue);
+          },
+        }),
+      ],
+    });
+  }
+
+  function buildResetSettingsPanel(props) {
+    return Panel({
       children: [
         Text(
           {
@@ -206,6 +220,6 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           },
         }),
       ],
-    }),
-  ]);
+    });
+  }
 }
