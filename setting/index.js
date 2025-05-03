@@ -14,6 +14,7 @@ import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 AppSettingsPage({
   build(props) {
     SettingInitializer.initDefaultSettings(props);
+
     const navState = this.getNavState(props);
 
     // Render the appropriate page based on the navigation state
@@ -78,6 +79,15 @@ AppSettingsPage({
           ? `${currentLocation.country}, ${currentLocation.city}`
           : gettext("no_location_selected")
       ),
+      currentLocation
+        ? Text(
+            { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
+            gettext("latitude") +
+              `: ${currentLocation.latitude}°, ` +
+              gettext("longitude") +
+              `: ${currentLocation.longitude}°`
+          )
+        : null,
     ];
   },
 

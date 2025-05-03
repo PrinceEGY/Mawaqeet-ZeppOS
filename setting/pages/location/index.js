@@ -17,10 +17,10 @@ export function locationSettingsPage(onBack, props) {
   const locationPageState = getLocationState();
   const currentLocation = getCurrentLocation();
 
-  if (locationPageState.step === "city") {
-    return renderCitySelection();
-  } else {
+  if (locationPageState.step === "country") {
     return renderCountrySelection();
+  } else {
+    return renderCitySelection();
   }
 
   function getLocationState() {
@@ -84,12 +84,20 @@ export function locationSettingsPage(onBack, props) {
         gettext("current_location")
       ),
       Text(
-        {
-          style: TEXT_STYLES.normal,
-          marginBottom: SPACING.md,
-        },
-        `${currentLocation.country}, ${currentLocation.city}`
+        { style: { ...TEXT_STYLES.normal } },
+        currentLocation
+          ? `${currentLocation.country}, ${currentLocation.city}`
+          : gettext("no_location_selected")
       ),
+      currentLocation
+        ? Text(
+            { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
+            gettext("latitude") +
+              `: ${currentLocation.latitude}°, ` +
+              gettext("longitude") +
+              `: ${currentLocation.longitude}°`
+          )
+        : null,
     ]);
   }
 
