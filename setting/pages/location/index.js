@@ -14,18 +14,18 @@ import {
 import { Theme } from "../../utils/theme";
 
 export function locationSettingsPage(onBack, props) {
-  const locationState = getLocationState();
+  const locationPageState = getLocationState();
   const currentLocation = getCurrentLocation();
 
-  if (locationState.step === "city") {
+  if (locationPageState.step === "city") {
     return renderCitySelection();
   } else {
     return renderCountrySelection();
   }
 
   function getLocationState() {
-    return props.settingsStorage.getItem("locationState")
-      ? JSON.parse(props.settingsStorage.getItem("locationState"))
+    return props.settingsStorage.getItem("locationPageState")
+      ? JSON.parse(props.settingsStorage.getItem("locationPageState"))
       : {
           step: "country",
           selectedCountry: null,
@@ -33,41 +33,23 @@ export function locationSettingsPage(onBack, props) {
         };
   }
 
-  function saveLocationState(state) {
-    props.settingsStorage.setItem("locationState", JSON.stringify(state));
+  function updatePageState(state) {
+    props.settingsStorage.setItem("locationPageState", JSON.stringify(state));
   }
 
   function getCurrentLocation() {
     return JSON.parse(props.settingsStorage.getItem("currentLocation"));
   }
 
-  function saveSelectedLocation(locationData) {
-    let locationToSave;
-
-    if (locationData.city && locationData.country) {
-      locationToSave = {
-        country: locationData.country,
-        city: locationData.city,
-        latitude: locationData.latitude,
-        longitude: locationData.longitude,
-      };
-    } else {
-      const lat = parseFloat(validateCoordinate(locationData.latitude, "lat"));
-      const lon = parseFloat(validateCoordinate(locationData.longitude, "lon"));
-
-      const closestCity = GeoService.getClosestCity(lat, lon);
-
-      locationToSave = {
-        country: closestCity.country,
-        city: closestCity.city,
-        latitude: closestCity.latitude,
-        longitude: closestCity.longitude,
-      };
-    }
-
+  function saveSelectedLocation(city) {
     props.settingsStorage.setItem(
       "currentLocation",
-      JSON.stringify(locationToSave)
+      JSON.stringify({
+        country: city.country,
+        city: city.city,
+        latitude: city.latitude,
+        longitude: city.longitude,
+      })
     );
     props.settingsStorage.setItem("lastPrayerTimesUpdate", null);
 
@@ -210,10 +192,10 @@ export function locationSettingsPage(onBack, props) {
           label: gettext("save_coordinates"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            saveSelectedLocation({
-              latitude: lat,
-              longitude: lon,
-            });
+            lat = validateCoordinate(lat, "lat");
+            lon = validateCoordinate(lon, "lon");
+            const city = GeoService.getClosestCity(lat, lon);
+            saveSelectedLocation(city);
           },
         }),
       ],
@@ -242,11 +224,11 @@ export function locationSettingsPage(onBack, props) {
               props.settingsStorage.removeItem("tempLongitude");
 
               const newState = {
-                ...locationState,
+                ...locationPageState,
                 selectedCountry: country,
                 step: "city",
               };
-              saveLocationState(newState);
+              updatePageState(newState);
             },
           })
         ),
@@ -280,13 +262,13 @@ export function locationSettingsPage(onBack, props) {
   function renderCitySelection() {
     return Section({ style: LAYOUT_STYLES.mainContainer }, [
       AppBar({
-        title: `${locationState.selectedCountry} | ${gettext(
+        title: `${locationPageState.selectedCountry} | ${gettext(
           "loc_select_city"
         )}`,
         onBack: () => {
-          locationState.step = "country";
-          locationState.selectedCity = null;
-          saveLocationState(locationState);
+          locationPageState.step = "country";
+          locationPageState.selectedCity = null;
+          updatePageState(locationPageState);
         },
         showBackButton: true,
       }),
@@ -295,23 +277,24 @@ export function locationSettingsPage(onBack, props) {
 
       Panel({
         children: [
-          ...GeoService.getCitiesByCountry(locationState.selectedCountry).map(
-            (city) =>
-              MenuButton({
-                label: city.city,
-                showArrow: false,
-                onClick: () => {
-                  locationState.selectedCity = city;
-                  saveLocationState(locationState);
-                  saveSelectedLocation(city);
+          ...GeoService.getCitiesByCountry(
+            locationPageState.selectedCountry
+          ).map((city) =>
+            MenuButton({
+              label: city.city,
+              showArrow: false,
+              onClick: () => {
+                locationPageState.selectedCity = city;
+                updatePageState(locationPageState);
+                saveSelectedLocation(city);
 
-                  saveLocationState({
-                    step: "country",
-                    selectedCountry: null,
-                    selectedCity: null,
-                  });
-                },
-              })
+                updatePageState({
+                  step: "country",
+                  selectedCountry: null,
+                  selectedCity: null,
+                });
+              },
+            })
           ),
         ],
       }),
