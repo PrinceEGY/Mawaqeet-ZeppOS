@@ -1,7 +1,10 @@
 msgid "example"
 msgstr "This is an example in app-side"
 
+
+#########################
 # General Settings
+#########################
 msgid "prayer_times_settings"
 msgstr "Mawaqeet Settings"
 
@@ -20,7 +23,10 @@ msgstr "Advanced Settings"
 msgid "about"
 msgstr "About"
 
+
+#########################
 # Location Settings
+#########################
 msgid "loc_select_country"
 msgstr "Location Settings"
 
@@ -58,12 +64,15 @@ msgid "save_coordinates"
 msgstr "Save Coordinates"
 
 msgid "coordinates_range_info"
-msgstr "Latitude: -90 to 90, Longitude: -180 to 180"
+msgstr "The closest city will be selected based on the coordinates you enter. Latitude range: -90 to 90, Longitude range: -180 to 180."
 
 msgid "select_manually"
 msgstr "Select Location Manually"
 
+
+#########################
 # Prayer Settings
+#########################
 msgid "prayers_settings_description"
 msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."
 
@@ -100,7 +109,10 @@ msgstr "days ago"
 msgid "prayer_update_desc"
 msgstr "The app automatically fetches prayer times at regular intervals (see settings below), so you only need to update manually if necessary."
 
+
+#########################
 # Calculation Method
+#########################
 msgid "calculation_method_auto"
 msgstr "Auto (Recommended)"
 
@@ -110,7 +122,10 @@ msgstr "Automatically selects the best calculation method based on your location
 msgid "calc_method_page_desc"
 msgstr "Select the calculation method for determining prayer times. If you don't want a specific calculation method, leave it as 'Auto'"
 
+
+#########################
 # Fetching Settings
+#########################
 msgid "fetch_window_size"
 msgstr "Prayer Times Data Range"
 
@@ -132,7 +147,10 @@ msgstr "Set how often the app fetches new prayer times automatically (in days)."
 msgid "days_between_updates"
 msgstr "Days Between Updates"
 
+
+#########################
 # Reset Settings
+#########################
 msgid "reset_default_settings"
 msgstr "Reset to Default Settings"
 
@@ -142,7 +160,10 @@ msgstr "Reset"
 msgid "reset_settings_desc"
 msgstr "This will restore all application settings to their original defaults. This cannot be undone."
 
+
+#########################
 # About
+#########################
 msgid "version"
 msgstr "Version"
 
