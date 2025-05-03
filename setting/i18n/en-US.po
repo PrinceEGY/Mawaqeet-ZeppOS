@@ -175,3 +175,9 @@ msgstr "Description"
 
 msgid "homepage"
 msgstr "Source Code"
+
+msgid "email"
+msgstr "Contact Email"
+
+msgid "onlineProvider"
+msgstr "Online API Provider"

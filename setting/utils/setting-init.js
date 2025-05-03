@@ -1,4 +1,3 @@
-import { APP_CONFIG } from "../../app-config.js";
 import { DEFAULT_SETTINGS } from "../../shared/constants.js";
 import { GeoService } from "../../shared/geo-service.js";
 import {
@@ -28,7 +27,6 @@ export const SettingInitializer = {
       this.initFetchingSettings(props);
       this.initPrayerSettings(props);
       this.initLocationSettings(props);
-      this.initAppInfo(props);
       await this.initCalculationMethod(props);
       this.__initDoneThisSession = true;
     } catch (error) {
@@ -160,20 +158,5 @@ export const SettingInitializer = {
         `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.automaticFetchInterval}`
       );
     }
-  },
-
-  initAppInfo(props) {
-    const appInfo = {
-      appId: APP_CONFIG.app.appId,
-      appName: APP_CONFIG.app.appName,
-      version: APP_CONFIG.app.version.name,
-      vender: APP_CONFIG.app.vender,
-      description: APP_CONFIG.app.description,
-      homepage: APP_CONFIG.app.homepage,
-      permissions: APP_CONFIG.permissions,
-    };
-
-    props.settingsStorage.setItem("appInfo", JSON.stringify(appInfo));
-    console.log(`AppInfo set from app-config.js: ${JSON.stringify(appInfo)}`);
   },
 };

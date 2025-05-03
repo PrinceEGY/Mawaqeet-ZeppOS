@@ -1,4 +1,5 @@
 import { gettext } from "i18n";
+import { APP_CONFIG } from "../../../app-config";
 import { AppBar } from "../../components/app_bar";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
@@ -6,8 +7,7 @@ import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "../../utils/styles";
 import { Theme } from "../../utils/theme";
 
 export function aboutPage(navigateBackCallback, props) {
-  const appInfoString = props.settingsStorage.getItem("appInfo");
-  const appInfo = appInfoString ? JSON.parse(appInfoString) : {};
+  const appInfo = APP_CONFIG.app;
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
     AppBar({
@@ -30,10 +30,12 @@ export function aboutPage(navigateBackCallback, props) {
           appInfo.appName
         ),
         Spacer({ height: SPACING.md }),
-        buildInfoRow(gettext("version"), appInfo.version),
+        buildInfoRow(gettext("version"), appInfo.version.name),
         buildInfoRow(gettext("developer"), appInfo.vender),
         buildInfoRow(gettext("description"), appInfo.description),
         buildInfoRow(gettext("homepage"), appInfo.homepage, true),
+        buildInfoRow(gettext("email"), appInfo.email, true),
+        buildInfoRow(gettext("onlineProvider"), appInfo.onlineProvider, true),
       ],
     }),
   ]);
