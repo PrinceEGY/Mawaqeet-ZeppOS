@@ -65,7 +65,7 @@ export const SettingInitializer = {
 
   initPrayerSettings(props) {
     Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
-      const displayKey = `display_${prayer}`;
+      const displayKey = `display:${prayer}`;
       if (!props.settingsStorage.getItem(displayKey)) {
         props.settingsStorage.setItem(
           displayKey,
@@ -73,7 +73,7 @@ export const SettingInitializer = {
         );
       }
 
-      const notifyKey = `notify_${prayer}`;
+      const notifyKey = `notify:${prayer}`;
       if (!props.settingsStorage.getItem(notifyKey)) {
         props.settingsStorage.setItem(
           notifyKey,

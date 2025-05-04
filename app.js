@@ -4,7 +4,8 @@ App(
   BaseApp({
     globalData: {},
     onCreate() {
-      this.request(); // Initiate request to open connection with the app side
+      this.request({ method: "openConnection" }); // Initiate request to open connection with the app side
+      console.log("app on create invoke");
     },
 
     onDestroy() {

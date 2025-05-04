@@ -15,6 +15,16 @@ export const TIMINGS_LIST = [
   { name: "lastthird", label: "Last Third" },
 ];
 
+export const SYNC_SETTINGS_LIST = [
+  "prayerTimes",
+  "lastPrayerTimesUpdate",
+  "currentLocation",
+  "calculationMethod",
+  "autoFetchDays",
+  ...TIMINGS_LIST.map((timing) => `display:${timing.name}`),
+  ...TIMINGS_LIST.map((timing) => `notify:${timing.name}`),
+];
+
 export const DEFAULT_SETTINGS = {
   // Location defaults
   location: {
@@ -46,8 +56,8 @@ export const DEFAULT_SETTINGS = {
   fetching: {
     monthsMax: 120,
     monthsMin: 1,
-    monthsBefore: 24,
-    monthsAfter: 24,
+    monthsBefore: 12,
+    monthsAfter: 12,
     automaticFetchInterval: 7,
   },
 };
