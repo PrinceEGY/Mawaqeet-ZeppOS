@@ -82,16 +82,21 @@ AppSideService(
         SYNC_SETTINGS_LIST.includes(key)
       ) {
         this.syncManager.addToPendingSync(key, newValue);
+        this.triggerSync([key]);
+      }
+
+      if (key === "triggerSync") {
+        this.triggerSync();
       }
     },
 
-    async triggerSync() {
-      const params = this.syncManager.getPendingSyncKeys();
-      if (params.length === 0) {
+    async triggerSync(keys) {
+      const syncKeys = keys || this.syncManager.getPendingSyncKeys();
+      if (!syncKeys || syncKeys.length === 0) {
         console.log("No pending sync keys to trigger.");
         return;
       }
-      this.call({ method: "sync.triggerSync", params });
+      this.call({ method: "sync.triggerSync", keys: syncKeys });
     },
   })
 );

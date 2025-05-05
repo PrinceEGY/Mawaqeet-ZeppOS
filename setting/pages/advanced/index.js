@@ -41,6 +41,10 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
     Spacer({ height: SPACING.xs }),
 
+    buildManualSyncPanel(props),
+
+    Spacer({ height: SPACING.xs }),
+
     buildResetSettingsPanel(props),
 
     Spacer({ height: SPACING.md }),
@@ -194,6 +198,38 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           onChange: (value) => {
             const validatedValue = validateFetchIntervalInput(value);
             props.settingsStorage.setItem("autoFetchDays", validatedValue);
+          },
+        }),
+      ],
+    });
+  }
+
+  function buildManualSyncPanel(props) {
+    return Panel({
+      children: [
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.subheading,
+              marginBottom: SPACING.xs,
+            },
+          },
+          gettext("manual_sync")
+        ),
+        Text(
+          {
+            style: {
+              ...TEXT_STYLES.small,
+              marginBottom: SPACING.md,
+            },
+          },
+          gettext("manual_sync_desc")
+        ),
+        Button({
+          label: gettext("manual_sync_btn"),
+          style: { ...BUTTON_STYLES.primary },
+          onClick: () => {
+            props.settingsStorage.setItem("triggerSync", true);
           },
         }),
       ],

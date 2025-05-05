@@ -190,3 +190,12 @@ msgstr "Sync Pending"
 
 msgid "pending_sync_items_detected"
 msgstr "Some settings changes have not yet been synced with your Watch Device. The app will attempt to sync automatically. If this message remains for an extended period, please try a manual sync from the `Advanced Settings` page."
+
+msgid "manual_sync"
+msgstr "Manual Sync"
+
+msgid "manual_sync_desc"
+msgstr "Manually trigger syncing of pending settings with your Watch Device."
+
+msgid "manual_sync_btn"
+msgstr "Sync Now"
