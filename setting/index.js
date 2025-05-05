@@ -34,6 +34,48 @@ AppSettingsPage({
     return renderPage();
   },
 
+  renderMainMenu(props) {
+    const currentLocation = JSON.parse(
+      props.settingsStorage.getItem("currentLocation")
+    );
+
+    const menuItems = [
+      { label: gettext("location_settings"), page: "location" },
+      { label: gettext("prayers_settings"), page: "prayers" },
+      { label: gettext("calculation_method"), page: "calculation" },
+      { label: gettext("advanced_settings"), page: "advanced" },
+      { label: gettext("about"), page: "about" },
+    ];
+
+    return Section({ style: LAYOUT_STYLES.mainContainer }, [
+      AppBar({
+        title: gettext("prayer_times_settings"),
+        showBackButton: false,
+      }),
+
+      Spacer({ height: SPACING.xs }),
+
+      this.buildSyncingNotifyPanel(props),
+
+      Spacer({ height: SPACING.xs }),
+
+      Panel({
+        children: [...this.buildLocationPanel(currentLocation)],
+      }),
+
+      Spacer({ height: SPACING.xs }),
+
+      Panel({
+        children: menuItems.map((item) =>
+          MenuButton({
+            label: item.label,
+            onClick: () => this.navigateTo(item.page, props),
+          })
+        ),
+      }),
+    ]);
+  },
+
   // --- Helper Methods ---
   getNavState(props) {
     const navState = props.settingsStorage.getItem("navState");
@@ -62,7 +104,7 @@ AppSettingsPage({
   },
 
   // --- Build Methods ---
-  createLocationPanel(currentLocation) {
+  buildLocationPanel(currentLocation) {
     return [
       Text(
         {
@@ -91,41 +133,60 @@ AppSettingsPage({
     ];
   },
 
-  renderMainMenu(props) {
-    const currentLocation = JSON.parse(
-      props.settingsStorage.getItem("currentLocation")
-    );
+  buildSyncingNotifyPanel(props) {
+    const pendingSyncStr = props.settingsStorage.getItem("pendingSync");
+    if (!pendingSyncStr) return null;
+    const pendingSync = JSON.parse(pendingSyncStr);
+    if (Object.keys(pendingSync).length === 0) return null;
 
-    const menuItems = [
-      { label: gettext("location_settings"), page: "location" },
-      { label: gettext("prayers_settings"), page: "prayers" },
-      { label: gettext("calculation_method"), page: "calculation" },
-      { label: gettext("advanced_settings"), page: "advanced" },
-      { label: gettext("about"), page: "about" },
-    ];
-
-    return Section({ style: LAYOUT_STYLES.mainContainer }, [
-      AppBar({
-        title: gettext("prayer_times_settings"),
-        showBackButton: false,
-      }),
-
-      Spacer({ height: SPACING.xs }),
-
-      Panel({
-        children: [...this.createLocationPanel(currentLocation)],
-      }),
-
-      Spacer({ height: SPACING.xs }),
-
-      Panel({
-        children: menuItems.map((item) =>
-          MenuButton({
-            label: item.label,
-            onClick: () => this.navigateTo(item.page, props),
-          })
+    return Panel({
+      style: {
+        backgroundColor: "#e22239", // red
+      },
+      children: [
+        Text(
+          {
+            style: {
+              fontWeight: "bold",
+              fontSize: "14px",
+              textAlign: "center",
+              display: "block",
+            },
+          },
+          gettext("syncing_notify")
         ),
-      }),
-    ]);
+
+        View({
+          style: {
+            ...LAYOUT_STYLES.separator,
+            margin: `${SPACING.sm} 0`,
+            backgroundColor: "#fff",
+          },
+        }),
+
+        Text(
+          {
+            style: {
+              fontWeight: 600,
+              fontSize: "12px",
+              display: "block",
+            },
+          },
+          gettext("pending_sync_items_detected")
+        ),
+        // TODO: to be removed in production
+        Text(
+          {
+            style: {
+              display: "block",
+              fontSize: "11px",
+              marginTop: SPACING.xs,
+              color: "#fff",
+            },
+          },
+          Object.keys(pendingSync).join(", ")
+        ),
+      ],
+    });
   },
 });

@@ -8,46 +8,50 @@ AppSideService(
   BaseSideService({
     onInit() {
       console.log("App side service initialized");
-      this.syncManager = new SyncManager({
-        request: this.request.bind(this),
-      });
+      this.syncManager = new SyncManager();
     },
 
     onRun() {
       console.log("App side service running");
-      const pendingSync = this.syncManager.getPendingSync();
-      if (Object.keys(pendingSync).length > 0) {
-        console.log(
-          `Pending sync items detected, `,
-          pendingSync,
-          `attempting sync...`
-        );
-        setTimeout(() => {
-          this.syncManager.syncPendingItems();
-        }, 3000);
-      } else {
-        console.log("No pending sync items.");
-      }
+      console.log("Syncing keys: ", this.syncManager.getPendingSync());
+      setTimeout(() => {
+        this.triggerSync();
+      }, 1000);
     },
 
     onDestroy() {},
 
     async onRequest(req, res) {
       try {
-        if (req.method === "fetchPrayerTimes") {
-          await fetchAndSavePrayerTimes({ storage: settingsLib });
-          res(null, { status: "success" });
-        } else if (req.method === "getCurrentLocation") {
-          const currentLocation = JSON.parse(
-            settingsLib.getItem("currentLocation")
-          );
-          res(null, { location: currentLocation });
-        } else if (req.method === "getCityByGeoLocation") {
-          const { latitude, longitude } = req.params;
-          const closestCity = GeoService.getClosestCity(latitude, longitude);
-          res(null, { city: closestCity });
-        } else {
-          res({ error: "Unknown method" }, null);
+        switch (req.method) {
+          case "fetchPrayerTimes":
+            await fetchAndSavePrayerTimes({ storage: settingsLib });
+            res(null, { status: "success" });
+            break;
+          case "getCurrentLocation": {
+            const currentLocation = JSON.parse(
+              settingsLib.getItem("currentLocation")
+            );
+            res(null, { location: currentLocation });
+            break;
+          }
+          case "getCityByGeoLocation": {
+            const { latitude, longitude } = req.params;
+            const closestCity = GeoService.getClosestCity(latitude, longitude);
+            res(null, { city: closestCity });
+            break;
+          }
+          case "getPendingSyncKeys":
+            keys = this.syncManager.getPendingSyncKeys();
+            res(null, { keys });
+            break;
+          default:
+            if (req.method && req.method.startsWith("sync.")) {
+              const key = req.method.split(".")[1];
+              await this.syncManager.handleSyncRequest(key, req, res);
+            } else {
+              res({ error: "Unknown method" }, null);
+            }
         }
       } catch (error) {
         console.error("onRequest error:", error);
@@ -72,15 +76,22 @@ AppSideService(
         });
       }
 
-      // Sync the setting with the device
       if (
         newValue &&
         newValue !== oldValue &&
         SYNC_SETTINGS_LIST.includes(key)
       ) {
         this.syncManager.addToPendingSync(key, newValue);
-        this.syncManager.syncPendingItems();
       }
+    },
+
+    async triggerSync() {
+      const params = this.syncManager.getPendingSyncKeys();
+      if (params.length === 0) {
+        console.log("No pending sync keys to trigger.");
+        return;
+      }
+      this.call({ method: "sync.triggerSync", params });
     },
   })
 );

@@ -37,14 +37,14 @@ export function prayersSettingsPage(navigateBackCallback, props) {
 
   // --- Helper Methods ---
   function getNotifyValue(prayerName) {
-    const notifyKey = `notify_${prayerName}`;
+    const notifyKey = `notify:${prayerName}`;
     return props && props.settingsStorage
       ? props.settingsStorage.getItem(notifyKey) === "true"
       : false;
   }
 
   function getDisplayValue(prayerName) {
-    const displayKey = `display_${prayerName}`;
+    const displayKey = `display:${prayerName}`;
     return props && props.settingsStorage
       ? props.settingsStorage.getItem(displayKey) === "true"
       : true;
@@ -52,8 +52,8 @@ export function prayersSettingsPage(navigateBackCallback, props) {
 
   // --- Build Methods ---
   function buildPrayerRow(prayer) {
-    const notifyKey = `notify_${prayer.name}`;
-    const displayKey = `display_${prayer.name}`;
+    const notifyKey = `notify:${prayer.name}`;
+    const displayKey = `display:${prayer.name}`;
 
     const notifyValue = getNotifyValue(prayer.name);
     const displayValue = getDisplayValue(prayer.name);
