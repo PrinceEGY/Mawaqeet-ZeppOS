@@ -62,6 +62,20 @@ AppSideService(
     async onSettingsChange({ key, newValue, oldValue }) {
       console.log("Settings changed:", { key, newValue, oldValue });
 
+      if (key === "triggerSync") {
+        this.triggerSync();
+      }
+
+      if (
+        newValue &&
+        newValue !== oldValue &&
+        SYNC_SETTINGS_LIST.includes(key)
+      ) {
+        console.log(`Syncing setting change for key: ${key}`);
+        this.syncManager.addToPendingSync(key, newValue);
+        this.triggerSync([key]);
+      }
+
       if (
         (key === "currentLocation" || key === "calculationMethod") &&
         newValue !== oldValue &&
@@ -74,19 +88,6 @@ AppSideService(
           newValue: settingsLib.getItem("prayerTimes"),
           oldValue: null,
         });
-      }
-
-      if (
-        newValue &&
-        newValue !== oldValue &&
-        SYNC_SETTINGS_LIST.includes(key)
-      ) {
-        this.syncManager.addToPendingSync(key, newValue);
-        this.triggerSync([key]);
-      }
-
-      if (key === "triggerSync") {
-        this.triggerSync();
       }
     },
 

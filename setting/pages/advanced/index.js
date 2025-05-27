@@ -261,8 +261,9 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("reset_settings_btn"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            SettingInitializer.resetSessionFlag();
             props.settingsStorage.clear();
+            SettingInitializer.resetSessionFlag();
+            SettingInitializer.initDefaultSettings(props);
             console.log("Settings reset to default.");
           },
         }),
