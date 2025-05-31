@@ -1,8 +1,7 @@
-import { gettext } from "i18n";
-
 export const ALADHAN_URL = "https://api.aladhan.com/v1/calendar";
 
-export const ALADHAN_METHODS_URL = "https://api.aladhan.com/v1/methods";
+export const ALADHAN_CALCULATION_METHODS_URL =
+  "https://api.aladhan.com/v1/methods";
 
 export const TIMINGS_LIST = [
   { name: "fajr", label: "Fajr" },
@@ -48,7 +47,7 @@ export const DEFAULT_SETTINGS = {
   calculationMethod: {
     id: -1,
     label: "Auto",
-    name: gettext("calculation_method_auto"),
+    name: "Auto (Recommended)",
     params: {},
   },
 

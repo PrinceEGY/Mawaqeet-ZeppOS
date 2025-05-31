@@ -1,5 +1,5 @@
 import { gettext } from "i18n";
-import { GeoService } from "../../../shared/geo-service";
+import { GeoService } from "../../../shared/utils/geo-service";
 import { AppBar } from "../../components/app_bar";
 import { Input } from "../../components/input";
 import { MenuButton } from "../../components/menu_button";
@@ -229,9 +229,6 @@ export function locationSettingsPage(navigateBackCallback, props) {
             label: country,
             showArrow: true,
             onClick: () => {
-              props.settingsStorage.removeItem("tempLatitude");
-              props.settingsStorage.removeItem("tempLongitude");
-
               const newState = {
                 ...locationPageState,
                 selectedCountry: country,

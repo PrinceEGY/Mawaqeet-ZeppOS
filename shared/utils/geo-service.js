@@ -1,4 +1,4 @@
-import { GEO_RAW } from "./geo-raw.js";
+import { GEO_DATA } from "../data/geo-data";
 
 export class City {
   constructor(city, latitude, longitude, country, iso2, iso3) {
@@ -23,25 +23,24 @@ export class City {
 }
 
 export class GeoService {
-  static GEO_RAW = GEO_RAW;
+  static GEO_DATA = GEO_DATA;
 
   static COUNTRIES = [
-    ...new Set(GeoService.GEO_RAW.map((entry) => entry.country)),
+    ...new Set(this.GEO_DATA.map((entry) => entry.country)),
   ].sort();
 
   static getCitiesByCountry(country) {
-    return GeoService.GEO_RAW.filter((entry) => entry.country === country)
+    return this.GEO_DATA.filter((entry) => entry.country === country)
       .sort((a, b) => a.city.localeCompare(b.city))
       .map((entry) => City.fromObject(entry));
   }
 
   static getCityByName(cityName) {
-    const entry = GeoService.GEO_RAW.find((entry) => entry.city === cityName);
+    const entry = this.GEO_DATA.find((entry) => entry.city === cityName);
     return entry ? City.fromObject(entry) : null;
   }
 
   static getClosestCity(latitude, longitude) {
-    // Validate coordinates
     const latNum = parseFloat(latitude);
     const lonNum = parseFloat(longitude);
 
@@ -58,29 +57,14 @@ export class GeoService {
         latitude,
         longitude
       );
-      return null; // Return null for invalid coordinates
-    }
-
-    // Calculate distance using the Haversine formula
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Earth's radius in km
-      const dLat = ((lat2 - lat1) * Math.PI) / 180;
-      const dLon = ((lon2 - lon1) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((lat1 * Math.PI) / 180) *
-          Math.cos((lat2 * Math.PI) / 180) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c; // Distance in km
+      return null;
     }
 
     let closestCity = null;
     let minDistance = Infinity;
 
-    for (const entry of GeoService.GEO_RAW) {
-      const distance = calculateDistance(
+    for (const entry of this.GEO_DATA) {
+      const distance = this._calculateDistance(
         latNum,
         lonNum,
         entry.latitude,
@@ -94,5 +78,20 @@ export class GeoService {
     }
 
     return closestCity ? City.fromObject(closestCity) : null;
+  }
+
+  static _calculateDistance(lat1, lon1, lat2, lon2) {
+    // Calculate distance using the Haversine formula
+    const R = 6371; // Earth's radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
   }
 }

@@ -1,14 +1,12 @@
 import { gettext } from "i18n";
 import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
-import {
-  fetchAndSavePrayerTimes,
-  getTimeAgo,
-} from "../../../shared/helpers.js";
+import { fetchAndSavePrayerTimes } from "../../../shared/helpers.js";
+import { DateUtils } from "../../../shared/utils/date-utils.js";
+import { SettingInitializer } from "../../../shared/utils/setting-init.js";
 import { AppBar } from "../../components/app_bar";
 import { Input } from "../../components/input";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
-import { SettingInitializer } from "../../utils/setting-init.js";
 import {
   BUTTON_STYLES,
   LAYOUT_STYLES,
@@ -18,7 +16,7 @@ import {
 
 export function advancedSettingsPage(navigateBackCallback, props) {
   const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
-  const lastUpdateText = getTimeAgo(lastUpdate);
+  const lastUpdateText = DateUtils.getTimeAgo(lastUpdate);
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
     AppBar({

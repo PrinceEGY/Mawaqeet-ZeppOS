@@ -1,20 +1,17 @@
-import { DEFAULT_SETTINGS } from "../../shared/constants.js";
-import { GeoService } from "../../shared/geo-service.js";
-import {
-  fetchCalculationMethods,
-  parseCalculationMethods,
-} from "../../shared/helpers.js";
+import { DEFAULT_SETTINGS } from "../constants.js";
+import { GeoService } from "./geo-service.js";
+import { PrayersApi } from "./prayers-api.js";
 
-export const SettingInitializer = {
-  isInitializing: false,
-  __initDoneThisSession: false,
+export class SettingInitializer {
+  static isInitializing = false;
+  static _initDoneThisSession = false;
 
-  resetSessionFlag() {
-    this.__initDoneThisSession = false;
-  },
+  static resetSessionFlag() {
+    this._initDoneThisSession = false;
+  }
 
-  async initDefaultSettings(props) {
-    if (this.isInitializing || this.__initDoneThisSession) return;
+  static async initDefaultSettings(props) {
+    if (this.isInitializing || this._initDoneThisSession) return;
 
     this.isInitializing = true;
 
@@ -28,15 +25,15 @@ export const SettingInitializer = {
       this.initPrayerSettings(props);
       this.initLocationSettings(props);
       await this.initCalculationMethod(props);
-      this.__initDoneThisSession = true;
+      this._initDoneThisSession = true;
     } catch (error) {
       console.error("Error during settings initialization:", error);
     } finally {
       this.isInitializing = false;
     }
-  },
+  }
 
-  initLocationSettings(props) {
+  static initLocationSettings(props) {
     if (!props.settingsStorage.getItem("currentLocation")) {
       const defaultLocation = GeoService.getCityByName(
         DEFAULT_SETTINGS.location.city
@@ -61,9 +58,9 @@ export const SettingInitializer = {
         );
       }
     }
-  },
+  }
 
-  initPrayerSettings(props) {
+  static initPrayerSettings(props) {
     Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
       const displayKey = `display:${prayer}`;
       if (!props.settingsStorage.getItem(displayKey)) {
@@ -81,9 +78,9 @@ export const SettingInitializer = {
         );
       }
     });
-  },
+  }
 
-  async initCalculationMethod(props) {
+  static async initCalculationMethod(props) {
     if (!props.settingsStorage.getItem("calculationMethod")) {
       props.settingsStorage.setItem(
         "calculationMethod",
@@ -111,11 +108,10 @@ export const SettingInitializer = {
       now - lastFetch > interval
     ) {
       try {
-        const methods = await fetchCalculationMethods();
-        const parsedMethods = await parseCalculationMethods(methods);
+        const methods = await PrayersApi.fetchCalculationMethods();
         props.settingsStorage.setItem(
           "calculationMethodsList",
-          JSON.stringify(parsedMethods)
+          JSON.stringify(methods)
         );
         props.settingsStorage.setItem(
           "lastCalculationMethodsUpdate",
@@ -126,9 +122,9 @@ export const SettingInitializer = {
         console.error("Failed to fetch or parse calculation methods:", error);
       }
     }
-  },
+  }
 
-  initFetchingSettings(props) {
+  static initFetchingSettings(props) {
     if (!props.settingsStorage.getItem("fetchingMonthsBefore")) {
       props.settingsStorage.setItem(
         "fetchingMonthsBefore",
@@ -158,5 +154,5 @@ export const SettingInitializer = {
         `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.automaticFetchInterval}`
       );
     }
-  },
-};
+  }
+}

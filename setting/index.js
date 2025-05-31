@@ -1,4 +1,5 @@
 import { gettext } from "i18n";
+import { SettingInitializer } from "../shared/utils/setting-init.js";
 import { AppBar } from "./components/app_bar.js";
 import { MenuButton } from "./components/menu_button.js";
 import { Panel } from "./components/panel.js";
@@ -8,7 +9,6 @@ import { advancedSettingsPage } from "./pages/advanced/index";
 import { calculationSettingsPage } from "./pages/calculation/index";
 import { locationSettingsPage } from "./pages/location/index";
 import { prayersSettingsPage } from "./pages/prayers/index";
-import { SettingInitializer } from "./utils/setting-init.js";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 AppSettingsPage({
