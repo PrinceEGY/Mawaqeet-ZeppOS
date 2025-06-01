@@ -7,25 +7,25 @@ export class PrayersApi {
     startDate,
     endDate,
     iso8601 = true,
-    timezonestring,
+    timezoneString,
     calculationMethodId,
-    chunkMonths = 11,
+    monthsPerChunk = 11,
   }) {
-    const fromDate = new Date(startDate);
-    const toDate = new Date(endDate);
+    const requestStartDate = new Date(startDate);
+    const requestEndDate = new Date(endDate);
 
-    const fetchPromises = [];
-    let currentStartDate = new Date(fromDate);
+    const chunkPromises = [];
+    let chunkStartDate = new Date(requestStartDate);
 
-    while (currentStartDate < toDate) {
-      let chunkEndDate = new Date(currentStartDate);
-      chunkEndDate.setMonth(chunkEndDate.getMonth() + chunkMonths);
+    while (chunkStartDate < requestEndDate) {
+      let chunkEndDate = new Date(chunkStartDate);
+      chunkEndDate.setMonth(chunkEndDate.getMonth() + monthsPerChunk);
 
-      if (chunkEndDate > toDate) {
-        chunkEndDate = new Date(toDate);
+      if (chunkEndDate > requestEndDate) {
+        chunkEndDate = new Date(requestEndDate);
       }
 
-      const chunkStartStr = this._formatDateForApi(currentStartDate);
+      const chunkStartStr = this._formatDateForApi(chunkStartDate);
       const chunkEndStr = this._formatDateForApi(chunkEndDate);
 
       console.log(
@@ -37,34 +37,34 @@ export class PrayersApi {
           ? calculationMethodId
           : undefined; // Use method only if it's not "auto" (-1)
 
-      const fetchPromise = this._fetchPrayerTimesChunk({
+      const chunkPromise = this._fetchPrayerTimesChunk({
         latitude: latitude,
         longitude: longitude,
         startDate: chunkStartStr,
         endDate: chunkEndStr,
         iso8601: iso8601,
-        timezonestring: timezonestring,
+        timezoneString: timezoneString,
         calculationMethodId: methodParam,
-      }).then((chunkData) => {
+      }).then((chunkResponse) => {
         console.log(`Received data for ${chunkStartStr} to ${chunkEndStr}`);
-        return this._transformApiResponse(chunkData.data);
+        return this._transformApiResponse(chunkResponse.data);
       });
 
-      fetchPromises.push(fetchPromise);
+      chunkPromises.push(chunkPromise);
 
-      currentStartDate = new Date(chunkEndDate);
-      currentStartDate.setDate(currentStartDate.getDate() + 1); // add 1 day to avoid overlap
+      chunkStartDate = new Date(chunkEndDate);
+      chunkStartDate.setDate(chunkStartDate.getDate() + 1); // add 1 day to avoid overlap
     }
 
-    const results = await Promise.all(fetchPromises);
+    const chunkResults = await Promise.all(chunkPromises);
 
-    const allResults = results.flat().sort((a, b) => {
+    const sortedPrayerTimes = chunkResults.flat().sort((a, b) => {
       const dateA = a.date.split("-").reverse().join("-");
       const dateB = b.date.split("-").reverse().join("-");
       return new Date(dateA) - new Date(dateB);
     });
 
-    return allResults;
+    return sortedPrayerTimes;
   }
 
   static async fetchCalculationMethods() {
@@ -94,7 +94,7 @@ export class PrayersApi {
     startDate,
     endDate,
     iso8601,
-    timezonestring,
+    timezoneString,
     calculationMethodId,
   }) {
     let URL = `${ALADHAN_URL}/from/${startDate}/to/${endDate}?latitude=${latitude}&longitude=${longitude}`;
@@ -103,8 +103,8 @@ export class PrayersApi {
       URL += `&method=${calculationMethodId}`;
     }
 
-    if (timezonestring !== undefined) {
-      URL += `&timezonestring=${timezonestring}`;
+    if (timezoneString !== undefined) {
+      URL += `&timezonestring=${timezoneString}`;
     }
 
     if (iso8601 !== undefined) {
