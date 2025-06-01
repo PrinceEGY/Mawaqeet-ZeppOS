@@ -38,16 +38,12 @@ export function prayersSettingsPage(navigateBackCallback, props) {
   // --- Helper Methods ---
   function getNotifyValue(prayerName) {
     const notifyKey = `notify:${prayerName}`;
-    return props && props.settingsStorage
-      ? props.settingsStorage.getItem(notifyKey) === "true"
-      : false;
+    return props.storageService.getItem(notifyKey);
   }
 
   function getDisplayValue(prayerName) {
     const displayKey = `display:${prayerName}`;
-    return props && props.settingsStorage
-      ? props.settingsStorage.getItem(displayKey) === "true"
-      : true;
+    return props.storageService.getItem(displayKey);
   }
 
   // --- Build Methods ---
@@ -88,8 +84,7 @@ export function prayersSettingsPage(navigateBackCallback, props) {
           }),
           onClick: () => {
             if (displayValue) {
-              const newValue = notifyValue ? "false" : "true";
-              props.settingsStorage.setItem(notifyKey, newValue);
+              props.storageService.setItem(notifyKey, !notifyValue);
             }
           },
         }),
@@ -97,13 +92,13 @@ export function prayersSettingsPage(navigateBackCallback, props) {
         View({ style: { flex: 1 } }, [
           ToggleItem({
             label: prayer.label,
-            settingsKey: displayKey,
             value: displayValue,
             onChange: (newDisplayValue) => {
+              props.storageService.setItem(displayKey, newDisplayValue);
               if (!newDisplayValue && notifyValue) {
-                props.settingsStorage.setItem(notifyKey, "false");
+                props.storageService.setItem(notifyKey, false);
               } else if (newDisplayValue) {
-                props.settingsStorage.setItem(notifyKey, "true");
+                props.storageService.setItem(notifyKey, true);
               }
             },
           }),
