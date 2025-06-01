@@ -1,5 +1,6 @@
 import { gettext } from "i18n";
 import { SettingInitializer } from "../shared/utils/setting-init.js";
+import { StorageService } from "../shared/utils/storage-service.js";
 import { AppBar } from "./components/app_bar.js";
 import { MenuButton } from "./components/menu_button.js";
 import { Panel } from "./components/panel.js";
@@ -11,33 +12,34 @@ import { locationSettingsPage } from "./pages/location/index";
 import { prayersSettingsPage } from "./pages/prayers/index";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
+let storageService = null;
+
 AppSettingsPage({
   build(props) {
+    storageService = new StorageService(props.settingsStorage);
+    props.storageService = storageService;
+
     SettingInitializer.initDefaultSettings(props);
 
-    const navState = this.getNavState(props);
+    const navState = this.getNavState();
 
     // Render the appropriate page based on the navigation state
     const pages = {
-      location: () =>
-        locationSettingsPage(() => this.navigateBack(props), props),
-      prayers: () => prayersSettingsPage(() => this.navigateBack(props), props),
+      location: () => locationSettingsPage(() => this.navigateBack(), props),
+      prayers: () => prayersSettingsPage(() => this.navigateBack(), props),
       calculation: () =>
-        calculationSettingsPage(() => this.navigateBack(props), props),
-      advanced: () =>
-        advancedSettingsPage(() => this.navigateBack(props), props),
-      about: () => aboutPage(() => this.navigateBack(props), props),
-      main: () => this.renderMainMenu(props),
+        calculationSettingsPage(() => this.navigateBack(), props),
+      advanced: () => advancedSettingsPage(() => this.navigateBack(), props),
+      about: () => aboutPage(() => this.navigateBack(), props),
+      main: () => this.renderMainMenu(),
     };
 
     const renderPage = pages[navState.currentPage] || pages.main;
     return renderPage();
   },
 
-  renderMainMenu(props) {
-    const currentLocation = JSON.parse(
-      props.settingsStorage.getItem("currentLocation")
-    );
+  renderMainMenu() {
+    const currentLocation = storageService.getItem("currentLocation");
 
     const menuItems = [
       { label: gettext("location_settings"), page: "location" },
@@ -55,7 +57,7 @@ AppSettingsPage({
 
       Spacer({ height: SPACING.xs }),
 
-      this.buildSyncingNotifyPanel(props),
+      this.buildSyncingNotifyPanel(),
 
       Spacer({ height: SPACING.xs }),
 
@@ -69,7 +71,7 @@ AppSettingsPage({
         children: menuItems.map((item) =>
           MenuButton({
             label: item.label,
-            onClick: () => this.navigateTo(item.page, props),
+            onClick: () => this.navigateTo(item.page),
           })
         ),
       }),
@@ -77,67 +79,34 @@ AppSettingsPage({
   },
 
   // --- Helper Methods ---
-  getNavState(props) {
-    const navState = props.settingsStorage.getItem("navState");
-    return navState
-      ? JSON.parse(navState)
-      : { currentPage: "main", history: [] };
+  getNavState() {
+    const navState = storageService.getItem("navState");
+    return navState ? navState : { currentPage: "main", history: [] };
   },
 
-  saveNavState(props, navState) {
-    props.settingsStorage.setItem("navState", JSON.stringify(navState));
+  saveNavState(navState) {
+    storageService.setItem("navState", navState);
   },
 
-  navigateTo(page, props) {
-    const navState = this.getNavState(props);
+  navigateTo(page) {
+    const navState = this.getNavState();
     navState.history.push(navState.currentPage);
     navState.currentPage = page;
-    this.saveNavState(props, navState);
+    this.saveNavState(navState);
   },
 
-  navigateBack(props) {
-    const navState = this.getNavState(props);
+  navigateBack() {
+    const navState = this.getNavState();
     if (navState.history.length > 0) {
       navState.currentPage = navState.history.pop();
-      this.saveNavState(props, navState);
+      this.saveNavState(navState);
     }
   },
 
   // --- Build Methods ---
-  buildLocationPanel(currentLocation) {
-    return [
-      Text(
-        {
-          style: {
-            ...TEXT_STYLES.heading,
-            marginBottom: SPACING.xs,
-          },
-        },
-        gettext("current_location")
-      ),
-      Text(
-        { style: { ...TEXT_STYLES.normal } },
-        currentLocation
-          ? `${currentLocation.country}, ${currentLocation.city}`
-          : gettext("no_location_selected")
-      ),
-      currentLocation
-        ? Text(
-            { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
-            gettext("latitude") +
-              `: ${currentLocation.latitude}°, ` +
-              gettext("longitude") +
-              `: ${currentLocation.longitude}°`
-          )
-        : null,
-    ];
-  },
-
-  buildSyncingNotifyPanel(props) {
-    const pendingSyncStr = props.settingsStorage.getItem("pendingSync");
-    if (!pendingSyncStr) return null;
-    const pendingSync = JSON.parse(pendingSyncStr);
-    if (Object.keys(pendingSync).length === 0) return null;
+  buildSyncingNotifyPanel() {
+    const pendingSync = storageService.getItem("pendingSync");
+    if (!pendingSync || pendingSync.length === 0) return null;
 
     return Panel({
       style: {
@@ -174,7 +143,7 @@ AppSettingsPage({
           },
           gettext("pending_sync_items_detected")
         ),
-        // TODO: to be removed in production
+        // TODO: remove in production
         Text(
           {
             style: {
@@ -184,9 +153,37 @@ AppSettingsPage({
               color: "#fff",
             },
           },
-          Object.keys(pendingSync).join(", ")
+          pendingSync.join(", ")
         ),
       ],
     });
+  },
+  buildLocationPanel(currentLocation) {
+    return [
+      Text(
+        {
+          style: {
+            ...TEXT_STYLES.heading,
+            marginBottom: SPACING.xs,
+          },
+        },
+        gettext("current_location")
+      ),
+      Text(
+        { style: { ...TEXT_STYLES.normal } },
+        currentLocation
+          ? `${currentLocation.country}, ${currentLocation.city}`
+          : gettext("no_location_selected")
+      ),
+      currentLocation
+        ? Text(
+            { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
+            gettext("latitude") +
+              `: ${currentLocation.latitude}°, ` +
+              gettext("longitude") +
+              `: ${currentLocation.longitude}°`
+          )
+        : null,
+    ];
   },
 });

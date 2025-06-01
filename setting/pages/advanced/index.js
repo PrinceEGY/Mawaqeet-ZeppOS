@@ -15,7 +15,7 @@ import {
 } from "../../utils/styles";
 
 export function advancedSettingsPage(navigateBackCallback, props) {
-  const lastUpdate = props.settingsStorage.getItem("lastPrayerTimesUpdate");
+  const lastUpdate = props.storageService.getItem("lastPrayerTimesUpdate");
   const lastUpdateText = DateUtils.getTimeAgo(lastUpdate);
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
@@ -53,23 +53,23 @@ export function advancedSettingsPage(navigateBackCallback, props) {
     const numValue = parseInt(value);
 
     if (isNaN(numValue)) {
-      return DEFAULT_SETTINGS.fetching.monthsBefore.toString();
+      return DEFAULT_SETTINGS.fetching.monthsBefore;
     }
 
     const { monthsMin, monthsMax } = DEFAULT_SETTINGS.fetching;
-    return Math.max(monthsMin, Math.min(monthsMax, numValue)).toString();
+    return Math.max(monthsMin, Math.min(monthsMax, numValue));
   }
 
   function validateFetchIntervalInput(value) {
     const numValue = parseInt(value);
 
     if (isNaN(numValue)) {
-      return DEFAULT_SETTINGS.fetching.automaticFetchInterval.toString();
+      return DEFAULT_SETTINGS.fetching.automaticFetchInterval;
     }
 
     const { monthsMax } = DEFAULT_SETTINGS.fetching;
     const maxDays = monthsMax * 30 - 1;
-    return Math.max(1, Math.min(maxDays, numValue)).toString();
+    return Math.max(1, Math.min(maxDays, numValue));
   }
 
   // --- Build Methods ---
@@ -107,7 +107,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("manual_update"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            fetchAndSavePrayerTimes({ storage: props.settingsStorage });
+            fetchAndSavePrayerTimes({ storage: props.storageService });
           },
         }),
       ],
@@ -115,8 +115,8 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   function buildFetchWindowPanel(props) {
-    const monthsBefore = props.settingsStorage.getItem("fetchingMonthsBefore");
-    const monthsAfter = props.settingsStorage.getItem("fetchingMonthsAfter");
+    const monthsBefore = props.storageService.getItem("fetchingMonthsBefore");
+    const monthsAfter = props.storageService.getItem("fetchingMonthsAfter");
 
     return Panel({
       children: [
@@ -144,7 +144,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           value: monthsBefore,
           onChange: (value) => {
             const validatedValue = validateMonthsInput(value);
-            props.settingsStorage.setItem(
+            props.storageService.setItem(
               "fetchingMonthsBefore",
               validatedValue
             );
@@ -156,10 +156,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           value: monthsAfter,
           onChange: (value) => {
             const validatedValue = validateMonthsInput(value);
-            props.settingsStorage.setItem(
-              "fetchingMonthsAfter",
-              validatedValue
-            );
+            props.storageService.setItem("fetchingMonthsAfter", validatedValue);
           },
         }),
       ],
@@ -167,7 +164,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   function buildAutoFetchPanel(props) {
-    const autoFetchDays = props.settingsStorage.getItem("autoFetchDays");
+    const autoFetchDays = props.storageService.getItem("autoFetchDays");
 
     return Panel({
       children: [
@@ -195,7 +192,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           value: autoFetchDays,
           onChange: (value) => {
             const validatedValue = validateFetchIntervalInput(value);
-            props.settingsStorage.setItem("autoFetchDays", validatedValue);
+            props.storageService.setItem("autoFetchDays", validatedValue);
           },
         }),
       ],
@@ -227,7 +224,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("manual_sync_btn"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            props.settingsStorage.setItem("triggerSync", true);
+            props.storageService.setItem("triggerSync", true);
           },
         }),
       ],
@@ -259,7 +256,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("reset_settings_btn"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            props.settingsStorage.clear();
+            props.storageService.clear();
             SettingInitializer.resetSessionFlag();
             SettingInitializer.initDefaultSettings(props);
             console.log("Settings reset to default.");

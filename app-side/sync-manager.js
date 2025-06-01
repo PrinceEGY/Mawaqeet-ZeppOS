@@ -1,4 +1,7 @@
 import { settingsLib } from "@zeppos/zml/base-side";
+import { StorageService } from "../shared/utils/storage-service";
+
+const storageService = new StorageService(settingsLib);
 
 export class SyncManager {
   constructor() {
@@ -14,36 +17,40 @@ export class SyncManager {
   }
 
   getPendingSync() {
-    const pendingSyncStr = settingsLib.getItem("pendingSync");
-    return pendingSyncStr ? JSON.parse(pendingSyncStr) : {};
-  }
-
-  getPendingSyncKeys() {
-    const pendingSync = this.getPendingSync();
-    const keys = Object.keys(pendingSync);
-    return keys;
+    const pendingSync = storageService.getItem("pendingSync");
+    return pendingSync || [];
   }
 
   setPendingSync(pendingSync) {
-    settingsLib.setItem("pendingSync", JSON.stringify(pendingSync));
+    storageService.setItem("pendingSync", pendingSync);
   }
 
-  addToPendingSync(key, value) {
+  addToPendingSync(key) {
     const pendingSync = this.getPendingSync();
-    pendingSync[key] = value;
-    this.setPendingSync(pendingSync);
+    if (!pendingSync.includes(key)) {
+      pendingSync.push(key);
+      console.log("Adding to pendingSync:", key);
+      this.setPendingSync(pendingSync);
+    }
   }
 
   removeFromPendingSync(key) {
     const pendingSync = this.getPendingSync();
-    delete pendingSync[key];
-    this.setPendingSync(pendingSync);
+    const index = pendingSync.indexOf(key);
+    if (index > -1) {
+      pendingSync.splice(index, 1);
+      this.setPendingSync(pendingSync);
+    }
+  }
+
+  clearPendingSync() {
+    storageService.removeItem("pendingSync");
   }
 
   removePendingIfUnchanged(key, originalValue) {
-    const recentPendingSync = this.getPendingSync();
-    const recentValue = recentPendingSync[key];
-    if (recentValue === originalValue) {
+    const currentStorageItem = storageService.getItem(key);
+    const currentValue = currentStorageItem;
+    if (currentValue === originalValue) {
       this.removeFromPendingSync(key);
       return true;
     }
@@ -60,7 +67,7 @@ export class SyncManager {
     }
 
     const pendingSync = this.getPendingSync();
-    if (!(key in pendingSync)) {
+    if (!pendingSync.includes(key)) {
       res(
         {
           type: "not_pending",
@@ -72,14 +79,14 @@ export class SyncManager {
     }
 
     this.currentlySyncingKeys.add(key);
-    const value = pendingSync[key];
+    const value = storageService.getItem(key);
     console.log("Syncing key: ", key);
 
     try {
       if (key === "prayerTimes") {
         this._handlePrayerTimesChunkSync(key, value, req, res);
       } else {
-        this._handleDefaultSync(key, value, res);
+        this._handleRegularSync(key, value, res);
       }
     } catch (err) {
       res({ type: "exception", error: err.message }, null);
@@ -88,23 +95,26 @@ export class SyncManager {
     }
   }
 
-  _handlePrayerTimesChunkSync(key, value, req, res) {
-    const chunkSize = 8192;
+  _handlePrayerTimesChunkSync(key, value, req, res, chunkSize = 1024 * 8) {
     const chunks = this.chunkString(value, chunkSize);
     const totalChunks = chunks.length;
     const chunkIndex = req?.params?.chunkIndex ?? 0;
 
-    if (chunkIndex < 0 || chunkIndex >= totalChunks) {
-      res({ type: "invalid_chunk_index", error: "Invalid chunk index." }, null);
+    console.log(
+      `Syncing prayerTimes: totalChunks=${totalChunks}, chunkIndex=${chunkIndex}`
+    );
+
+    // Info request
+    if (chunkIndex == -1) {
+      res(null, {
+        dataLength: value.length,
+        chunkIndex: -1,
+        totalChunks,
+        complete: false,
+        data: null,
+      });
       return;
     }
-
-    res(null, {
-      chunkIndex,
-      totalChunks,
-      complete: false,
-      data: chunks[chunkIndex],
-    });
 
     // If the device notifies completion, remove from pendingSync only if value unchanged
     if (req?.params?.complete === true) {
@@ -113,10 +123,31 @@ export class SyncManager {
       } else {
         console.log("prayerTimes updated during sync, keeping in pendingSync");
       }
+      res(null, {
+        dataLength: value.length,
+        chunkIndex: -1,
+        totalChunks,
+        complete: true,
+        data: null,
+      });
+      return;
     }
+
+    if (chunkIndex < 0 || chunkIndex >= totalChunks) {
+      res({ type: "invalid_chunk_index", error: "Invalid chunk index." }, null);
+      return;
+    }
+
+    res(null, {
+      dataLength: value.length,
+      chunkIndex,
+      totalChunks,
+      complete: false,
+      data: chunks[chunkIndex],
+    });
   }
 
-  _handleDefaultSync(key, value, res) {
+  _handleRegularSync(key, value, res) {
     res(null, { data: value });
     this.removePendingIfUnchanged(key, value);
   }

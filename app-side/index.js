@@ -1,19 +1,22 @@
-import { BaseSideService, settingsLib } from "@zeppos/zml/base-side";
+import { BaseSideService } from "@zeppos/zml/base-side";
 import { SYNC_SETTINGS_LIST } from "../shared/constants";
-import { GeoService } from "../shared/geo-service";
 import { fetchAndSavePrayerTimes } from "../shared/helpers";
+import { GeoService } from "../shared/utils/geo-service";
+import { StorageService } from "../shared/utils/storage-service";
 import { SyncManager } from "./sync-manager";
+
+const syncManager = new SyncManager();
+const storageService = new StorageService(settings.settingsStorage);
 
 AppSideService(
   BaseSideService({
     onInit() {
       console.log("App side service initialized");
-      this.syncManager = new SyncManager();
     },
 
     onRun() {
       console.log("App side service running");
-      console.log("Syncing keys: ", this.syncManager.getPendingSync());
+      console.log("Syncing keys: ", syncManager.getPendingSync());
       setTimeout(() => {
         this.triggerSync();
       }, 1000);
@@ -25,13 +28,14 @@ AppSideService(
       try {
         switch (req.method) {
           case "fetchPrayerTimes":
-            await fetchAndSavePrayerTimes({ storage: settingsLib });
+            await fetchAndSavePrayerTimes({
+              storage: storageService,
+            });
             res(null, { status: "success" });
             break;
           case "getCurrentLocation": {
-            const currentLocation = JSON.parse(
-              settingsLib.getItem("currentLocation")
-            );
+            const currentLocation = storageService.getItem("currentLocation");
+
             res(null, { location: currentLocation });
             break;
           }
@@ -41,14 +45,14 @@ AppSideService(
             res(null, { city: closestCity });
             break;
           }
-          case "getPendingSyncKeys":
-            keys = this.syncManager.getPendingSyncKeys();
+          case "getPendingSync":
+            keys = syncManager.getPendingSync();
             res(null, { keys });
             break;
           default:
             if (req.method && req.method.startsWith("sync.")) {
               const key = req.method.split(".")[1];
-              await this.syncManager.handleSyncRequest(key, req, res);
+              await syncManager.handleSyncRequest(key, req, res);
             } else {
               res({ error: "Unknown method" }, null);
             }
@@ -72,7 +76,7 @@ AppSideService(
         SYNC_SETTINGS_LIST.includes(key)
       ) {
         console.log(`Syncing setting change for key: ${key}`);
-        this.syncManager.addToPendingSync(key, newValue);
+        syncManager.addToPendingSync(key);
         this.triggerSync([key]);
       }
 
@@ -81,18 +85,18 @@ AppSideService(
         newValue !== oldValue &&
         newValue
       ) {
-        await fetchAndSavePrayerTimes({ storage: settingsLib });
+        await fetchAndSavePrayerTimes({ storage: storageService });
         console.log(`Prayer times updated due to "${key}" change:`);
         this.onSettingsChange({
           key: "prayerTimes",
-          newValue: settingsLib.getItem("prayerTimes"),
+          newValue: storageService.getItem("prayerTimes"),
           oldValue: null,
         });
       }
     },
 
     async triggerSync(keys) {
-      const syncKeys = keys || this.syncManager.getPendingSyncKeys();
+      const syncKeys = keys || syncManager.getPendingSync();
       if (!syncKeys || syncKeys.length === 0) {
         console.log("No pending sync keys to trigger.");
         return;

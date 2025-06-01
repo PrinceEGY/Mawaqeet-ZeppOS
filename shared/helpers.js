@@ -9,20 +9,12 @@ export async function fetchAndSavePrayerTimes({
   monthsAfter,
 }) {
   function getStorageItem(key) {
-    const itemStr = storage.getItem(key);
-    if (!itemStr) {
+    const item = storage.getItem(key);
+    if (!item) {
       console.error(`${key} not found in storage`);
       throw new Error(`Missing ${key}`);
     }
-    try {
-      return JSON.parse(itemStr);
-    } catch (error) {
-      console.error(
-        `Failed to parse ${key} from storage. Value: ${itemStr}`,
-        error
-      );
-      throw new Error(`Invalid ${key} format in storage`);
-    }
+    return item;
   }
 
   const resolvedLocation = location ?? getStorageItem("currentLocation");
@@ -39,9 +31,6 @@ export async function fetchAndSavePrayerTimes({
   );
 
   try {
-    console.log(
-      `Fetching prayer times from ${startDate.toLocaleString()} to ${endDate.toLocaleString()}`
-    );
     const prayerTimesData = await PrayersApi.fetchPrayerTimes({
       latitude: resolvedLocation.latitude,
       longitude: resolvedLocation.longitude,
@@ -51,8 +40,8 @@ export async function fetchAndSavePrayerTimes({
     });
 
     const currentTime = new Date().getTime();
-    storage.setItem("lastPrayerTimesUpdate", currentTime.toString());
-    storage.setItem("prayerTimes", JSON.stringify(prayerTimesData));
+    storage.setItem("lastPrayerTimesUpdate", currentTime);
+    storage.setItem("prayerTimes", prayerTimesData);
     console.log(
       `Successfully fetched and saved prayer times. Last update: ${new Date(
         currentTime

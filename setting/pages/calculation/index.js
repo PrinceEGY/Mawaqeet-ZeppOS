@@ -6,11 +6,11 @@ import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "../../utils/styles";
 import { Theme } from "../../utils/theme";
 
 export function calculationSettingsPage(navigateBackCallback, props) {
-  const methodsList = props.settingsStorage.getItem("calculationMethodsList");
-  const methods = methodsList ? JSON.parse(methodsList) : [];
+  const methodsList = props.storageService.getItem("calculationMethodsList");
+  const methods = methodsList ? methodsList : [];
 
-  const currentMethod = props.settingsStorage.getItem("calculationMethod");
-  const selectedMethodId = currentMethod ? JSON.parse(currentMethod).id : null;
+  const currentMethod = props.storageService.getItem("calculationMethod");
+  const selectedMethodId = currentMethod ? currentMethod.id : null;
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
     AppBar({
@@ -36,10 +36,7 @@ export function calculationSettingsPage(navigateBackCallback, props) {
             method: method,
             isSelected: method.id === selectedMethodId,
             onClick: () => {
-              props.settingsStorage.setItem(
-                "calculationMethod",
-                JSON.stringify(method)
-              );
+              props.storageService.setItem("calculationMethod", method);
             },
           })
         ),

@@ -16,14 +16,13 @@ export class SettingInitializer {
     this.isInitializing = true;
 
     try {
-      props.settingsStorage.setItem(
-        "navState",
-        JSON.stringify({ currentPage: "main", history: [] })
-      );
-
+      props.storageService.setItem("navState", {
+        currentPage: "main",
+        history: [],
+      });
+      this.initLocationSettings(props);
       this.initFetchingSettings(props);
       this.initPrayerSettings(props);
-      this.initLocationSettings(props);
       await this.initCalculationMethod(props);
       this._initDoneThisSession = true;
     } catch (error) {
@@ -34,21 +33,18 @@ export class SettingInitializer {
   }
 
   static initLocationSettings(props) {
-    if (!props.settingsStorage.getItem("currentLocation")) {
+    if (!props.storageService.getItem("currentLocation")) {
       const defaultLocation = GeoService.getCityByName(
         DEFAULT_SETTINGS.location.city
       );
 
       if (defaultLocation) {
-        props.settingsStorage.setItem(
-          "currentLocation",
-          JSON.stringify({
-            country: defaultLocation.country,
-            city: defaultLocation.city,
-            latitude: defaultLocation.latitude,
-            longitude: defaultLocation.longitude,
-          })
-        );
+        props.storageService.setItem("currentLocation", {
+          country: defaultLocation.country,
+          city: defaultLocation.city,
+          latitude: defaultLocation.latitude,
+          longitude: defaultLocation.longitude,
+        });
         console.log(
           `Default location set to ${DEFAULT_SETTINGS.location.city}`
         );
@@ -63,28 +59,30 @@ export class SettingInitializer {
   static initPrayerSettings(props) {
     Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
       const displayKey = `display:${prayer}`;
-      if (!props.settingsStorage.getItem(displayKey)) {
-        props.settingsStorage.setItem(
+      const displayValue = props.storageService.getItem(displayKey);
+      if (displayValue === undefined || displayValue === null) {
+        props.storageService.setItem(
           displayKey,
-          DEFAULT_SETTINGS.display[prayer].toString()
+          DEFAULT_SETTINGS.display[prayer]
         );
       }
 
       const notifyKey = `notify:${prayer}`;
-      if (!props.settingsStorage.getItem(notifyKey)) {
-        props.settingsStorage.setItem(
+      const notifyValue = props.storageService.getItem(notifyKey);
+      if (notifyValue === undefined || notifyValue === null) {
+        props.storageService.setItem(
           notifyKey,
-          DEFAULT_SETTINGS.display[prayer].toString()
+          DEFAULT_SETTINGS.display[prayer]
         );
       }
     });
   }
 
   static async initCalculationMethod(props) {
-    if (!props.settingsStorage.getItem("calculationMethod")) {
-      props.settingsStorage.setItem(
+    if (!props.storageService.getItem("calculationMethod")) {
+      props.storageService.setItem(
         "calculationMethod",
-        JSON.stringify(DEFAULT_SETTINGS.calculationMethod)
+        DEFAULT_SETTINGS.calculationMethod
       );
       console.log(
         `Default calculation method set to ${JSON.stringify(
@@ -95,28 +93,22 @@ export class SettingInitializer {
 
     const now = Date.now();
     const lastFetch = parseInt(
-      props.settingsStorage.getItem("lastCalculationMethodsUpdate") || "0"
+      props.storageService.getItem("lastCalculationMethodsUpdate") || "0"
     );
     const autoFetchDays = parseInt(
-      props.settingsStorage.getItem("autoFetchDays")
+      props.storageService.getItem("autoFetchDays")
     );
     const msPerDay = 24 * 60 * 60 * 1000;
     const interval = autoFetchDays * msPerDay;
 
     if (
-      !props.settingsStorage.getItem("calculationMethodsList") ||
+      !props.storageService.getItem("calculationMethodsList") ||
       now - lastFetch > interval
     ) {
       try {
         const methods = await PrayersApi.fetchCalculationMethods();
-        props.settingsStorage.setItem(
-          "calculationMethodsList",
-          JSON.stringify(methods)
-        );
-        props.settingsStorage.setItem(
-          "lastCalculationMethodsUpdate",
-          now.toString()
-        );
+        props.storageService.setItem("calculationMethodsList", methods);
+        props.storageService.setItem("lastCalculationMethodsUpdate", now);
         console.log(`Calculation methods list has been set/refreshed`);
       } catch (error) {
         console.error("Failed to fetch or parse calculation methods:", error);
@@ -125,30 +117,30 @@ export class SettingInitializer {
   }
 
   static initFetchingSettings(props) {
-    if (!props.settingsStorage.getItem("fetchingMonthsBefore")) {
-      props.settingsStorage.setItem(
+    if (!props.storageService.getItem("fetchingMonthsBefore")) {
+      props.storageService.setItem(
         "fetchingMonthsBefore",
-        DEFAULT_SETTINGS.fetching.monthsBefore.toString()
+        DEFAULT_SETTINGS.fetching.monthsBefore
       );
       console.log(
         `Default fetchingMonthsBefore set to ${DEFAULT_SETTINGS.fetching.monthsBefore}`
       );
     }
 
-    if (!props.settingsStorage.getItem("fetchingMonthsAfter")) {
-      props.settingsStorage.setItem(
+    if (!props.storageService.getItem("fetchingMonthsAfter")) {
+      props.storageService.setItem(
         "fetchingMonthsAfter",
-        DEFAULT_SETTINGS.fetching.monthsAfter.toString()
+        DEFAULT_SETTINGS.fetching.monthsAfter
       );
       console.log(
         `Default fetchingMonthsAfter set to ${DEFAULT_SETTINGS.fetching.monthsAfter}`
       );
     }
 
-    if (!props.settingsStorage.getItem("autoFetchDays")) {
-      props.settingsStorage.setItem(
+    if (!props.storageService.getItem("autoFetchDays")) {
+      props.storageService.setItem(
         "autoFetchDays",
-        DEFAULT_SETTINGS.fetching.automaticFetchInterval.toString()
+        DEFAULT_SETTINGS.fetching.automaticFetchInterval
       );
       console.log(
         `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.automaticFetchInterval}`

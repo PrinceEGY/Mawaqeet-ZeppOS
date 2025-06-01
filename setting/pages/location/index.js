@@ -25,8 +25,8 @@ export function locationSettingsPage(navigateBackCallback, props) {
 
   // --- Helper Methods ---
   function getLocationState() {
-    return props.settingsStorage.getItem("locationPageState")
-      ? JSON.parse(props.settingsStorage.getItem("locationPageState"))
+    return props.storageService.getItem("locationPageState")
+      ? props.storageService.getItem("locationPageState")
       : {
           step: "country",
           selectedCountry: null,
@@ -35,27 +35,24 @@ export function locationSettingsPage(navigateBackCallback, props) {
   }
 
   function updatePageState(state) {
-    props.settingsStorage.setItem("locationPageState", JSON.stringify(state));
+    props.storageService.setItem("locationPageState", state);
   }
 
   function getCurrentLocation() {
-    return JSON.parse(props.settingsStorage.getItem("currentLocation"));
+    return props.storageService.getItem("currentLocation");
   }
 
   function saveSelectedLocation(city) {
-    props.settingsStorage.setItem(
-      "currentLocation",
-      JSON.stringify({
-        country: city.country,
-        city: city.city,
-        latitude: city.latitude,
-        longitude: city.longitude,
-      })
-    );
-    props.settingsStorage.setItem("lastPrayerTimesUpdate", null);
+    props.storageService.setItem("currentLocation", {
+      country: city.country,
+      city: city.city,
+      latitude: city.latitude,
+      longitude: city.longitude,
+    });
+    props.storageService.setItem("lastPrayerTimesUpdate", null);
 
-    props.settingsStorage.removeItem("tempLatitude");
-    props.settingsStorage.removeItem("tempLongitude");
+    props.storageService.removeItem("tempLatitude");
+    props.storageService.removeItem("tempLongitude");
   }
 
   function validateCoordinate(value, type) {
@@ -152,11 +149,11 @@ export function locationSettingsPage(navigateBackCallback, props) {
   }
 
   function buildManualCoordinatesPanel() {
-    let lat = props.settingsStorage.getItem("tempLatitude")
-      ? props.settingsStorage.getItem("tempLatitude")
+    let lat = props.storageService.getItem("tempLatitude")
+      ? props.storageService.getItem("tempLatitude")
       : 0;
-    let lon = props.settingsStorage.getItem("tempLongitude")
-      ? props.settingsStorage.getItem("tempLongitude")
+    let lon = props.storageService.getItem("tempLongitude")
+      ? props.storageService.getItem("tempLongitude")
       : 0;
 
     return Panel({
@@ -184,7 +181,7 @@ export function locationSettingsPage(navigateBackCallback, props) {
           value: lat,
           onChange: (value) => {
             lat = validateCoordinate(value, "lat");
-            props.settingsStorage.setItem("tempLatitude", lat);
+            props.storageService.setItem("tempLatitude", lat);
           },
         }),
         Spacer({ height: SPACING.xs }),
@@ -193,7 +190,7 @@ export function locationSettingsPage(navigateBackCallback, props) {
           value: lon,
           onChange: (value) => {
             lon = validateCoordinate(value, "lon");
-            props.settingsStorage.setItem("tempLongitude", lon);
+            props.storageService.setItem("tempLongitude", lon);
           },
         }),
         Spacer({ height: SPACING.sm }),
