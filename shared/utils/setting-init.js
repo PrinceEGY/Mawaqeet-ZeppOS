@@ -71,7 +71,7 @@ export class SettingInitializer {
       if (notifyValue === undefined || notifyValue === null) {
         props.storageService.setItem(
           notifyKey,
-          DEFAULT_SETTINGS.display[prayer]
+          DEFAULT_SETTINGS.notify[prayer]
         );
       }
     });

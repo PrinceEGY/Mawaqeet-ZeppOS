@@ -42,6 +42,17 @@ export const DEFAULT_SETTINGS = {
     lastthird: false,
   },
 
+  notify: {
+    fajr: true,
+    sunrise: false,
+    dhuhr: true,
+    asr: true,
+    maghrib: true,
+    isha: true,
+    midnight: false,
+    lastthird: false,
+  },
+
   // Calculation method defaults
   calculationMethod: {
     id: -1,
