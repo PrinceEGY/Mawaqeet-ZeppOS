@@ -45,11 +45,11 @@ export class SettingInitializer {
           latitude: defaultLocation.latitude,
           longitude: defaultLocation.longitude,
         });
-        console.log(
+        console.debug(
           `Default location set to ${DEFAULT_SETTINGS.location.city}`
         );
       } else {
-        console.log(
+        console.debug(
           `Default location (${DEFAULT_SETTINGS.location.city}) not found in GEO_DATA`
         );
       }
@@ -84,7 +84,7 @@ export class SettingInitializer {
         "calculationMethod",
         DEFAULT_SETTINGS.calculationMethod
       );
-      console.log(
+      console.debug(
         `Default calculation method set to ${JSON.stringify(
           DEFAULT_SETTINGS.calculationMethod
         )}`
@@ -109,7 +109,7 @@ export class SettingInitializer {
         const methods = await PrayersApi.fetchCalculationMethods();
         props.storageService.setItem("calculationMethodsList", methods);
         props.storageService.setItem("lastCalculationMethodsUpdate", now);
-        console.log(`Calculation methods list has been set/refreshed`);
+        console.debug(`Calculation methods list has been set/refreshed`);
       } catch (error) {
         console.error("Failed to fetch or parse calculation methods:", error);
       }
@@ -122,7 +122,7 @@ export class SettingInitializer {
         "fetchingMonthsBefore",
         DEFAULT_SETTINGS.fetching.monthsBefore
       );
-      console.log(
+      console.debug(
         `Default fetchingMonthsBefore set to ${DEFAULT_SETTINGS.fetching.monthsBefore}`
       );
     }
@@ -132,7 +132,7 @@ export class SettingInitializer {
         "fetchingMonthsAfter",
         DEFAULT_SETTINGS.fetching.monthsAfter
       );
-      console.log(
+      console.debug(
         `Default fetchingMonthsAfter set to ${DEFAULT_SETTINGS.fetching.monthsAfter}`
       );
     }
@@ -142,7 +142,7 @@ export class SettingInitializer {
         "autoFetchDays",
         DEFAULT_SETTINGS.fetching.automaticFetchInterval
       );
-      console.log(
+      console.debug(
         `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.automaticFetchInterval}`
       );
     }

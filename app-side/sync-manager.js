@@ -29,7 +29,7 @@ export class SyncManager {
     const pendingSync = this.getPendingSync();
     if (!pendingSync.includes(key)) {
       pendingSync.push(key);
-      console.log("Adding to pendingSync:", key);
+      console.debug("Adding to pendingSync:", key);
       this.setPendingSync(pendingSync);
     }
   }
@@ -80,7 +80,7 @@ export class SyncManager {
 
     this.currentlySyncingKeys.add(key);
     const value = storageService.getItem(key);
-    console.log("Syncing key: ", key);
+    console.debug("Syncing key: ", key);
 
     try {
       if (key === "prayerTimes") {
