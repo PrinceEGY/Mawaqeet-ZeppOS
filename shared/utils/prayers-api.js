@@ -1,4 +1,5 @@
 import { ALADHAN_CALCULATION_METHODS_URL, ALADHAN_URL } from "../constants.js";
+import { DateUtils } from "./date-utils.js";
 
 export class PrayersApi {
   static async fetchPrayerTimes({
@@ -25,29 +26,29 @@ export class PrayersApi {
         chunkEndDate = new Date(requestEndDate);
       }
 
-      const chunkStartStr = this._formatDateForApi(chunkStartDate);
-      const chunkEndStr = this._formatDateForApi(chunkEndDate);
+      const chunkStartStr = DateUtils.dateToDateString(chunkStartDate);
+      const chunkEndStr = DateUtils.dateToDateString(chunkEndDate);
 
       console.log(
         `Preparing to fetch prayer times from ${chunkStartStr} to ${chunkEndStr}`
       );
 
-      const methodParam =
+      calculationMethodId =
         calculationMethodId && calculationMethodId !== -1
           ? calculationMethodId
           : undefined; // Use method only if it's not "auto" (-1)
 
       const chunkPromise = this._fetchPrayerTimesChunk({
-        latitude: latitude,
-        longitude: longitude,
+        latitude,
+        longitude,
         startDate: chunkStartStr,
         endDate: chunkEndStr,
-        iso8601: iso8601,
-        timezoneString: timezoneString,
-        calculationMethodId: methodParam,
+        iso8601,
+        timezoneString,
+        calculationMethodId,
       }).then((chunkResponse) => {
         console.log(`Received data for ${chunkStartStr} to ${chunkEndStr}`);
-        return this._transformApiResponse(chunkResponse.data);
+        return this._transformPrayerTimesResponse(chunkResponse.data);
       });
 
       chunkPromises.push(chunkPromise);
@@ -59,9 +60,9 @@ export class PrayersApi {
     const chunkResults = await Promise.all(chunkPromises);
 
     const sortedPrayerTimes = chunkResults.flat().sort((a, b) => {
-      const dateA = a.date.split("-").reverse().join("-");
-      const dateB = b.date.split("-").reverse().join("-");
-      return new Date(dateA) - new Date(dateB);
+      return (
+        DateUtils.dateStringToDate(a.date) - DateUtils.dateStringToDate(b.date)
+      );
     });
 
     return sortedPrayerTimes;
@@ -133,11 +134,7 @@ export class PrayersApi {
     return data;
   }
 
-  static _formatDateForApi(date) {
-    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-  }
-
-  static _transformApiResponse(data) {
+  static _transformPrayerTimesResponse(data) {
     return data.map((dayData) => {
       const timings = {};
 
@@ -148,12 +145,11 @@ export class PrayersApi {
         timings[prayerName] = prayerDate.getTime();
       });
 
-      const date = dayData.date.gregorian.date;
-      let splitDate = date.split("-");
-      let formattedDate = `${splitDate[1]}-${splitDate[0]}-${splitDate[2]}`;
+      const dateTimestamp = dayData.date.timestamp * 1000; // Convert to milliseconds
+      const dateString = DateUtils.dateToDateString(new Date(dateTimestamp));
 
       return {
-        date: formattedDate,
+        date: dateString,
         timings: timings,
       };
     });

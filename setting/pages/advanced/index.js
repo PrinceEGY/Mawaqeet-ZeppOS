@@ -1,7 +1,7 @@
 import { gettext } from "i18n";
 import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
-import { fetchAndSavePrayerTimes } from "../../../shared/helpers.js";
 import { DateUtils } from "../../../shared/utils/date-utils.js";
+import { PrayersService } from "../../../shared/utils/prayers-service.js";
 import { SettingInitializer } from "../../../shared/utils/setting-init.js";
 import { AppBar } from "../../components/app_bar";
 import { Input } from "../../components/input";
@@ -15,6 +15,7 @@ import {
 } from "../../utils/styles";
 
 export function advancedSettingsPage(navigateBackCallback, props) {
+  const prayersService = new PrayersService(props.storageService);
   const lastUpdate = props.storageService.getItem("lastPrayerTimesUpdate");
   const lastUpdateText = DateUtils.getTimeAgo(lastUpdate);
 
@@ -107,7 +108,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("manual_update"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            fetchAndSavePrayerTimes({ storage: props.storageService });
+            prayersService.fetchAndSavePrayerTimes();
           },
         }),
       ],

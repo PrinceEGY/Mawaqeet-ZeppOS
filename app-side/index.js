@@ -1,22 +1,22 @@
 import { BaseSideService } from "@zeppos/zml/base-side";
 import { SYNC_SETTINGS_LIST } from "../shared/constants";
-import { fetchAndSavePrayerTimes } from "../shared/helpers";
 import { GeoService } from "../shared/utils/geo-service";
+import { PrayersService } from "../shared/utils/prayers-service";
 import { StorageService } from "../shared/utils/storage-service";
 import { SyncManager } from "./sync-manager";
 
 const syncManager = new SyncManager();
 const storageService = new StorageService(settings.settingsStorage);
+const prayersService = new PrayersService(storageService);
 
 AppSideService(
   BaseSideService({
     onInit() {
-      console.log("App side service initialized");
+      console.debug("App side service initialized");
     },
 
     onRun() {
-      console.log("App side service running");
-      console.log("Syncing keys: ", syncManager.getPendingSync());
+      console.debug("App side service running");
       setTimeout(() => {
         this.triggerSync();
       }, 1000);
@@ -28,9 +28,7 @@ AppSideService(
       try {
         switch (req.method) {
           case "fetchPrayerTimes":
-            await fetchAndSavePrayerTimes({
-              storage: storageService,
-            });
+            await prayersService.fetchAndSavePrayerTimes({});
             res(null, { status: "success" });
             break;
           case "getCurrentLocation": {
@@ -64,7 +62,7 @@ AppSideService(
     },
 
     async onSettingsChange({ key, newValue, oldValue }) {
-      console.log("Settings changed:", { key, newValue, oldValue });
+      console.warn("Settings changed:", { key, newValue, oldValue });
 
       if (key === "triggerSync") {
         this.triggerSync();
@@ -75,7 +73,7 @@ AppSideService(
         newValue !== oldValue &&
         SYNC_SETTINGS_LIST.includes(key)
       ) {
-        console.log(`Syncing setting change for key: ${key}`);
+        console.debug(`Syncing setting change for key: ${key}`);
         syncManager.addToPendingSync(key);
         this.triggerSync([key]);
       }
@@ -85,7 +83,7 @@ AppSideService(
         newValue !== oldValue &&
         newValue
       ) {
-        await fetchAndSavePrayerTimes({ storage: storageService });
+        await prayersService.fetchAndSavePrayerTimes();
         console.log(`Prayer times updated due to "${key}" change:`);
         this.onSettingsChange({
           key: "prayerTimes",
@@ -97,6 +95,7 @@ AppSideService(
 
     async triggerSync(keys) {
       const syncKeys = keys || syncManager.getPendingSync();
+      console.log("Triggering sync with keys:", syncKeys);
       if (!syncKeys || syncKeys.length === 0) {
         console.log("No pending sync keys to trigger.");
         return;

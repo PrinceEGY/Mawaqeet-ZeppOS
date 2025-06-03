@@ -48,7 +48,28 @@ export class DateUtils {
     return { startDate, endDate };
   }
 
-  static formatDateForApi(date) {
+  /**
+   * Converts a Date object to a string in the format "DD-MM-YYYY".
+   *
+   * @param {Date} date - The date to convert.
+   * @returns {string} The date string in "DD-MM-YYYY" format.
+   */
+  static dateToDateString(date) {
     return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  }
+
+  /**
+   * Converts a date string in the format "DD-MM-YYYY" to a JavaScript Date object.
+   *
+   * @param {string} dateString - The date string in "DD-MM-YYYY" format.
+   * @returns {Date} The corresponding JavaScript Date object.
+   */
+  static dateStringToDate(dateString) {
+    const parts = dateString.split("-");
+
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    return new Date(year, month, day);
   }
 }
