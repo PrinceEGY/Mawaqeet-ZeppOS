@@ -49,7 +49,6 @@ export function locationSettingsPage(navigateBackCallback, props) {
       latitude: city.latitude,
       longitude: city.longitude,
     });
-    props.storageService.setItem("lastPrayerTimesUpdate", null);
 
     props.storageService.removeItem("tempLatitude");
     props.storageService.removeItem("tempLongitude");

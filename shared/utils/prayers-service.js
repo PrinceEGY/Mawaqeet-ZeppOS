@@ -15,7 +15,7 @@ export class PrayersService {
     location = location || this.storageService.getItem("currentLocation");
     calculationMethodId =
       calculationMethodId ||
-      this.storageService.getItem("calculationMethod").id;
+      this.storageService.getItem("calculationMethod")?.id;
     monthsBefore =
       monthsBefore || this.storageService.getItem("fetchingMonthsBefore");
     monthsAfter =
@@ -35,16 +35,24 @@ export class PrayersService {
         calculationMethodId,
       });
 
-      const currentTime = new Date().getTime();
-      this.storageService.setItem("lastPrayerTimesUpdate", currentTime);
       this.storageService.setItem("prayerTimes", prayerTimesData);
-      console.log(
-        `Successfully fetched and saved prayer times. Last update: ${new Date(
-          currentTime
-        ).toLocaleString()}`
-      );
+      console.log("Successfully fetched and saved prayer times.");
     } catch (error) {
       console.error("Error fetching and saving prayer times:", error);
+      throw error;
+    }
+  }
+
+  async fetchAndSaveCalculationMethodsList() {
+    try {
+      const calculationMethods = await PrayersApi.fetchCalculationMethods();
+      this.storageService.setItem("calculationMethodsList", calculationMethods);
+      console.log("Successfully fetched and saved calculation methods list.");
+    } catch (error) {
+      console.error(
+        "Error fetching and saving calculation methods list:",
+        error
+      );
       throw error;
     }
   }
@@ -69,16 +77,42 @@ export class PrayersService {
     return prayerTimesForDate;
   }
 
-  isPrayerTimesOutdated() {
-    const lastUpdate = parseInt(
-      this.storageService.getItem("lastPrayerTimesUpdate") || "0"
-    );
-    const autoFetchDays = parseInt(
-      this.storageService.getItem("autoFetchDays")
-    );
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const interval = autoFetchDays * msPerDay;
+  updateOutdatedItems() {
+    if (this.isPrayerTimesOutdated()) {
+      this.fetchAndSavePrayerTimes();
+    }
 
-    return Date.now() - lastUpdate > interval;
+    if (this.isCalculationMethodsListOutdated()) {
+      this.fetchAndSaveCalculationMethodsList();
+    }
+  }
+
+  isPrayerTimesOutdated() {
+    const autoFetchDays = this.storageService.getItem("autoFetchDays");
+    const msPerDay = 24 * 60 * 60 * 1000;
+    if (
+      this.storageService.isKeyOutdated("prayerTimes", autoFetchDays * msPerDay)
+    ) {
+      console.debug("Prayer times are outdated, needs refresh.");
+      return true;
+    }
+    console.debug("Prayer times are up-to-date.");
+    return false;
+  }
+
+  isCalculationMethodsListOutdated() {
+    const autoFetchDays = this.storageService.getItem("autoFetchDays");
+    const msPerDay = 24 * 60 * 60 * 1000;
+    if (
+      this.storageService.isKeyOutdated(
+        "calculationMethodsList",
+        autoFetchDays * msPerDay
+      )
+    ) {
+      console.log("Calculation methods list is outdated, needs refresh.");
+      return true;
+    }
+    console.log("Calculation methods list is up-to-date.");
+    return false;
   }
 }

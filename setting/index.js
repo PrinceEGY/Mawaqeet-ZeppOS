@@ -1,4 +1,5 @@
 import { gettext } from "i18n";
+import { PrayersService } from "../shared/utils/prayers-service.js";
 import { SettingInitializer } from "../shared/utils/setting-init.js";
 import { StorageService } from "../shared/utils/storage-service.js";
 import { AppBar } from "./components/app_bar.js";
@@ -17,9 +18,11 @@ let storageService = null;
 AppSettingsPage({
   build(props) {
     storageService = new StorageService(props.settingsStorage);
+    const prayerService = new PrayersService(storageService);
     props.storageService = storageService;
 
     SettingInitializer.initDefaultSettings(props);
+    prayerService.updateOutdatedItems();
 
     const navState = this.getNavState();
 

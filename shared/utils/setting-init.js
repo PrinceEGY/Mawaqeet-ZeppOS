@@ -1,6 +1,5 @@
 import { DEFAULT_SETTINGS } from "../constants.js";
 import { GeoService } from "./geo-service.js";
-import { PrayersApi } from "./prayers-api.js";
 
 export class SettingInitializer {
   static isInitializing = false;
@@ -23,7 +22,7 @@ export class SettingInitializer {
       this.initLocationSettings(props);
       this.initFetchingSettings(props);
       this.initPrayerSettings(props);
-      await this.initCalculationMethod(props);
+      this.initCalculationMethod(props);
       this._initDoneThisSession = true;
     } catch (error) {
       console.error("Error during settings initialization:", error);
@@ -78,7 +77,7 @@ export class SettingInitializer {
     });
   }
 
-  static async initCalculationMethod(props) {
+  static initCalculationMethod(props) {
     if (!props.storageService.getItem("calculationMethod")) {
       props.storageService.setItem(
         "calculationMethod",
@@ -89,30 +88,6 @@ export class SettingInitializer {
           DEFAULT_SETTINGS.calculationMethod
         )}`
       );
-    }
-
-    const now = Date.now();
-    const lastFetch = parseInt(
-      props.storageService.getItem("lastCalculationMethodsUpdate") || "0"
-    );
-    const autoFetchDays = parseInt(
-      props.storageService.getItem("autoFetchDays")
-    );
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const interval = autoFetchDays * msPerDay;
-
-    if (
-      !props.storageService.getItem("calculationMethodsList") ||
-      now - lastFetch > interval
-    ) {
-      try {
-        const methods = await PrayersApi.fetchCalculationMethods();
-        props.storageService.setItem("calculationMethodsList", methods);
-        props.storageService.setItem("lastCalculationMethodsUpdate", now);
-        console.debug(`Calculation methods list has been set/refreshed`);
-      } catch (error) {
-        console.error("Failed to fetch or parse calculation methods:", error);
-      }
     }
   }
 

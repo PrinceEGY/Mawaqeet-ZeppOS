@@ -16,8 +16,8 @@ import {
 
 export function advancedSettingsPage(navigateBackCallback, props) {
   const prayersService = new PrayersService(props.storageService);
-  const lastUpdate = props.storageService.getItem("lastPrayerTimesUpdate");
-  const lastUpdateText = DateUtils.getTimeAgo(lastUpdate);
+  const prayerTimes = props.storageService.getItem("prayerTimes", true);
+  const lastUpdateText = DateUtils.getTimeAgo(prayerTimes?.timestamp);
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
     AppBar({

@@ -63,4 +63,15 @@ export class StorageService {
   getAllKeys() {
     return Object.keys(this.getAllContents());
   }
+
+  isKeyOutdated(key, intervalMs) {
+    const item = this.getItem(key, true);
+    if (!item || !item.data || !item.timestamp) {
+      return true;
+    }
+
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - item.timestamp;
+    return elapsedTime > intervalMs;
+  }
 }

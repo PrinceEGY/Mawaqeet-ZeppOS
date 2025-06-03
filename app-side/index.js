@@ -13,6 +13,7 @@ AppSideService(
   BaseSideService({
     onInit() {
       console.debug("App side service initialized");
+      prayersService.updateOutdatedItems();
     },
 
     onRun() {
@@ -62,7 +63,7 @@ AppSideService(
     },
 
     async onSettingsChange({ key, newValue, oldValue }) {
-      console.warn("Settings changed:", { key, newValue, oldValue });
+      console.debug("Settings changed:", { key, newValue, oldValue });
 
       if (key === "triggerSync") {
         this.triggerSync();

@@ -16,7 +16,6 @@ export const TIMINGS_LIST = [
 
 export const SYNC_SETTINGS_LIST = [
   "prayerTimes",
-  "lastPrayerTimesUpdate",
   "currentLocation",
   "calculationMethod",
   "autoFetchDays",
@@ -55,8 +54,8 @@ export const DEFAULT_SETTINGS = {
   fetching: {
     monthsMax: 120,
     monthsMin: 1,
-    monthsBefore: 12,
-    monthsAfter: 12,
-    automaticFetchInterval: 7,
+    monthsBefore: 1,
+    monthsAfter: 1,
+    automaticFetchInterval: 30,
   },
 };
