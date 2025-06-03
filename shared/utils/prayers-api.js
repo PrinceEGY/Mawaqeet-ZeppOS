@@ -1,8 +1,19 @@
 import { ALADHAN_CALCULATION_METHODS_URL, ALADHAN_URL } from "../constants.js";
+import { debounceAsync } from "../helpers.js";
 import { DateUtils } from "./date-utils.js";
 
 export class PrayersApi {
-  static async fetchPrayerTimes({
+  static fetchPrayerTimes = debounceAsync(
+    this._fetchPrayerTimesImmediate.bind(this),
+    2000
+  );
+
+  static fetchCalculationMethods = debounceAsync(
+    this._fetchCalculationMethodsImmediate.bind(this),
+    2000
+  );
+
+  static async _fetchPrayerTimesImmediate({
     latitude,
     longitude,
     startDate,
@@ -68,7 +79,7 @@ export class PrayersApi {
     return sortedPrayerTimes;
   }
 
-  static async fetchCalculationMethods() {
+  static async _fetchCalculationMethodsImmediate() {
     const response = await fetch(ALADHAN_CALCULATION_METHODS_URL, {
       method: "GET",
       headers: { Accept: "application/json" },

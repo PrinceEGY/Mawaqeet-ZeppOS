@@ -38,7 +38,17 @@ export class PrayersService {
       this.storageService.setItem("prayerTimes", prayerTimesData);
       console.log("Successfully fetched and saved prayer times.");
     } catch (error) {
-      console.error("Error fetching and saving prayer times:", error);
+      if (error.message.includes("debounce")) {
+        console.debug(
+          "Debounce error while fetching calculation methods list."
+        );
+        return;
+      }
+
+      console.error(
+        "Error fetching and saving calculation methods list:",
+        error
+      );
       throw error;
     }
   }
@@ -49,6 +59,13 @@ export class PrayersService {
       this.storageService.setItem("calculationMethodsList", calculationMethods);
       console.log("Successfully fetched and saved calculation methods list.");
     } catch (error) {
+      if (error.message.includes("debounce")) {
+        console.debug(
+          "Debounce error while fetching calculation methods list."
+        );
+        return;
+      }
+
       console.error(
         "Error fetching and saving calculation methods list:",
         error
