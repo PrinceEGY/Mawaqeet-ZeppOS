@@ -1,15 +1,18 @@
 import { BaseApp } from "@zeppos/zml/base-app";
+import { log as Logger } from "@zos/utils";
+
+const logger = Logger.getLogger("app");
 
 App(
   BaseApp({
     globalData: {},
     onCreate() {
       this.request({ method: "openConnection" }); // Initiate request to open connection with the app side
-      console.log("app on create invoke");
+      logger.debug("app on create invoke");
     },
 
     onDestroy() {
-      console.log("app on destroy invoke");
+      logger.debug("app on destroy invoke");
     },
   })
 );
