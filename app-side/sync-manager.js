@@ -1,4 +1,5 @@
 import { settingsLib } from "@zeppos/zml/base-side";
+import _ from "lodash";
 import { StorageService } from "../shared/utils/storage-service";
 
 const storageService = new StorageService(settingsLib);
@@ -6,14 +7,6 @@ const storageService = new StorageService(settingsLib);
 export class SyncManager {
   constructor() {
     this.currentlySyncingKeys = new Set();
-  }
-
-  chunkString(str, size) {
-    const results = [];
-    for (let i = 0; i < str.length; i += size) {
-      results.push(str.slice(i, i + size));
-    }
-    return results;
   }
 
   getPendingSync() {
@@ -50,7 +43,15 @@ export class SyncManager {
   removePendingIfUnchanged(key, originalValue) {
     const currentStorageItem = storageService.getItem(key);
     const currentValue = currentStorageItem;
-    if (currentValue === originalValue) {
+    console.debug(
+      `Checking if value for key "${key}" has changed. Original: ${JSON.stringify(
+        originalValue
+      )}, Current: ${JSON.stringify(currentValue)}`
+    );
+    if (_.isEqual(originalValue, currentValue)) {
+      console.debug(
+        `Value for key "${key}" has not changed, removing from pendingSync.`
+      );
       this.removeFromPendingSync(key);
       return true;
     }
@@ -79,14 +80,13 @@ export class SyncManager {
     }
 
     this.currentlySyncingKeys.add(key);
-    const value = storageService.getItem(key);
     console.debug("Syncing key: ", key);
 
     try {
       if (key === "prayerTimes") {
-        this._handlePrayerTimesChunkSync(key, value, req, res);
+        this._handlePrayerTimesChunkSync(key, req, res);
       } else {
-        this._handleRegularSync(key, value, res);
+        this._handleRegularSync(key, res);
       }
     } catch (err) {
       res({ type: "exception", error: err.message }, null);
@@ -95,8 +95,10 @@ export class SyncManager {
     }
   }
 
-  _handlePrayerTimesChunkSync(key, value, req, res, chunkSize = 1024 * 8) {
-    const chunks = this.chunkString(value, chunkSize);
+  _handlePrayerTimesChunkSync(key, req, res, chunkSize = 1024 * 8) {
+    const value = storageService.getItem(key, true, true);
+
+    const chunks = this._chunkString(value, chunkSize);
     const totalChunks = chunks.length;
     const chunkIndex = req?.params?.chunkIndex ?? 0;
 
@@ -104,14 +106,15 @@ export class SyncManager {
       `Syncing prayerTimes: totalChunks=${totalChunks}, chunkIndex=${chunkIndex}`
     );
 
-    // Info request
+    // Metadata request
     if (chunkIndex == -1) {
       res(null, {
-        dataLength: value.length,
+        dataLength: value.data.length,
         chunkIndex: -1,
         totalChunks,
         complete: false,
         data: null,
+        timestamp: value.timestamp,
       });
       return;
     }
@@ -124,11 +127,12 @@ export class SyncManager {
         console.log("prayerTimes updated during sync, keeping in pendingSync");
       }
       res(null, {
-        dataLength: value.length,
+        dataLength: value.data.length,
         chunkIndex: -1,
         totalChunks,
         complete: true,
         data: null,
+        timestamp: value.timestamp,
       });
       return;
     }
@@ -139,16 +143,26 @@ export class SyncManager {
     }
 
     res(null, {
-      dataLength: value.length,
+      dataLength: value.data.length,
       chunkIndex,
       totalChunks,
       complete: false,
       data: chunks[chunkIndex],
+      timestamp: value.timestamp,
     });
   }
 
-  _handleRegularSync(key, value, res) {
-    res(null, { data: value });
-    this.removePendingIfUnchanged(key, value);
+  _handleRegularSync(key, res) {
+    const value = storageService.getItem(key, true);
+    res(null, value);
+    this.removePendingIfUnchanged(key, value.data);
+  }
+
+  _chunkString(str, size) {
+    const results = [];
+    for (let i = 0; i < str.length; i += size) {
+      results.push(str.slice(i, i + size));
+    }
+    return results;
   }
 }

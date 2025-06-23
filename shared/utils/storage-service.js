@@ -3,7 +3,7 @@ export class StorageService {
     this.storage = storage;
   }
 
-  getItem(key, returnTimestamp = false) {
+  getItem(key, returnTimestamp = false, stringify = false) {
     let value = this.storage.getItem(key);
 
     if (value === undefined || value === null) {
@@ -12,18 +12,19 @@ export class StorageService {
     }
 
     console.debug(`Retrieved item for key "${key}":`, value);
-    let parsedValue;
+
     try {
-      parsedValue = JSON.parse(value);
+      value = JSON.parse(value);
+      if (stringify) value.data = JSON.stringify(value.data);
+
+      return returnTimestamp ? value : value.data;
     } catch (error) {
       console.error(`Error parsing value for key "${key}":`, error);
-      console.error(`Returning raw value for key "${key}":`, value);
       return returnTimestamp ? { data: value, timestamp: Date.now() } : value;
     }
-    return returnTimestamp ? parsedValue : parsedValue.data;
   }
 
-  setItem(key, value) {
+  setItem(key, value, timestamp = Date.now()) {
     if (value === undefined) {
       console.warn(`Attempted to set undefined value for key "${key}".`);
       return;
@@ -32,7 +33,7 @@ export class StorageService {
     try {
       const wrappedValue = {
         data: value,
-        timestamp: Date.now(),
+        timestamp,
       };
       this.storage.setItem(key, JSON.stringify(wrappedValue));
       console.debug(`Set item for key "${key}":`, wrappedValue);
