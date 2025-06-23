@@ -98,7 +98,7 @@ export class SyncManager {
   _handlePrayerTimesChunkSync(key, req, res, chunkSize = 1024 * 8) {
     const value = storageService.getItem(key, true, true);
 
-    const chunks = this._chunkString(value, chunkSize);
+    const chunks = this._chunkString(value.data, chunkSize);
     const totalChunks = chunks.length;
     const chunkIndex = req?.params?.chunkIndex ?? 0;
 
