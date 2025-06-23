@@ -8,7 +8,7 @@ export class StorageService {
 
     if (value === undefined || value === null) {
       console.warn(`Key "${key}" not found in storage.`);
-      return returnTimestamp ? { data: value, timestamp: Date.now() } : value;
+      return returnTimestamp ? { data: value, timestamp: 0 } : value;
     }
 
     console.debug(`Retrieved item for key "${key}":`, value);
@@ -20,7 +20,7 @@ export class StorageService {
       return returnTimestamp ? value : value.data;
     } catch (error) {
       console.error(`Error parsing value for key "${key}":`, error);
-      return returnTimestamp ? { data: value, timestamp: Date.now() } : value;
+      return value;
     }
   }
 
