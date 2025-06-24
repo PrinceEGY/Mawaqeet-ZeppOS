@@ -121,7 +121,7 @@ export class SyncManager {
 
     // If the device notifies completion, remove from pendingSync only if value unchanged
     if (req?.params?.complete === true) {
-      if (this.removePendingIfUnchanged(key, value)) {
+      if (this.removePendingIfUnchanged(key, JSON.parse(value.data))) {
         console.log("Syncing complete for key:", key);
       } else {
         console.log("prayerTimes updated during sync, keeping in pendingSync");
