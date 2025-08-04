@@ -153,7 +153,7 @@ export class PrayersApi {
       Object.keys(dayData.timings).forEach((prayerName) => {
         const isoTimeString = dayData.timings[prayerName];
         const prayerDate = new Date(isoTimeString);
-        timings[prayerName] = prayerDate.getTime();
+        timings[prayerName.toLowerCase()] = prayerDate.getTime();
       });
 
       const dateTimestamp = dayData.date.timestamp * 1000; // Convert to milliseconds
