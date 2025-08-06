@@ -58,9 +58,35 @@ export class PrayersService {
     );
 
     return {
-      date: parsedDate,
-      timings: timings,
+      date: targetDate,
+      timings: Object.fromEntries(sortedTimings),
     };
+  }
+
+  /**
+   * Get the next prayer time using effective prayer times (handles cross-midnight scenarios).
+   * This method will find the next upcoming prayer considering both today's and yesterday's
+   * prayer times that may extend into today.
+   *
+   * @param {Date} date - The date to check (default: new Date())
+   * @param {Date} now - Current time (default: new Date())
+   * @returns {Object|null} Object with next prayer info or null if no upcoming prayer today
+   */
+  static getNextPrayerTime(date = new Date(), now = new Date()) {
+    const { timings: todayTimings } =
+      PrayersService.getEffectiveDayPrayerTimes(date);
+
+    for (const [prayer, time] of Object.entries(todayTimings)) {
+      const prayerTime = new Date(time);
+
+      if (prayerTime > now) {
+        logger.debug(
+          `Next prayer time is ${prayer} at ${prayerTime.toLocaleTimeString()}`
+        );
+        logger.debug(`Current time is ${now.toLocaleTimeString()}`);
+        return { prayer, time };
+      }
+    }
   }
 
   static savePrayerTimes(dataString) {
