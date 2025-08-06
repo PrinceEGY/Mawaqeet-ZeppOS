@@ -14,6 +14,22 @@ export const TIMINGS_LIST = [
   { name: "lastthird", label: "Last Third" },
 ];
 
+export const PRAYER_ICONS = {
+  fajr: "prayer icons/fajr.png",
+  sunrise: "prayer icons/sunrise.png",
+  dhuhr: "prayer icons/dhuhr.png",
+  asr: "prayer icons/asr.png",
+  maghrib: "prayer icons/maghrib.png",
+  isha: "prayer icons/isha.png",
+  midnight: "prayer icons/midnight.png",
+  lastthird: "prayer icons/lastthird.png",
+};
+
+export const getPrayerLabel = (prayerName) => {
+  const timing = TIMINGS_LIST.find((t) => t.name === prayerName);
+  return timing ? timing.label : prayerName;
+};
+
 export const SYNC_SETTINGS_LIST = [
   "prayerTimes",
   "currentLocation",
@@ -24,13 +40,11 @@ export const SYNC_SETTINGS_LIST = [
 ];
 
 export const DEFAULT_SETTINGS = {
-  // Location defaults
   location: {
     country: "Egypt",
     city: "Cairo",
   },
 
-  // Prayer settings defaults
   display: {
     fajr: true,
     sunrise: true,
@@ -53,7 +67,6 @@ export const DEFAULT_SETTINGS = {
     lastthird: false,
   },
 
-  // Calculation method defaults
   calculationMethod: {
     id: -1,
     label: "Auto",
@@ -61,7 +74,6 @@ export const DEFAULT_SETTINGS = {
     params: {},
   },
 
-  // Fetching settings defaults
   fetching: {
     monthsMax: 120,
     monthsMin: 1,

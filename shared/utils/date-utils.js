@@ -72,4 +72,98 @@ export class DateUtils {
     const year = parseInt(parts[2], 10);
     return new Date(year, month, day);
   }
+
+  /**
+   * Formats a date and returns separate parts for flexible usage
+   *
+   * @param {Date} date - The date to format
+   * @returns {Object} Object with dayName, monthName, day, ordinal, year properties
+   */
+  static formatGregorianDate(date = new Date()) {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const dayName = days[date.getDay()];
+    const monthName = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    const ordinal = this.getOrdinalSuffix(day);
+
+    return {
+      dayName,
+      monthName,
+      day,
+      ordinal,
+      year,
+      // Helper methods for common formatting
+      getFullDate: () => `${dayName}, ${day}${ordinal} ${monthName}, ${year}`,
+      getDayName: () => dayName,
+      getDateOnly: () => `${day} ${monthName}, ${year}`,
+      getShortDate: () => `${dayName}, ${day}${ordinal} ${monthName}`,
+    };
+  }
+
+  static getOrdinalSuffix(num) {
+    const j = num % 10;
+    const k = num % 100;
+    if (j == 1 && k != 11) {
+      return "st";
+    }
+    if (j == 2 && k != 12) {
+      return "nd";
+    }
+    if (j == 3 && k != 13) {
+      return "rd";
+    }
+    return "th";
+  }
+
+  /**
+   * Formats current time in 12-hour format with AM/PM
+   *
+   * @param {Date} date - The date to get time from (defaults to current time)
+   * @param {boolean} includeSeconds - Whether to include seconds in the output (defaults to true)
+   * @returns {string} The formatted time string (e.g., "12:12:12 PM" or "12:12 PM")
+   */
+  static formatCurrentTime(date = new Date(), includeSeconds = true) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const period = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    const hoursStr = hours.toString().padStart(2, "0");
+    const minutesStr = minutes.toString().padStart(2, "0");
+
+    if (includeSeconds) {
+      const secondsStr = seconds.toString().padStart(2, "0");
+      return `${hoursStr}:${minutesStr}:${secondsStr} ${period}`;
+    } else {
+      return `${hoursStr}:${minutesStr} ${period}`;
+    }
+  }
 }
