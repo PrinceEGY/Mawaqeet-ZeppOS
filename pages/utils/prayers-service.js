@@ -8,7 +8,7 @@ const storage = new StorageService("file", "prayer-times");
 
 export class PrayersService {
   static getDayPrayerTimes(date = new Date()) {
-    parsedDate = this._parseDate(date);
+    const parsedDate = this._parseDate(date);
     if (!parsedDate) return null;
 
     const key = DateUtils.dateToDateString(parsedDate);
@@ -16,8 +16,46 @@ export class PrayersService {
       logger.error(`No prayer times found for date: ${key}`);
       return null;
     }
+
     const timings = storage.getItem(key);
-    logger.debug(`Prayer times for ${key}: ${JSON.stringify(timings)}`);
+    return { date: parsedDate, timings };
+  }
+
+  /**
+   * Get effective prayer times for a given date, handling cross-midnight scenarios.
+   * This method ensures that if a prayer time extends past midnight, it's included
+   * in the current day's schedule even if it technically belongs to the previous day.
+   *
+   * @param {Date} date - The date for which to get effective prayer times
+   * @param {Date} now - Current time (default: new Date())
+   * @returns {Object} Object containing effective prayer times for the day
+   */
+  static getEffectiveDayPrayerTimes(date = new Date(), now = new Date()) {
+    const targetDate = this._parseDate(date);
+    if (!targetDate) return null;
+
+    const todayPrayerTimes = this.getDayPrayerTimes(targetDate);
+    if (!todayPrayerTimes) return null;
+
+    const previousDay = new Date(targetDate);
+    previousDay.setDate(previousDay.getDate() - 1);
+    const yesterdayPrayerTimes = this.getDayPrayerTimes(previousDay);
+
+    const effectiveTimings = { ...todayPrayerTimes.timings };
+
+    for (const [prayer, timestamp] of Object.entries(
+      yesterdayPrayerTimes.timings
+    )) {
+      const yesterdayPrayerTime = new Date(timestamp);
+      // Check if yesterday's prayer time extends into today
+      if (yesterdayPrayerTime > now) {
+        effectiveTimings[prayer] = timestamp;
+      }
+    }
+
+    const sortedTimings = Object.entries(effectiveTimings).sort(
+      ([, timeA], [, timeB]) => new Date(timeA) - new Date(timeB)
+    );
 
     return {
       date: parsedDate,
@@ -41,7 +79,6 @@ export class PrayersService {
       logger.debug(
         `${storage.getAllKeys().length} prayer times saved in local storage.`
       );
-
       logger.info("Prayer times data set in local storage.");
       return true;
     } catch (error) {
