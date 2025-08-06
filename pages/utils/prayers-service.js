@@ -70,13 +70,22 @@ export class PrayersService {
    *
    * @param {Date} date - The date to check (default: new Date())
    * @param {Date} now - Current time (default: new Date())
-   * @returns {Object|null} Object with next prayer info or null if no upcoming prayer today
+   * @param {Array<string>} enabledPrayers - List of prayer names that are enabled for display (optional)
+   * @returns {Object|null} Object with { prayer, time } or null if no upcoming prayer found
    */
-  static getNextPrayerTime(date = new Date(), now = new Date()) {
+  static getNextPrayerTime(
+    date = new Date(),
+    now = new Date(),
+    enabledPrayers = null
+  ) {
     const { timings: todayTimings } =
       PrayersService.getEffectiveDayPrayerTimes(date);
 
     for (const [prayer, time] of Object.entries(todayTimings)) {
+      if (enabledPrayers && !enabledPrayers.includes(prayer)) {
+        continue;
+      }
+
       const prayerTime = new Date(time);
 
       if (prayerTime > now) {
