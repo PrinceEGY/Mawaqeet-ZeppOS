@@ -15,24 +15,34 @@ export class StorageService {
    * @param {string} [directory] - The directory or filename for storage. If not provided or invalid, defaults are used.
    */
   constructor(type = "memory", directory) {
-    if (typeof type !== "string" || !["memory", "file"].includes(type)) {
+    this.type = this.validateStorageType(type);
+    this.storage = this.initializeStorage(this.type, directory);
+  }
+
+  validateStorageType(type) {
+    const validTypes = ["memory", "file"];
+    if (typeof type !== "string" || !validTypes.includes(type)) {
       logger.warn(
         `Invalid storage type "${type}" specified. Defaulting to "memory" storage.`
       );
-      type = "memory";
+      return "memory";
     }
-    this.type = type;
+    return type;
+  }
 
-    if (typeof directory !== "string") directory = undefined;
+  initializeStorage(type, directory) {
+    if (typeof directory !== "string") {
+      directory = undefined;
+    }
 
     if (type === "file") {
-      this.storage = new EasyFlashStorage(directory);
-      return;
-    } else if (type === "memory") {
-      if (typeof directory === "string" && !directory.endsWith(".json"))
-        directory += ".json";
-      this.storage = new EasyStorage(directory);
+      return new EasyFlashStorage(directory);
     }
+
+    if (typeof directory === "string" && !directory.endsWith(".json")) {
+      directory += ".json";
+    }
+    return new EasyStorage(directory);
   }
 
   getItem(key, returnTimestamp = false, stringify = false) {
@@ -45,9 +55,13 @@ export class StorageService {
 
     logger.debug(`Retrieved item for key "${key}":`, value);
 
-    if (this.type === "memory") value = JSON.parse(value);
+    if (this.type === "memory") {
+      value = JSON.parse(value);
+    }
 
-    if (stringify) value.data = JSON.stringify(value.data);
+    if (stringify) {
+      value.data = JSON.stringify(value.data);
+    }
 
     return returnTimestamp ? value : value.data;
   }
@@ -60,15 +74,12 @@ export class StorageService {
 
     // TODO: sync items with settings app
     try {
-      let wrappedValue = {
-        data: value,
-        timestamp: timestamp,
-      };
+      const wrappedValue = { data: value, timestamp };
+      const finalValue =
+        this.type === "memory" ? JSON.stringify(wrappedValue) : wrappedValue;
 
-      if (this.type === "memory") wrappedValue = JSON.stringify(wrappedValue);
-
-      this.storage.setKey(key, wrappedValue);
-      logger.debug(`Set item for key "${key}":`, wrappedValue);
+      this.storage.setKey(key, finalValue);
+      logger.debug(`Set item for key "${key}":`, finalValue);
     } catch (error) {
       logger.error(`Error setting item for key "${key}":`, error);
     }
@@ -88,16 +99,13 @@ export class StorageService {
   }
 
   getAllKeys() {
-    if (this.type === "memory") {
-      return Object.keys(this.storage.getStorageSnapshot());
-    }
-
-    return this.storage.getAllKeys();
+    return this.type === "memory"
+      ? Object.keys(this.storage.getStorageSnapshot())
+      : this.storage.getAllKeys();
   }
 
   getAllContents() {
-    const contents = this.storage.getStorageSnapshot();
-    return contents;
+    return this.storage.getStorageSnapshot();
   }
 
   clear() {
@@ -111,7 +119,7 @@ export class StorageService {
 
   isKeyOutdated(key, intervalMs) {
     const item = this.getItem(key, true);
-    if (!item || !item.data || !item.timestamp) {
+    if (!item?.data || !item.timestamp) {
       return true;
     }
 
