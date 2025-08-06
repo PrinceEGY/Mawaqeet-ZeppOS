@@ -20,9 +20,7 @@ export class SyncManager {
 
     logger.info("No sync keys provided, fetching pending sync keys.");
     this.request({ method: "getPendingSync" })
-      .then((res) => {
-        this._performSync(res.keys || []);
-      })
+      .then((res) => this._performSync(res.keys || []))
       .catch((error) => {
         logger.error("Error fetching pending sync keys:", error);
         return [];
@@ -48,25 +46,23 @@ export class SyncManager {
 
   _handleRegularSync(key) {
     this.currentSyncKeys.add(key);
+
     this.request({ method: `sync.${key}`, params: {} })
       .then((res) => {
         logger.debug(`Sync response for ${key}:`, res);
         const currentValue = storage.getItem(key, true);
-        if (currentValue.timestamp < res.timestamp)
+
+        if (currentValue.timestamp < res.timestamp) {
           storage.setItem(key, res.data, res.timestamp);
-        else {
+        } else {
           logger.info(
             `The current data for key: ${key} is newer than the synced data.`
           );
           // TODO: sync with settings app
         }
       })
-      .catch((error) => {
-        logger.error(`Error syncing ${key}:`, error);
-      })
-      .finally(() => {
-        this.currentSyncKeys.delete(key);
-      });
+      .catch((error) => logger.error(`Error syncing ${key}:`, error))
+      .finally(() => this.currentSyncKeys.delete(key));
   }
 
   _handlePrayerTimesSync(key) {
@@ -108,7 +104,7 @@ export class SyncManager {
   }
 
   _fetchPrayerTimesChunks(key, totalChunks) {
-    let chunks = new Array(totalChunks).fill("");
+    const chunks = new Array(totalChunks).fill("");
 
     const chunkPromises = Array.from({ length: totalChunks }, (_, i) =>
       this.request({ method: `sync.${key}`, params: { chunkIndex: i } })
