@@ -30,6 +30,9 @@ Page(
     onInit() {
       logger.debug("Home page initialized");
       this.state.pageState = new HomePageState();
+      syncManager = new SyncManager(this.request.bind(this));
+      syncManager.triggerSync();
+      RefreshManager.setRefreshCallback(this.onRefresh.bind(this));
     },
 
     build() {
@@ -70,9 +73,6 @@ Page(
     },
 
     initializeWidgets() {
-      syncManager = new SyncManager(this.request.bind(this));
-      syncManager.triggerSync();
-
       this.state.widgets = {
         date: new DateWidget(this.state.infoGroup, this.state.pageState),
 
@@ -85,8 +85,6 @@ Page(
           this.state.pageState
         ),
       };
-
-      RefreshManager.setRefreshCallback(this.onRefresh.bind(this));
     },
 
     buildAllWidgets() {
@@ -102,14 +100,12 @@ Page(
     },
 
     onRefresh() {
-      this.state.widgets.time.updateView();
-      this.state.widgets.prayerList.update();
-    },
-
-    onGlobalUpdate() {
-      logger.debug("Global update triggered");
-      this.state.pageState.updateEnabledPrayers();
-      this.state.widgets.city.update();
+      if (this.state.widgets.time) {
+        this.state.widgets.time.updateView();
+      }
+      if (this.state.widgets.prayerList) {
+        this.state.widgets.prayerList.update();
+      }
     },
 
     reloadPage() {
