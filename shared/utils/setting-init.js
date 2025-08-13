@@ -92,34 +92,22 @@ export class SettingInitializer {
   }
 
   static initFetchingSettings(props) {
-    if (!props.storageService.getItem("fetchingMonthsBefore")) {
-      props.storageService.setItem(
-        "fetchingMonthsBefore",
-        DEFAULT_SETTINGS.fetching.monthsBefore
-      );
-      console.debug(
-        `Default fetchingMonthsBefore set to ${DEFAULT_SETTINGS.fetching.monthsBefore}`
-      );
-    }
+    if (!props.storageService.getItem("fetchMetaData")) {
+      if (!props.storageService.getItem("fetchMetaData")) {
+        const defaultFetchMetaData = {
+          beforeMonths: DEFAULT_SETTINGS.fetching.monthsBefore,
+          afterMonths: DEFAULT_SETTINGS.fetching.monthsAfter,
+          autoFetchInterval: DEFAULT_SETTINGS.fetching.autoFetchInterval,
+          startDate: null,
+          endDate: null,
+          fetchDate: null,
+        };
 
-    if (!props.storageService.getItem("fetchingMonthsAfter")) {
-      props.storageService.setItem(
-        "fetchingMonthsAfter",
-        DEFAULT_SETTINGS.fetching.monthsAfter
-      );
-      console.debug(
-        `Default fetchingMonthsAfter set to ${DEFAULT_SETTINGS.fetching.monthsAfter}`
-      );
-    }
-
-    if (!props.storageService.getItem("autoFetchDays")) {
-      props.storageService.setItem(
-        "autoFetchDays",
-        DEFAULT_SETTINGS.fetching.automaticFetchInterval
-      );
-      console.debug(
-        `Default autoFetchDays set to ${DEFAULT_SETTINGS.fetching.automaticFetchInterval}`
-      );
+        props.storageService.setItem("fetchMetaData", defaultFetchMetaData);
+        console.debug(
+          `Default fetchMetaData set to ${JSON.stringify(defaultFetchMetaData)}`
+        );
+      }
     }
   }
 }

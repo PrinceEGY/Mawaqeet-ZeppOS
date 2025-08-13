@@ -16,10 +16,10 @@ export class PrayersService {
     calculationMethodId =
       calculationMethodId ||
       this.storageService.getItem("calculationMethod")?.id;
-    monthsBefore =
-      monthsBefore || this.storageService.getItem("fetchingMonthsBefore");
-    monthsAfter =
-      monthsAfter || this.storageService.getItem("fetchingMonthsAfter");
+
+    const fetchMetaData = this.storageService.getItem("fetchMetaData");
+    monthsBefore = monthsBefore ?? fetchMetaData.beforeMonths;
+    monthsAfter = monthsAfter ?? fetchMetaData.afterMonths;
 
     const { startDate, endDate } = DateUtils.calculateDateRange(
       monthsBefore,
@@ -36,19 +36,25 @@ export class PrayersService {
       });
 
       this.storageService.setItem("prayerTimes", prayerTimesData);
+
+      const updatedFetchMetaData = {
+        beforeMonths: monthsBefore,
+        afterMonths: monthsAfter,
+        autoFetchInterval: fetchMetaData.autoFetchInterval,
+        startDate: startDate.getTime(),
+        endDate: endDate.getTime(),
+        fetchDate: Date.now(),
+      };
+
+      this.storageService.setItem("fetchMetaData", updatedFetchMetaData);
       console.log("Successfully fetched and saved prayer times.");
     } catch (error) {
       if (error.message.includes("debounce")) {
-        console.debug(
-          "Debounce error while fetching calculation methods list."
-        );
+        console.debug("Debounce error while fetching prayer times.");
         return;
       }
 
-      console.error(
-        "Error fetching and saving calculation methods list:",
-        error
-      );
+      console.error("Error fetching and saving prayer times:", error);
       throw error;
     }
   }
@@ -105,10 +111,15 @@ export class PrayersService {
   }
 
   isPrayerTimesOutdated() {
-    const autoFetchDays = this.storageService.getItem("autoFetchDays");
+    const fetchMetaData = this.storageService.getItem("fetchMetaData");
+
+    const autoFetchInterval = fetchMetaData.autoFetchInterval;
     const msPerDay = 24 * 60 * 60 * 1000;
     if (
-      this.storageService.isKeyOutdated("prayerTimes", autoFetchDays * msPerDay)
+      this.storageService.isKeyOutdated(
+        "prayerTimes",
+        autoFetchInterval * msPerDay
+      )
     ) {
       console.debug("Prayer times are outdated, needs refresh.");
       return true;
@@ -118,12 +129,13 @@ export class PrayersService {
   }
 
   isCalculationMethodsListOutdated() {
-    const autoFetchDays = this.storageService.getItem("autoFetchDays");
+    const fetchMetaData = this.storageService.getItem("fetchMetaData");
+    const autoFetchInterval = fetchMetaData.autoFetchInterval;
     const msPerDay = 24 * 60 * 60 * 1000;
     if (
       this.storageService.isKeyOutdated(
         "calculationMethodsList",
-        autoFetchDays * msPerDay
+        autoFetchInterval * msPerDay
       )
     ) {
       console.log("Calculation methods list is outdated, needs refresh.");

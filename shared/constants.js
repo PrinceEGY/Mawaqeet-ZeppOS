@@ -34,7 +34,7 @@ export const SYNC_SETTINGS_LIST = [
   "prayerTimes",
   "currentLocation",
   "calculationMethod",
-  "autoFetchDays",
+  "fetchMetaData",
   ...TIMINGS_LIST.map((timing) => `display:${timing.name}`),
   ...TIMINGS_LIST.map((timing) => `notify:${timing.name}`),
 ];
@@ -79,6 +79,6 @@ export const DEFAULT_SETTINGS = {
     monthsMin: 1,
     monthsBefore: 1,
     monthsAfter: 1,
-    automaticFetchInterval: 30,
+    autoFetchInterval: 30,
   },
 };

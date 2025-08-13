@@ -16,8 +16,8 @@ import {
 
 export function advancedSettingsPage(navigateBackCallback, props) {
   const prayersService = new PrayersService(props.storageService);
-  const prayerTimes = props.storageService.getItem("prayerTimes", true);
-  const lastUpdateText = DateUtils.getTimeAgo(prayerTimes?.timestamp);
+  const fetchMetaData = props.storageService.getItem("fetchMetaData");
+  const lastUpdateText = DateUtils.getTimeAgo(fetchMetaData.fetchDate);
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
     AppBar({
@@ -28,7 +28,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
     Spacer({ height: SPACING.sm }),
 
-    buildUpdatePanel(lastUpdateText, props),
+    buildUpdatePanel(lastUpdateText),
 
     Spacer({ height: SPACING.xs }),
 
@@ -65,7 +65,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
     const numValue = parseInt(value);
 
     if (isNaN(numValue)) {
-      return DEFAULT_SETTINGS.fetching.automaticFetchInterval;
+      return DEFAULT_SETTINGS.fetching.autoFetchInterval;
     }
 
     const { monthsMax } = DEFAULT_SETTINGS.fetching;
@@ -74,7 +74,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   // --- Build Methods ---
-  function buildUpdatePanel(lastUpdateText, props) {
+  function buildUpdatePanel(lastUpdateText) {
     return Panel({
       children: [
         Text(
@@ -116,8 +116,9 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   function buildFetchWindowPanel(props) {
-    const monthsBefore = props.storageService.getItem("fetchingMonthsBefore");
-    const monthsAfter = props.storageService.getItem("fetchingMonthsAfter");
+    const fetchMetaData = props.storageService.getItem("fetchMetaData");
+    const monthsBefore = fetchMetaData.beforeMonths;
+    const monthsAfter = fetchMetaData.afterMonths;
 
     return Panel({
       children: [
@@ -145,10 +146,11 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           value: monthsBefore,
           onChange: (value) => {
             const validatedValue = validateMonthsInput(value);
-            props.storageService.setItem(
-              "fetchingMonthsBefore",
-              validatedValue
-            );
+            const updatedFetchMetaData = {
+              ...fetchMetaData,
+              beforeMonths: validatedValue,
+            };
+            props.storageService.setItem("fetchMetaData", updatedFetchMetaData);
           },
         }),
 
@@ -157,7 +159,11 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           value: monthsAfter,
           onChange: (value) => {
             const validatedValue = validateMonthsInput(value);
-            props.storageService.setItem("fetchingMonthsAfter", validatedValue);
+            const updatedFetchMetaData = {
+              ...fetchMetaData,
+              afterMonths: validatedValue,
+            };
+            props.storageService.setItem("fetchMetaData", updatedFetchMetaData);
           },
         }),
       ],
@@ -165,7 +171,8 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   function buildAutoFetchPanel(props) {
-    const autoFetchDays = props.storageService.getItem("autoFetchDays");
+    const fetchMetaData = props.storageService.getItem("fetchMetaData");
+    const autoFetchInterval = fetchMetaData.autoFetchInterval;
 
     return Panel({
       children: [
@@ -190,10 +197,14 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
         Input({
           label: gettext("days_between_updates"),
-          value: autoFetchDays,
+          value: autoFetchInterval,
           onChange: (value) => {
             const validatedValue = validateFetchIntervalInput(value);
-            props.storageService.setItem("autoFetchDays", validatedValue);
+            const updatedFetchMetaData = {
+              ...fetchMetaData,
+              autoFetchInterval: validatedValue,
+            };
+            props.storageService.setItem("fetchMetaData", updatedFetchMetaData);
           },
         }),
       ],
