@@ -166,4 +166,10 @@ export class DateUtils {
       return `${hoursStr}:${minutesStr} ${period}`;
     }
   }
+
+  static isDateToday(date) {
+    const dateString = date.toDateString();
+    const now = new Date();
+    return dateString === now.toDateString();
+  }
 }

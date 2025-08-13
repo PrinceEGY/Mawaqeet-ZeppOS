@@ -130,13 +130,15 @@ export const LAYOUT = {
       align_v: hmUI.align.CENTER_V,
     },
   },
-
-  SPACER: {
-    x: 0,
-  },
 };
 
 export const UI_BUILDERS = {
+  createMainContainer: () => {
+    return hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
+      scroll_enable: 0,
+    });
+  },
+
   createCityText: (parent, currentLocation) => {
     return parent.createWidget(hmUI.widget.TEXT, {
       ...LAYOUT.CITY_TEXT,
@@ -217,7 +219,6 @@ export const UI_BUILDERS = {
     const { x = 0, y = 0, w = px(10), h = px(50) } = options;
 
     return parent.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.SPACER,
       x,
       y,
       w,
