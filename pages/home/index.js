@@ -1,8 +1,8 @@
 import { BasePage } from "@zeppos/zml/base-page";
 import * as hmUI from "@zos/ui";
 import { log as Logger, px } from "@zos/utils";
+import { RefreshManager } from "../utils/refresh-manager";
 import { SyncManager } from "../utils/sync-manager";
-import { UpdateManager } from "../utils/update-manager";
 import { HomePageState } from "./home_page_state";
 import { UI_BUILDERS } from "./index.r.layout";
 
@@ -66,7 +66,7 @@ Page(
       if (this.state.pageState) {
         this.state.pageState.destroy();
       }
-      UpdateManager.destroy();
+      RefreshManager.clear();
     },
 
     initializeWidgets() {
@@ -86,7 +86,7 @@ Page(
         ),
       };
 
-      UpdateManager.setUpdateCallback(this.onRefresh.bind(this));
+      RefreshManager.setRefreshCallback(this.onRefresh.bind(this));
     },
 
     buildAllWidgets() {
