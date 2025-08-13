@@ -53,8 +53,6 @@ export class StorageService {
       return returnTimestamp ? { data: value, timestamp: 0 } : value;
     }
 
-    logger.debug(`Retrieved item for key "${key}":`, value);
-
     if (this.type === "memory") {
       value = JSON.parse(value);
     }
@@ -110,7 +108,7 @@ export class StorageService {
 
   clear() {
     this.storage.deleteAll();
-    logger.info("All items cleared from storage.");
+    logger.debug("All items cleared from storage.");
   }
 
   getStorageType() {
