@@ -2,6 +2,7 @@ import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../../shared/utils/date-utils";
 import { UI_BUILDERS } from "../index.r.layout";
+import { DatePickerWidget } from "./date_picker_widget";
 
 const logger = Logger.getLogger("date-widget");
 
@@ -13,6 +14,9 @@ export class DateWidget {
       isBuilt: false,
     };
     this.widget = null;
+    this.datePicker = null;
+
+    this.pageState.on("dateChanged", this.update.bind(this));
   }
 
   build() {
@@ -21,6 +25,8 @@ export class DateWidget {
         logger.debug("Widget already built");
         return;
       }
+
+      this.datePicker = new DatePickerWidget(this.pageState);
 
       UI_BUILDERS.createLeftArrow(this.parentContainer, () => {
         this.previousDay();
@@ -34,6 +40,10 @@ export class DateWidget {
       const dateParts = DateUtils.formatGregorianDate(currentDate);
       const dateText = `${dateParts.getDayName()}\n${dateParts.getDateOnly()}`;
       this.widget = UI_BUILDERS.createDateText(this.parentContainer, dateText);
+
+      this.widget.addEventListener(hmUI.event.CLICK_UP, () => {
+        this.showDatePicker();
+      });
 
       this.state.isBuilt = true;
     } catch (error) {
@@ -71,6 +81,14 @@ export class DateWidget {
     this.pageState.setCurrentDate(newDate);
   }
 
+  showDatePicker() {
+    try {
+      this.datePicker.show();
+    } catch (error) {
+      this.handleError("Failed to show date picker", error);
+    }
+  }
+
   updateView() {
     if (!this.widget) return;
 
@@ -86,6 +104,11 @@ export class DateWidget {
 
   destroy() {
     try {
+      if (this.datePicker) {
+        this.datePicker.destroy();
+        this.datePicker = null;
+      }
+
       if (this.widget) {
         hmUI.deleteWidget(this.widget);
       }

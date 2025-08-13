@@ -1,0 +1,209 @@
+import * as hmUI from "@zos/ui";
+import { log as Logger } from "@zos/utils";
+import { UI_BUILDERS } from "../index.r.layout";
+
+const logger = Logger.getLogger("date-picker-widget");
+
+export class DatePickerWidget {
+  constructor(pageState) {
+    this.pageState = pageState;
+    this.state = {
+      isBuilt: false,
+      isVisible: false,
+    };
+    this.widgets = {
+      container: null,
+      datePicker: null,
+      hint: null,
+      confirmButton: null,
+      cancelButton: null,
+    };
+  }
+
+  show() {
+    try {
+      if (this.state.isVisible) {
+        return;
+      }
+
+      if (!this.state.isBuilt) {
+        const currentDate = this.pageState.getCurrentDate();
+        const fetchMetaData = this.pageState.storage.getItem("fetchMetaData");
+        const dateRange = this.getAvailableDateRange(fetchMetaData);
+        this.build(currentDate, dateRange);
+      }
+
+      this.widgets.container.setProperty(hmUI.prop.VISIBLE, true);
+      this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, true);
+      this.widgets.hint.setProperty(hmUI.prop.VISIBLE, true);
+      this.widgets.confirmButton.setProperty(hmUI.prop.VISIBLE, true);
+      this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, true);
+
+      this.state.isVisible = true;
+
+      logger.debug("Date picker shown");
+    } catch (error) {
+      this.handleError("Failed to show date picker", error);
+    }
+  }
+
+  hide() {
+    try {
+      if (this.widgets.container) {
+        this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
+        this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
+        this.widgets.hint.setProperty(hmUI.prop.VISIBLE, false);
+        this.widgets.confirmButton.setProperty(hmUI.prop.VISIBLE, false);
+        this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, false);
+      }
+      this.state.isVisible = false;
+      logger.debug("Date picker hidden");
+    } catch (error) {
+      this.handleError("Failed to hide date picker", error);
+    }
+  }
+
+  build(currentDate, dateRange) {
+    try {
+      if (this.state.isBuilt) {
+        return;
+      }
+
+      this.widgets = UI_BUILDERS.createDatePickerUI(
+        currentDate,
+        dateRange,
+        this.onConfirm.bind(this),
+        this.onCancel.bind(this)
+      );
+
+      this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
+      this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
+      this.widgets.hint.setProperty(hmUI.prop.VISIBLE, false);
+      this.widgets.confirmButton.setProperty(hmUI.prop.VISIBLE, false);
+      this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, false);
+
+      this.state.isBuilt = true;
+      logger.debug("Date picker built successfully");
+    } catch (error) {
+      this.handleError("Failed to build date picker", error);
+    }
+  }
+
+  getAvailableDateRange(fetchMetaData) {
+    try {
+      if (
+        !fetchMetaData ||
+        !fetchMetaData.startDate ||
+        !fetchMetaData.endDate
+      ) {
+        const currentYear = new Date().getFullYear();
+        return {
+          startYear: currentYear - 1,
+          endYear: currentYear + 1,
+        };
+      }
+
+      const startDate = new Date(fetchMetaData.startDate);
+      const endDate = new Date(fetchMetaData.endDate);
+
+      return {
+        startYear: startDate.getFullYear(),
+        endYear: endDate.getFullYear(),
+        startDate: startDate,
+        endDate: endDate,
+      };
+    } catch (error) {
+      this.handleError("Failed to get available date range", error);
+      const currentYear = new Date().getFullYear();
+      return {
+        startYear: currentYear - 1,
+        endYear: currentYear + 1,
+      };
+    }
+  }
+
+  onConfirm() {
+    try {
+      const dateObj = this.widgets.datePicker.getProperty(hmUI.prop.MORE, {});
+      const { year, month, day } = dateObj;
+
+      const selectedDate = new Date(year, month - 1, day);
+
+      if (this.isDateInRange(selectedDate)) {
+        this.pageState.setCurrentDate(selectedDate);
+        logger.debug(`Date confirmed: ${selectedDate.toDateString()}`);
+      } else {
+        logger.warn("Selected date is outside available range");
+        hmUI.showToast({
+          text: "Selected date is outside the available prayer times.",
+        });
+        return;
+      }
+
+      this.hide();
+    } catch (error) {
+      this.handleError("Failed to confirm date selection", error);
+      this.hide();
+    }
+  }
+
+  onCancel() {
+    try {
+      logger.debug("Date picker cancelled");
+      this.hide();
+    } catch (error) {
+      this.handleError("Failed to cancel date picker", error);
+    }
+  }
+
+  isDateInRange(selectedDate) {
+    try {
+      const fetchMetaData = this.pageState.storage.getItem("fetchMetaData");
+
+      if (
+        !fetchMetaData ||
+        !fetchMetaData.startDate ||
+        !fetchMetaData.endDate
+      ) {
+        return true;
+      }
+
+      const startDate = new Date(fetchMetaData.startDate);
+      const endDate = new Date(fetchMetaData.endDate);
+
+      return selectedDate >= startDate && selectedDate <= endDate;
+    } catch (error) {
+      this.handleError("Failed to validate date range", error);
+      return true;
+    }
+  }
+
+  handleError(message, error) {
+    logger.error(`${message}: ${error}`);
+  }
+
+  destroy() {
+    try {
+      Object.values(this.widgets).forEach((widget) => {
+        if (widget) {
+          hmUI.deleteWidget(widget);
+        }
+      });
+
+      this.widgets = {
+        container: null,
+        datePicker: null,
+        hint: null,
+        confirmButton: null,
+        cancelButton: null,
+      };
+
+      this.state.isBuilt = false;
+      this.state.isVisible = false;
+
+      logger.debug("Date picker destroyed");
+    } catch (error) {
+      this.handleError("Failed to destroy date picker", error);
+    }
+  }
+}

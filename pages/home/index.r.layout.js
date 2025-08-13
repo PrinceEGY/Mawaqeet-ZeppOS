@@ -31,8 +31,9 @@ export const LAYOUT = {
     x: px(120),
     y: px(5),
     w: DEVICE_WIDTH - px(240),
-    h: px(100),
+    h: px(40),
     align_h: hmUI.align.CENTER_H,
+    align_v: hmUI.align.CENTER_V,
     text_size: px(24),
     color: 0xffffff,
   },
@@ -40,20 +41,22 @@ export const LAYOUT = {
   DATE_NAVIGATION: {
     DATE_TEXT: {
       x: px(140),
-      y: px(50),
+      y: px(45),
       w: DEVICE_WIDTH - px(280),
-      h: px(80),
+      h: px(90),
       align_h: hmUI.align.CENTER_H,
+      align_v: hmUI.align.CENTER_V,
       text_size: px(22),
       color: 0xffffff,
     },
 
     TIME_TEXT: {
       x: px(80),
-      y: px(120),
+      y: px(130),
       w: DEVICE_WIDTH - px(160),
       h: px(40),
       align_h: hmUI.align.CENTER_H,
+      align_v: hmUI.align.CENTER_V,
       text_size: px(24),
       color: 0xffffff,
     },
@@ -128,6 +131,61 @@ export const LAYOUT = {
       color: 0x888888,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
+    },
+  },
+
+  DATE_PICKER: {
+    CONTAINER: {
+      x: px(0),
+      y: px(0),
+      w: DEVICE_WIDTH,
+      h: DEVICE_HEIGHT,
+      z_index: 1,
+      scroll_enable: 0,
+    },
+
+    PICKER: {
+      x: px(40),
+      y: px(100),
+      w: DEVICE_WIDTH - px(80),
+      font_size: px(24),
+    },
+
+    HINT_TEXT: {
+      x: px(10),
+      y: px(290),
+      w: DEVICE_WIDTH - px(20),
+      h: px(60),
+      text_size: px(16),
+      color: 0xaaaaaa,
+      align_h: hmUI.align.CENTER_H,
+      align_v: hmUI.align.CENTER_V,
+    },
+
+    CONFIRM_BUTTON: {
+      x: px(60),
+      y: px(350),
+      w: px(140),
+      h: px(60),
+      text_size: px(24),
+      color: 0xffffff,
+      normal_color: 0x00ff00,
+      press_color: 0x00aa00,
+      radius: px(10),
+      text: "Confirm",
+    },
+
+    CANCEL_BUTTON: {
+      x: DEVICE_WIDTH - px(200),
+      y: px(350),
+      w: px(140),
+      h: px(60),
+      text_size: px(24),
+      color: 0xffffff,
+      normal_color: 0xff0000,
+      press_color: 0xaa0000,
+      radius: px(10),
+      text: "Cancel",
     },
   },
 };
@@ -224,5 +282,45 @@ export const UI_BUILDERS = {
       w,
       h,
     });
+  },
+
+  createDatePickerUI: (currentDate, dateRange, onConfirm, onCancel) => {
+    const container = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
+      ...LAYOUT.DATE_PICKER.CONTAINER,
+    });
+
+    const datePicker = container.createWidget(hmUI.widget.PICK_DATE, {
+      ...LAYOUT.DATE_PICKER.PICKER,
+      startYear: dateRange.startYear,
+      endYear: dateRange.endYear,
+      initYear: currentDate.getFullYear(),
+      initMonth: currentDate.getMonth() + 1,
+      initDay: currentDate.getDate(),
+    });
+
+    const hintText = `Prayer times are available from (${dateRange.startDate.toLocaleDateString()} - ${dateRange.endDate.toLocaleDateString()})`;
+
+    const hint = container.createWidget(hmUI.widget.TEXT, {
+      ...LAYOUT.DATE_PICKER.HINT_TEXT,
+      text: hintText,
+    });
+
+    const confirmButton = container.createWidget(hmUI.widget.BUTTON, {
+      ...LAYOUT.DATE_PICKER.CONFIRM_BUTTON,
+      click_func: onConfirm,
+    });
+
+    const cancelButton = container.createWidget(hmUI.widget.BUTTON, {
+      ...LAYOUT.DATE_PICKER.CANCEL_BUTTON,
+      click_func: onCancel,
+    });
+
+    return {
+      container,
+      datePicker,
+      hint,
+      confirmButton,
+      cancelButton,
+    };
   },
 };
