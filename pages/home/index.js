@@ -37,12 +37,10 @@ Page(
 
     build() {
       logger.debug("Building home page UI");
-      this.state.mainContainer = UI_BUILDERS.createMainContainer();
 
-      this.state.infoGroup = this.state.mainContainer.createWidget(
-        hmUI.widget.GROUP,
-        { y: px(10) }
-      );
+      this.state.infoGroup = hmUI.createWidget(hmUI.widget.GROUP, {
+        y: px(10),
+      });
 
       this.initializeWidgets();
       this.buildAllWidgets();
@@ -80,10 +78,7 @@ Page(
 
         city: new CityWidget(this.state.infoGroup, this.state.pageState),
 
-        prayerList: new PrayerListWidget(
-          this.state.mainContainer,
-          this.state.pageState
-        ),
+        prayerList: new PrayerListWidget(hmUI, this.state.pageState),
       };
     },
 

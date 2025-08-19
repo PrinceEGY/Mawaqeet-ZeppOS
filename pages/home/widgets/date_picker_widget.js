@@ -40,8 +40,6 @@ export class DatePickerWidget {
       this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, true);
 
       this.state.isVisible = true;
-
-      logger.debug("Date picker shown");
     } catch (error) {
       this.handleError("Failed to show date picker", error);
     }
@@ -57,7 +55,6 @@ export class DatePickerWidget {
         this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, false);
       }
       this.state.isVisible = false;
-      logger.debug("Date picker hidden");
     } catch (error) {
       this.handleError("Failed to hide date picker", error);
     }
@@ -83,7 +80,6 @@ export class DatePickerWidget {
       this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, false);
 
       this.state.isBuilt = true;
-      logger.debug("Date picker built successfully");
     } catch (error) {
       this.handleError("Failed to build date picker", error);
     }
@@ -131,9 +127,8 @@ export class DatePickerWidget {
 
       if (this.isDateInRange(selectedDate)) {
         this.pageState.setCurrentDate(selectedDate);
-        logger.debug(`Date confirmed: ${selectedDate.toDateString()}`);
       } else {
-        logger.warn("Selected date is outside available range");
+        logger.debug("Selected date is outside available range");
         hmUI.showToast({
           text: "Selected date is outside the available prayer times.",
         });
@@ -149,7 +144,6 @@ export class DatePickerWidget {
 
   onCancel() {
     try {
-      logger.debug("Date picker cancelled");
       this.hide();
     } catch (error) {
       this.handleError("Failed to cancel date picker", error);

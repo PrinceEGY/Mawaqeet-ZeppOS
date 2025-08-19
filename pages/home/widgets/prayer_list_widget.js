@@ -66,7 +66,7 @@ export class PrayerListWidget {
     UI_BUILDERS.createSpacer(this.widget, {
       y: yOffset,
       w: px(10),
-      h: px(150),
+      h: px(125),
     });
   }
 
