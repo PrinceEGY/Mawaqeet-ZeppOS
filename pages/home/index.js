@@ -86,6 +86,12 @@ Page(
       Object.keys(this.state.widgets).forEach((widgetName) => {
         this.state.widgets[widgetName].build();
       });
+
+      hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
+        target: this.state.widgets.prayerList.widget,
+      });
+    },
+
     },
 
     updateAllWidgets() {
