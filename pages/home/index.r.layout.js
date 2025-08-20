@@ -141,7 +141,7 @@ export const LAYOUT = {
       y: px(0),
       w: DEVICE_WIDTH,
       h: DEVICE_HEIGHT,
-      z_index: 1,
+      z_index: 100,
       scroll_enable: 0,
     },
 
@@ -251,19 +251,21 @@ export const UI_BUILDERS = {
     return { group: prayerGroup, icon, name, time, remaining };
   },
 
-  createDatePickerUI: ({ currentDate, dateRange, onConfirm, onCancel }) => {
-    const container = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
-      ...LAYOUT.DATE_PICKER.CONTAINER,
-    });
-
-    container.createWidget(hmUI.widget.FILL_RECT, {
+  createDatePickerUI: ({
+    parentWidget,
+    currentDate,
+    dateRange,
+    onConfirm,
+    onCancel,
+  }) => {
+    parentWidget.createWidget(hmUI.widget.FILL_RECT, {
       x: 0,
       y: 100,
       w: DEVICE_WIDTH,
       h: DEVICE_HEIGHT,
     });
 
-    const datePicker = container.createWidget(hmUI.widget.PICK_DATE, {
+    const datePicker = parentWidget.createWidget(hmUI.widget.PICK_DATE, {
       ...LAYOUT.DATE_PICKER.PICKER,
       startYear: dateRange.startYear,
       endYear: dateRange.endYear,
@@ -274,23 +276,22 @@ export const UI_BUILDERS = {
 
     const hintText = `Prayer times are available from (${dateRange.startDate.toLocaleDateString()} - ${dateRange.endDate.toLocaleDateString()})`;
 
-    const hint = container.createWidget(hmUI.widget.TEXT, {
+    const hint = parentWidget.createWidget(hmUI.widget.TEXT, {
       ...LAYOUT.DATE_PICKER.HINT_TEXT,
       text: hintText,
     });
 
-    const confirmButton = container.createWidget(hmUI.widget.BUTTON, {
+    const confirmButton = parentWidget.createWidget(hmUI.widget.BUTTON, {
       ...LAYOUT.DATE_PICKER.CONFIRM_BUTTON,
       click_func: onConfirm,
     });
 
-    const cancelButton = container.createWidget(hmUI.widget.BUTTON, {
+    const cancelButton = parentWidget.createWidget(hmUI.widget.BUTTON, {
       ...LAYOUT.DATE_PICKER.CANCEL_BUTTON,
       click_func: onCancel,
     });
 
     return {
-      container,
       datePicker,
       hint,
       confirmButton,

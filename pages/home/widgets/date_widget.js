@@ -27,7 +27,6 @@ export class DateWidget {
       }
 
       this.datePicker = new DatePickerWidget({
-        parentWidget: this.parentWidget,
         pageState: this.pageState,
       });
 

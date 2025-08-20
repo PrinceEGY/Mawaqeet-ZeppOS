@@ -1,19 +1,23 @@
 import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
-import { UI_BUILDERS } from "../index.r.layout";
+import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 
 const logger = Logger.getLogger("date-picker-widget");
 
 export class DatePickerWidget {
   constructor({ parentWidget, pageState }) {
     this.parentWidget = parentWidget;
+    if (!this.parentWidget) {
+      this.parentWidget = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
+        ...LAYOUT.DATE_PICKER.CONTAINER,
+      });
+    }
     this.pageState = pageState;
     this.state = {
       isBuilt: false,
       isVisible: false,
     };
     this.widgets = {
-      container: null,
       datePicker: null,
       hint: null,
       confirmButton: null,
@@ -32,13 +36,14 @@ export class DatePickerWidget {
       const dateRange = this.getAvailableDateRange(fetchMetaData);
 
       this.widgets = UI_BUILDERS.createDatePickerUI({
+        parentWidget: this.parentWidget,
         currentDate,
         dateRange,
         onConfirm: this.onConfirm.bind(this),
         onCancel: this.onCancel.bind(this),
       });
 
-      this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
+      this.parentWidget.setProperty(hmUI.prop.VISIBLE, false);
       this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
 
       this.state.isBuilt = true;
@@ -53,8 +58,8 @@ export class DatePickerWidget {
         this.build();
       }
 
-      if (!this.state.isVisible && this.widgets.container) {
-        this.widgets.container.setProperty(hmUI.prop.VISIBLE, true);
+      if (!this.state.isVisible && this.parentWidget) {
+        this.parentWidget.setProperty(hmUI.prop.VISIBLE, true);
         this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, true);
         this.state.isVisible = true;
       }
@@ -65,8 +70,8 @@ export class DatePickerWidget {
 
   hide() {
     try {
-      if (this.widgets.container) {
-        this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
+      if (this.parentWidget) {
+        this.parentWidget.setProperty(hmUI.prop.VISIBLE, false);
         this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
         this.state.isVisible = false;
       }
@@ -174,8 +179,10 @@ export class DatePickerWidget {
         }
       });
 
+      hmUI.deleteWidget(this.parentWidget);
+      this.parentWidget = null;
+
       this.widgets = {
-        container: null,
         datePicker: null,
         hint: null,
         confirmButton: null,
