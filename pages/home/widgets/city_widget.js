@@ -1,22 +1,19 @@
 import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
-import { UI_BUILDERS } from "../index.r.layout";
+import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 
 const logger = Logger.getLogger("city-widget");
 
 export class CityWidget {
-  constructor(parentContainer, homePageState) {
-    this.parentContainer = parentContainer;
-    this.homePageState = homePageState;
+  constructor({ parentWidget, pageState }) {
+    this.parentWidget = parentWidget;
+    this.pageState = pageState;
     this.state = {
       isBuilt: false,
     };
     this.widget = null;
 
-    this.homePageState.on(
-      "locationChanged",
-      this.handleLocationChange.bind(this)
-    );
+    this.pageState.on("locationChanged", this.update.bind(this));
   }
 
   build() {
@@ -26,11 +23,12 @@ export class CityWidget {
         return;
       }
 
-      const currentLocation = this.homePageState.getCurrentLocation();
-      this.widget = UI_BUILDERS.createCityText(
-        this.parentContainer,
-        currentLocation
-      );
+      const currentLocation = this.pageState.getCurrentLocation();
+      this.widget = UI_BUILDERS.createText({
+        parentWidget: this.parentWidget,
+        layout: LAYOUT.CITY_TEXT,
+        text: currentLocation["city"],
+      });
 
       this.state.isBuilt = true;
     } catch (error) {
@@ -40,31 +38,23 @@ export class CityWidget {
 
   update() {
     try {
-      if (this.state.isBuilt) {
-        this.updateView();
-      } else {
+      if (!this.state.isBuilt) {
         this.build();
       }
+
+      this.updateView();
     } catch (error) {
       this.handleError("Failed to update city widget", error);
-    }
-  }
-
-  handleLocationChange() {
-    try {
-      if (this.state.isBuilt) {
-        this.updateView();
-      }
-    } catch (error) {
-      this.handleError("Failed to handle location change", error);
     }
   }
 
   updateView() {
     if (!this.widget) return;
 
-    const currentLocation = this.homePageState.getCurrentLocation();
-    this.widget.setProperty(hmUI.prop.TEXT, currentLocation);
+    const currentLocation = this.pageState.getCurrentLocation();
+    const cityText = currentLocation["city"];
+
+    this.widget.setProperty(hmUI.prop.TEXT, cityText);
   }
 
   handleError(message, error) {
@@ -73,10 +63,7 @@ export class CityWidget {
 
   destroy() {
     try {
-      this.homePageState.off(
-        "locationChanged",
-        this.handleLocationChange.bind(this)
-      );
+      this.pageState.off("locationChanged", this.update.bind(this));
       if (this.widget) {
         hmUI.deleteWidget(this.widget);
       }

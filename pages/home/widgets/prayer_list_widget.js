@@ -6,8 +6,8 @@ import { PrayerItemWidget } from "./prayer_item_widget";
 const logger = Logger.getLogger("prayer-list-widget");
 
 export class PrayerListWidget {
-  constructor(parentContainer, pageState) {
-    this.parentContainer = parentContainer;
+  constructor({ parentWidget, pageState }) {
+    this.parentWidget = parentWidget;
     this.pageState = pageState;
     this.state = {
       isBuilt: false,
@@ -25,7 +25,9 @@ export class PrayerListWidget {
         return;
       }
 
-      this.widget = UI_BUILDERS.createPrayersContainer(this.parentContainer);
+      this.widget = UI_BUILDERS.createPrayersContainer({
+        parentWidget: this.parentWidget,
+      });
       this.createPrayerItems();
 
       this.state.isBuilt = true;
@@ -36,38 +38,13 @@ export class PrayerListWidget {
 
   update() {
     try {
-      if (this.state.isBuilt) {
-        this.updatePrayerItems();
-      } else {
+      if (!this.state.isBuilt) {
         this.build();
       }
+      this.updatePrayerItems();
     } catch (error) {
       this.handleError("Failed to update prayer list widget", error);
     }
-  }
-
-  createPrayerItems() {
-    this.clearPrayerItems();
-
-    const prayers = this.pageState.getPrayers();
-    let yOffset = 0;
-
-    prayers.forEach((prayer) => {
-      const prayerItemWidget = new PrayerItemWidget(
-        this.widget,
-        prayer,
-        yOffset
-      );
-      prayerItemWidget.build();
-      this.prayerItemWidgets.push(prayerItemWidget);
-      yOffset += 80;
-    });
-
-    UI_BUILDERS.createSpacer(this.widget, {
-      y: yOffset,
-      w: px(10),
-      h: px(125),
-    });
   }
 
   updatePrayerItems() {
@@ -83,6 +60,31 @@ export class PrayerListWidget {
       if (prayerItemWidget) {
         prayerItemWidget.update({ prayer });
       }
+    });
+  }
+
+  createPrayerItems() {
+    this.clearPrayerItems();
+
+    const prayers = this.pageState.getPrayers();
+    let yOffset = 0;
+
+    prayers.forEach((prayer) => {
+      const prayerItemWidget = new PrayerItemWidget({
+        parentWidget: this.widget,
+        pageState: this.pageState,
+        prayer,
+        yOffset,
+      });
+      prayerItemWidget.build();
+      this.prayerItemWidgets.push(prayerItemWidget);
+      yOffset += 80;
+    });
+
+    UI_BUILDERS.createSpacer({
+      parentWidget: this.widget,
+      yOffset: yOffset,
+      height: px(150),
     });
   }
 

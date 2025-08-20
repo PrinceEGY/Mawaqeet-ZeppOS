@@ -5,7 +5,8 @@ import { UI_BUILDERS } from "../index.r.layout";
 const logger = Logger.getLogger("date-picker-widget");
 
 export class DatePickerWidget {
-  constructor(pageState) {
+  constructor({ parentWidget, pageState }) {
+    this.parentWidget = parentWidget;
     this.pageState = pageState;
     this.state = {
       isBuilt: false,
@@ -20,26 +21,43 @@ export class DatePickerWidget {
     };
   }
 
-  show() {
+  build() {
     try {
-      if (this.state.isVisible) {
+      if (this.state.isBuilt) {
         return;
       }
 
+      const currentDate = this.pageState.getCurrentDate();
+      const fetchMetaData = this.pageState.storage.getItem("fetchMetaData");
+      const dateRange = this.getAvailableDateRange(fetchMetaData);
+
+      this.widgets = UI_BUILDERS.createDatePickerUI({
+        currentDate,
+        dateRange,
+        onConfirm: this.onConfirm.bind(this),
+        onCancel: this.onCancel.bind(this),
+      });
+
+      this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
+      this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
+
+      this.state.isBuilt = true;
+    } catch (error) {
+      this.handleError("Failed to build date picker", error);
+    }
+  }
+
+  show() {
+    try {
       if (!this.state.isBuilt) {
-        const currentDate = this.pageState.getCurrentDate();
-        const fetchMetaData = this.pageState.storage.getItem("fetchMetaData");
-        const dateRange = this.getAvailableDateRange(fetchMetaData);
-        this.build(currentDate, dateRange);
+        this.build();
       }
 
-      this.widgets.container.setProperty(hmUI.prop.VISIBLE, true);
-      this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, true);
-      this.widgets.hint.setProperty(hmUI.prop.VISIBLE, true);
-      this.widgets.confirmButton.setProperty(hmUI.prop.VISIBLE, true);
-      this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, true);
-
-      this.state.isVisible = true;
+      if (!this.state.isVisible && this.widgets.container) {
+        this.widgets.container.setProperty(hmUI.prop.VISIBLE, true);
+        this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, true);
+        this.state.isVisible = true;
+      }
     } catch (error) {
       this.handleError("Failed to show date picker", error);
     }
@@ -50,38 +68,10 @@ export class DatePickerWidget {
       if (this.widgets.container) {
         this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
         this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
-        this.widgets.hint.setProperty(hmUI.prop.VISIBLE, false);
-        this.widgets.confirmButton.setProperty(hmUI.prop.VISIBLE, false);
-        this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, false);
+        this.state.isVisible = false;
       }
-      this.state.isVisible = false;
     } catch (error) {
       this.handleError("Failed to hide date picker", error);
-    }
-  }
-
-  build(currentDate, dateRange) {
-    try {
-      if (this.state.isBuilt) {
-        return;
-      }
-
-      this.widgets = UI_BUILDERS.createDatePickerUI(
-        currentDate,
-        dateRange,
-        this.onConfirm.bind(this),
-        this.onCancel.bind(this)
-      );
-
-      this.widgets.container.setProperty(hmUI.prop.VISIBLE, false);
-      this.widgets.datePicker.setProperty(hmUI.prop.VISIBLE, false);
-      this.widgets.hint.setProperty(hmUI.prop.VISIBLE, false);
-      this.widgets.confirmButton.setProperty(hmUI.prop.VISIBLE, false);
-      this.widgets.cancelButton.setProperty(hmUI.prop.VISIBLE, false);
-
-      this.state.isBuilt = true;
-    } catch (error) {
-      this.handleError("Failed to build date picker", error);
     }
   }
 

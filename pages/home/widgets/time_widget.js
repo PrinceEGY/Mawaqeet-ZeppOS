@@ -1,13 +1,14 @@
 import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../../shared/utils/date-utils";
-import { UI_BUILDERS } from "../index.r.layout";
+import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 
 const logger = Logger.getLogger("time-widget");
 
 export class TimeWidget {
-  constructor(parentContainer) {
-    this.parentContainer = parentContainer;
+  constructor({ parentWidget, pageState }) {
+    this.parentWidget = parentWidget;
+    this.pageState = pageState;
     this.state = {
       isBuilt: false,
     };
@@ -22,10 +23,11 @@ export class TimeWidget {
       }
 
       const currentTime = DateUtils.formatCurrentTime();
-      this.widget = UI_BUILDERS.createTimeText(
-        this.parentContainer,
-        currentTime
-      );
+      this.widget = UI_BUILDERS.createText({
+        parentWidget: this.parentWidget,
+        layout: LAYOUT.DATE_NAVIGATION.TIME_TEXT,
+        text: currentTime,
+      });
 
       this.state.isBuilt = true;
     } catch (error) {

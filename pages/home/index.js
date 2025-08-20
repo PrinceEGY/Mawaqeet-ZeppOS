@@ -72,13 +72,24 @@ Page(
 
     initializeWidgets() {
       this.state.widgets = {
-        date: new DateWidget(this.state.infoGroup, this.state.pageState),
+        date: new DateWidget({
+          parentWidget: this.state.infoGroup,
+          pageState: this.state.pageState,
+        }),
 
-        time: new TimeWidget(this.state.infoGroup),
+        time: new TimeWidget({
+          parentWidget: this.state.infoGroup,
+          pageState: this.state.pageState,
+        }),
 
-        city: new CityWidget(this.state.infoGroup, this.state.pageState),
+        city: new CityWidget({
+          parentWidget: this.state.infoGroup,
+          pageState: this.state.pageState,
+        }),
 
-        prayerList: new PrayerListWidget(hmUI, this.state.pageState),
+        prayerList: new PrayerListWidget({
+          pageState: this.state.pageState,
+        }),
       };
     },
 

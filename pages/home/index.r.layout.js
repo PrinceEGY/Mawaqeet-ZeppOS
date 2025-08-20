@@ -2,6 +2,7 @@ import { getDeviceInfo } from "@zos/device";
 import * as hmUI from "@zos/ui";
 import { px } from "@zos/utils";
 import { PRAYER_ICONS, getPrayerLabel } from "../../shared/constants";
+import { SHARED_UI_BUILDERS } from "../shared/index.r.layout";
 
 export const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
 
@@ -46,7 +47,7 @@ export const LAYOUT = {
       h: px(90),
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
-      text_size: px(22),
+      text_size: px(20),
       color: 0xffffff,
     },
 
@@ -191,52 +192,35 @@ export const LAYOUT = {
 };
 
 export const UI_BUILDERS = {
-  createCityText: (parent = hmUI, currentLocation) => {
-    return parent.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.CITY_TEXT,
-      text: currentLocation ? currentLocation["city"] : "No location selected",
-    });
-  },
+  createText: SHARED_UI_BUILDERS.createText,
 
-  createDateText: (parent = hmUI, dateText) => {
-    return parent.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.DATE_NAVIGATION.DATE_TEXT,
-      text: dateText,
-    });
-  },
+  createSpacer: SHARED_UI_BUILDERS.createSpacer,
 
-  createTimeText: (parent = hmUI, timeText) => {
-    return parent.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.DATE_NAVIGATION.TIME_TEXT,
-      text: timeText,
-    });
-  },
-
-  createLeftArrow: (parent = hmUI, clickHandler) => {
-    return parent.createWidget(hmUI.widget.BUTTON, {
+  createLeftArrow: ({ parentWidget = hmUI, clickHandler }) => {
+    return parentWidget.createWidget(hmUI.widget.BUTTON, {
       ...LAYOUT.DATE_NAVIGATION.LEFT_ARROW,
       click_func: clickHandler,
     });
   },
 
-  createRightArrow: (parent = hmUI, clickHandler) => {
-    return parent.createWidget(hmUI.widget.BUTTON, {
+  createRightArrow: ({ parentWidget = hmUI, clickHandler }) => {
+    return parentWidget.createWidget(hmUI.widget.BUTTON, {
       ...LAYOUT.DATE_NAVIGATION.RIGHT_ARROW,
       click_func: clickHandler,
     });
   },
 
-  createPrayersContainer: (parent = hmUI) => {
-    return parent.createWidget(hmUI.widget.VIEW_CONTAINER, {
+  createPrayersContainer: ({ parentWidget = hmUI }) => {
+    return parentWidget.createWidget(hmUI.widget.VIEW_CONTAINER, {
       ...LAYOUT.PRAYERS_CONTAINER,
     });
   },
 
-  createPrayerItem: (parent = hmUI, prayer, yOffset) => {
+  createPrayerItem: ({ parentWidget = hmUI, prayer, yOffset }) => {
     const colors =
       PRAYER_STATUS_COLORS[prayer.status] || PRAYER_STATUS_COLORS.upcoming;
 
-    const prayerGroup = parent.createWidget(hmUI.widget.GROUP, {
+    const prayerGroup = parentWidget.createWidget(hmUI.widget.GROUP, {
       ...LAYOUT.PRAYER_ITEM,
       y: yOffset,
     });
@@ -267,18 +251,7 @@ export const UI_BUILDERS = {
     return { group: prayerGroup, icon, name, time, remaining };
   },
 
-  createSpacer: (parent = hmUI, options = {}) => {
-    const { x = 0, y = 0, w = px(10), h = px(50) } = options;
-
-    return parent.createWidget(hmUI.widget.TEXT, {
-      x,
-      y,
-      w,
-      h,
-    });
-  },
-
-  createDatePickerUI: (currentDate, dateRange, onConfirm, onCancel) => {
+  createDatePickerUI: ({ currentDate, dateRange, onConfirm, onCancel }) => {
     const container = hmUI.createWidget(hmUI.widget.VIEW_CONTAINER, {
       ...LAYOUT.DATE_PICKER.CONTAINER,
     });

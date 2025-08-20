@@ -6,8 +6,9 @@ import { PRAYER_STATUS_COLORS, UI_BUILDERS } from "../index.r.layout";
 const logger = Logger.getLogger("prayer-item-widget");
 
 export class PrayerItemWidget {
-  constructor(parentContainer, prayer = {}, yOffset = 0) {
-    this.parentContainer = parentContainer;
+  constructor({ parentWidget, pageState, prayer = {}, yOffset = 0 }) {
+    this.parentWidget = parentWidget;
+    this.pageState = pageState;
     this.state = {
       prayer: prayer,
       yOffset: yOffset,
@@ -23,11 +24,11 @@ export class PrayerItemWidget {
         return;
       }
 
-      this.widget = UI_BUILDERS.createPrayerItem(
-        this.parentContainer,
-        this.state.prayer,
-        this.state.yOffset
-      );
+      this.widget = UI_BUILDERS.createPrayerItem({
+        parentWidget: this.parentWidget,
+        prayer: this.state.prayer,
+        yOffset: this.state.yOffset,
+      });
 
       this.state.isBuilt = true;
     } catch (error) {
@@ -37,15 +38,15 @@ export class PrayerItemWidget {
 
   update({ prayer } = {}) {
     try {
+      if (!this.state.isBuilt) {
+        this.build();
+      }
+
       if (prayer !== undefined) {
         this.state.prayer = prayer;
       }
 
-      if (this.state.isBuilt) {
-        this.updateView();
-      } else {
-        this.build();
-      }
+      this.updateView();
     } catch (error) {
       this.handleError("Failed to update prayer item widget", error);
     }

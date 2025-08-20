@@ -1,14 +1,14 @@
 import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../../shared/utils/date-utils";
-import { UI_BUILDERS } from "../index.r.layout";
+import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 import { DatePickerWidget } from "./date_picker_widget";
 
 const logger = Logger.getLogger("date-widget");
 
 export class DateWidget {
-  constructor(parentContainer, pageState) {
-    this.parentContainer = parentContainer;
+  constructor({ parentWidget, pageState }) {
+    this.parentWidget = parentWidget;
     this.pageState = pageState;
     this.state = {
       isBuilt: false,
@@ -26,20 +26,33 @@ export class DateWidget {
         return;
       }
 
-      this.datePicker = new DatePickerWidget(this.pageState);
-
-      UI_BUILDERS.createLeftArrow(this.parentContainer, () => {
-        this.previousDay();
+      this.datePicker = new DatePickerWidget({
+        parentWidget: this.parentWidget,
+        pageState: this.pageState,
       });
 
-      UI_BUILDERS.createRightArrow(this.parentContainer, () => {
-        this.nextDay();
+      UI_BUILDERS.createLeftArrow({
+        parentWidget: this.parentWidget,
+        clickHandler: () => {
+          this.previousDay();
+        },
+      });
+
+      UI_BUILDERS.createRightArrow({
+        parentWidget: this.parentWidget,
+        clickHandler: () => {
+          this.nextDay();
+        },
       });
 
       const currentDate = this.pageState.getCurrentDate();
       const dateParts = DateUtils.formatGregorianDate(currentDate);
       const dateText = `${dateParts.getDayName()}\n${dateParts.getDateOnly()}`;
-      this.widget = UI_BUILDERS.createDateText(this.parentContainer, dateText);
+      this.widget = UI_BUILDERS.createText({
+        parentWidget: this.parentWidget,
+        layout: LAYOUT.DATE_NAVIGATION.DATE_TEXT,
+        text: dateText,
+      });
 
       this.widget.addEventListener(hmUI.event.CLICK_UP, () => {
         this.showDatePicker();
@@ -53,11 +66,10 @@ export class DateWidget {
 
   update() {
     try {
-      if (this.state.isBuilt) {
-        this.updateView();
-      } else {
+      if (!this.state.isBuilt) {
         this.build();
       }
+      this.updateView();
     } catch (error) {
       this.handleError("Failed to update date widget", error);
     }
