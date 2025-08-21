@@ -1,6 +1,7 @@
 import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../../shared/utils/date-utils";
+import { TextWidget } from "../../shared/widgets";
 import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 import { DatePickerWidget } from "./date_picker_widget";
 
@@ -14,7 +15,18 @@ export class DateWidget {
       isBuilt: false,
     };
     this.widget = null;
-    this.datePicker = null;
+    this.leftArrow = null;
+    this.rightArrow = null;
+
+    this.datePicker = new DatePickerWidget({
+      pageState: this.pageState,
+    });
+
+    this.dateTextWidget = new TextWidget({
+      pageState,
+      text: "",
+      layout: LAYOUT.DATE_NAVIGATION.DATE_TEXT,
+    });
 
     this.pageState.on("dateChanged", this.update.bind(this));
   }
@@ -26,36 +38,25 @@ export class DateWidget {
         return;
       }
 
-      this.datePicker = new DatePickerWidget({
-        pageState: this.pageState,
+      this.widget = UI_BUILDERS.createDateContainer({
+        parentWidget: this.parentWidget,
       });
 
-      UI_BUILDERS.createLeftArrow({
-        parentWidget: this.parentWidget,
+      this.leftArrow = UI_BUILDERS.createLeftArrow({
+        parentWidget: this.widget,
         clickHandler: () => {
           this.previousDay();
         },
       });
 
-      UI_BUILDERS.createRightArrow({
-        parentWidget: this.parentWidget,
+      this.rightArrow = UI_BUILDERS.createRightArrow({
+        parentWidget: this.widget,
         clickHandler: () => {
           this.nextDay();
         },
       });
 
-      const currentDate = this.pageState.getCurrentDate();
-      const dateParts = DateUtils.formatGregorianDate(currentDate);
-      const dateText = `${dateParts.getDayName()}\n${dateParts.getDateOnly()}`;
-      this.widget = UI_BUILDERS.createText({
-        parentWidget: this.parentWidget,
-        layout: LAYOUT.DATE_NAVIGATION.DATE_TEXT,
-        text: dateText,
-      });
-
-      this.widget.addEventListener(hmUI.event.CLICK_UP, () => {
-        this.showDatePicker();
-      });
+      this.buildDateTextWidget();
 
       this.state.isBuilt = true;
     } catch (error) {
@@ -92,6 +93,20 @@ export class DateWidget {
     this.pageState.setCurrentDate(newDate);
   }
 
+  buildDateTextWidget() {
+    const currentDate = this.pageState.getCurrentDate();
+    const dateParts = DateUtils.formatGregorianDate(currentDate);
+    const dateText = `${dateParts.getDayName()}\n${dateParts.getDateOnly()}`;
+
+    this.dateTextWidget.text = dateText;
+    this.dateTextWidget.parentWidget = this.widget;
+    this.dateTextWidget.build();
+
+    this.dateTextWidget.widget.addEventListener(hmUI.event.CLICK_UP, () => {
+      this.showDatePicker();
+    });
+  }
+
   showDatePicker() {
     try {
       this.datePicker.show();
@@ -101,12 +116,13 @@ export class DateWidget {
   }
 
   updateView() {
-    if (!this.widget) return;
+    if (!this.dateTextWidget) return;
 
     const currentDate = this.pageState.getCurrentDate();
     const dateParts = DateUtils.formatGregorianDate(currentDate);
     const dateText = `${dateParts.getDayName()}\n${dateParts.getDateOnly()}`;
-    this.widget.setProperty(hmUI.prop.TEXT, dateText);
+
+    this.dateTextWidget.update({ text: dateText });
   }
 
   handleError(message, error) {
@@ -120,10 +136,26 @@ export class DateWidget {
         this.datePicker = null;
       }
 
+      if (this.dateTextWidget) {
+        this.dateTextWidget.destroy();
+        this.dateTextWidget = null;
+      }
+
+      if (this.leftArrow) {
+        hmUI.deleteWidget(this.leftArrow);
+        this.leftArrow = null;
+      }
+
+      if (this.rightArrow) {
+        hmUI.deleteWidget(this.rightArrow);
+        this.rightArrow = null;
+      }
+
       if (this.widget) {
         hmUI.deleteWidget(this.widget);
+        this.widget = null;
       }
-      this.widget = null;
+
       this.state.isBuilt = false;
     } catch (error) {
       this.handleError("Failed to destroy date widget", error);

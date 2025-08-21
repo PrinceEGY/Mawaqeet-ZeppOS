@@ -15,7 +15,20 @@ export class PrayerListWidget {
     this.widget = null;
     this.prayerItemWidgets = [];
 
+    this.initializePrayerItems();
+
     this.pageState.on("prayersChanged", this.update.bind(this));
+  }
+
+  initializePrayerItems() {
+    const prayers = this.pageState.getPrayers();
+    this.prayerItemWidgets = prayers.map((prayer, index) => {
+      return new PrayerItemWidget({
+        pageState: this.pageState,
+        prayer,
+        yOffset: index * 80,
+      });
+    });
   }
 
   build() {
@@ -28,7 +41,18 @@ export class PrayerListWidget {
       this.widget = UI_BUILDERS.createPrayersContainer({
         parentWidget: this.parentWidget,
       });
-      this.createPrayerItems();
+
+      this.prayerItemWidgets.forEach((prayerItemWidget) => {
+        prayerItemWidget.parentWidget = this.widget;
+        prayerItemWidget.build();
+      });
+
+      const yOffset = this.prayerItemWidgets.length * 80;
+      UI_BUILDERS.createSpacer({
+        parentWidget: this.widget,
+        yOffset: yOffset,
+        height: px(150),
+      });
 
       this.state.isBuilt = true;
     } catch (error) {
@@ -51,7 +75,15 @@ export class PrayerListWidget {
     const prayers = this.pageState.getPrayers();
 
     if (this.prayerItemWidgets.length !== prayers.length) {
-      this.createPrayerItems();
+      this.clearPrayerItems();
+      this.initializePrayerItems();
+
+      if (this.state.isBuilt) {
+        this.prayerItemWidgets.forEach((prayerItemWidget) => {
+          prayerItemWidget.parentWidget = this.widget;
+          prayerItemWidget.build();
+        });
+      }
       return;
     }
 
@@ -60,31 +92,6 @@ export class PrayerListWidget {
       if (prayerItemWidget) {
         prayerItemWidget.update({ prayer });
       }
-    });
-  }
-
-  createPrayerItems() {
-    this.clearPrayerItems();
-
-    const prayers = this.pageState.getPrayers();
-    let yOffset = 0;
-
-    prayers.forEach((prayer) => {
-      const prayerItemWidget = new PrayerItemWidget({
-        parentWidget: this.widget,
-        pageState: this.pageState,
-        prayer,
-        yOffset,
-      });
-      prayerItemWidget.build();
-      this.prayerItemWidgets.push(prayerItemWidget);
-      yOffset += 80;
-    });
-
-    UI_BUILDERS.createSpacer({
-      parentWidget: this.widget,
-      yOffset: yOffset,
-      height: px(150),
     });
   }
 

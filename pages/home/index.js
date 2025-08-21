@@ -1,18 +1,15 @@
 import { BasePage } from "@zeppos/zml/base-page";
 import * as hmUI from "@zos/ui";
 import { log as Logger, px } from "@zos/utils";
+import { DateUtils } from "../../shared/utils/date-utils";
+import { TextWidget } from "../shared/widgets";
 import { RefreshManager } from "../utils/refresh-manager";
 import { SyncManager } from "../utils/sync-manager";
 import { HomePageState } from "./home_page_state";
-import { UI_BUILDERS } from "./index.r.layout";
+import { LAYOUT } from "./index.r.layout";
 
 import { replace } from "@zos/router";
-import {
-  CityWidget,
-  DateWidget,
-  PrayerListWidget,
-  TimeWidget,
-} from "./widgets";
+import { DateWidget, PrayerListWidget } from "./widgets";
 
 const logger = Logger.getLogger("home-page");
 
@@ -22,8 +19,6 @@ Page(
   BasePage({
     state: {
       widgets: {},
-      mainContainer: null,
-      infoGroup: null,
       pageState: null,
     },
 
@@ -70,27 +65,41 @@ Page(
       RefreshManager.clear();
     },
 
+    getCurrentCityText() {
+      const currentLocation = this.state.pageState.getCurrentLocation();
+      return currentLocation ? currentLocation["city"] : "No location selected";
+    },
+
+    getCurrentTimeText() {
+      return DateUtils.formatCurrentTime();
+    },
+
     initializeWidgets() {
       this.state.widgets = {
         date: new DateWidget({
-          parentWidget: this.state.infoGroup,
           pageState: this.state.pageState,
         }),
 
-        time: new TimeWidget({
-          parentWidget: this.state.infoGroup,
+        timeText: new TextWidget({
           pageState: this.state.pageState,
+          text: this.getCurrentTimeText(),
+          layout: LAYOUT.DATE_NAVIGATION.TIME_TEXT,
         }),
 
-        city: new CityWidget({
-          parentWidget: this.state.infoGroup,
+        cityText: new TextWidget({
           pageState: this.state.pageState,
+          text: this.getCurrentCityText(),
+          layout: LAYOUT.CITY_TEXT,
         }),
 
         prayerList: new PrayerListWidget({
           pageState: this.state.pageState,
         }),
       };
+
+      this.state.pageState.on("locationChanged", () => {
+        this.updateCityText();
+      });
     },
 
     buildAllWidgets() {
@@ -111,10 +120,24 @@ Page(
       });
     },
 
-    onRefresh() {
-      if (this.state.widgets.time) {
-        this.state.widgets.time.updateView();
+    updateCityText() {
+      if (this.state.widgets.cityText) {
+        this.state.widgets.cityText.update({
+          text: this.getCurrentCityText(),
+        });
       }
+    },
+
+    updateTimeText() {
+      if (this.state.widgets.timeText) {
+        this.state.widgets.timeText.update({
+          text: this.getCurrentTimeText(),
+        });
+      }
+    },
+
+    onRefresh() {
+      this.updateTimeText();
       if (this.state.widgets.prayerList) {
         this.state.widgets.prayerList.update();
       }
