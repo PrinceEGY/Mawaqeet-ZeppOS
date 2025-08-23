@@ -1,7 +1,7 @@
 import * as hmUI from "@zos/ui";
 import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../../shared/utils/date-utils";
-import { TextWidget } from "../../shared/widgets";
+import { ButtonWidget, TextWidget } from "../../shared/widgets";
 import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 import { DatePickerWidget } from "./date_picker_widget";
 
@@ -15,11 +15,25 @@ export class DateWidget {
       isBuilt: false,
     };
     this.widget = null;
-    this.leftArrow = null;
-    this.rightArrow = null;
 
     this.datePicker = new DatePickerWidget({
       pageState: this.pageState,
+    });
+
+    this.leftArrowButton = new ButtonWidget({
+      pageState,
+      layout: LAYOUT.DATE_NAVIGATION.LEFT_ARROW,
+      clickHandler: () => {
+        this.previousDay();
+      },
+    });
+
+    this.rightArrowButton = new ButtonWidget({
+      pageState,
+      layout: LAYOUT.DATE_NAVIGATION.RIGHT_ARROW,
+      clickHandler: () => {
+        this.nextDay();
+      },
     });
 
     this.dateTextWidget = new TextWidget({
@@ -42,19 +56,11 @@ export class DateWidget {
         parentWidget: this.parentWidget,
       });
 
-      this.leftArrow = UI_BUILDERS.createLeftArrow({
-        parentWidget: this.widget,
-        clickHandler: () => {
-          this.previousDay();
-        },
-      });
+      this.leftArrowButton.parentWidget = this.widget;
+      this.leftArrowButton.build();
 
-      this.rightArrow = UI_BUILDERS.createRightArrow({
-        parentWidget: this.widget,
-        clickHandler: () => {
-          this.nextDay();
-        },
-      });
+      this.rightArrowButton.parentWidget = this.widget;
+      this.rightArrowButton.build();
 
       this.buildDateTextWidget();
 
@@ -141,14 +147,14 @@ export class DateWidget {
         this.dateTextWidget = null;
       }
 
-      if (this.leftArrow) {
-        hmUI.deleteWidget(this.leftArrow);
-        this.leftArrow = null;
+      if (this.leftArrowButton) {
+        this.leftArrowButton.destroy();
+        this.leftArrowButton = null;
       }
 
-      if (this.rightArrow) {
-        hmUI.deleteWidget(this.rightArrow);
-        this.rightArrow = null;
+      if (this.rightArrowButton) {
+        this.rightArrowButton.destroy();
+        this.rightArrowButton = null;
       }
 
       if (this.widget) {

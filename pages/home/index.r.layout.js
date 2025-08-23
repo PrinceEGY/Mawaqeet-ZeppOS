@@ -209,20 +209,6 @@ export const UI_BUILDERS = {
     });
   },
 
-  createLeftArrow: ({ parentWidget = hmUI, clickHandler }) => {
-    return parentWidget.createWidget(hmUI.widget.BUTTON, {
-      ...LAYOUT.DATE_NAVIGATION.LEFT_ARROW,
-      click_func: clickHandler,
-    });
-  },
-
-  createRightArrow: ({ parentWidget = hmUI, clickHandler }) => {
-    return parentWidget.createWidget(hmUI.widget.BUTTON, {
-      ...LAYOUT.DATE_NAVIGATION.RIGHT_ARROW,
-      click_func: clickHandler,
-    });
-  },
-
   createPrayersContainer: ({ parentWidget = hmUI }) => {
     return parentWidget.createWidget(hmUI.widget.VIEW_CONTAINER, {
       ...LAYOUT.PRAYERS_CONTAINER,
