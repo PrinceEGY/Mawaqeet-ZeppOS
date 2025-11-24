@@ -6,20 +6,20 @@ export class PrayersService {
     this.storageService = storageService;
   }
 
-  async fetchAndSavePrayerTimes(
+  async fetchAndSavePrayerTimes({
     location = null,
     calculationMethodId = null,
     monthsBefore = null,
-    monthsAfter = null
-  ) {
+    monthsAfter = null,
+  } = {}) {
     location = location || this.storageService.getItem("currentLocation");
     calculationMethodId =
       calculationMethodId ||
       this.storageService.getItem("calculationMethod")?.id;
 
     const fetchMetaData = this.storageService.getItem("fetchMetaData");
-    monthsBefore = monthsBefore ?? fetchMetaData.beforeMonths;
-    monthsAfter = monthsAfter ?? fetchMetaData.afterMonths;
+    monthsBefore = monthsBefore ?? fetchMetaData?.beforeMonths;
+    monthsAfter = monthsAfter ?? fetchMetaData?.afterMonths;
 
     const { startDate, endDate } = DateUtils.calculateDateRange(
       monthsBefore,
@@ -50,7 +50,10 @@ export class PrayersService {
       console.log("Successfully fetched and saved prayer times.");
     } catch (error) {
       if (error.message.includes("debounce")) {
-        console.debug("Debounce error while fetching prayer times.");
+        console.debug(
+          "Debounce error while fetching prayer times.",
+          error.message
+        );
         return;
       }
 
@@ -67,7 +70,8 @@ export class PrayersService {
     } catch (error) {
       if (error.message.includes("debounce")) {
         console.debug(
-          "Debounce error while fetching calculation methods list."
+          "Debounce error while fetching calculation methods list.",
+          error.message
         );
         return;
       }

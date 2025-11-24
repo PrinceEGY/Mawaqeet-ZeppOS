@@ -46,7 +46,7 @@ export class StorageService {
     return new EasyStorage(directory);
   }
 
-  getItem(key, returnTimestamp = false, stringify = false) {
+  getItem(key, { returnTimestamp = false, stringify = false } = {}) {
     let value = this.storage.getKey(key);
 
     if (value === undefined || value === null) {
@@ -65,7 +65,7 @@ export class StorageService {
     return returnTimestamp ? value : value.data;
   }
 
-  setItem(key, value, timestamp = Date.now(), markForPush = true) {
+  setItem(key, value, { timestamp = Date.now(), markForPush = true } = {}) {
     if (value === undefined) {
       logger.warn(`Attempted to set undefined value for key "${key}".`);
       return;
@@ -135,7 +135,7 @@ export class StorageService {
   }
 
   isKeyOutdated(key, intervalMs) {
-    const item = this.getItem(key, true);
+    const item = this.getItem(key, { returnTimestamp: true });
     if (!item?.data || !item.timestamp) {
       return true;
     }

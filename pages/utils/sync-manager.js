@@ -136,7 +136,7 @@ export class SyncManager {
   }
 
   removePendingPushIfUnchanged(key, originalValue) {
-    const currentStorageItem = storage.getItem(key, true);
+    const currentStorageItem = storage.getItem(key, { returnTimestamp: true });
     const currentValue = currentStorageItem?.data;
 
     const originalStr = JSON.stringify(originalValue);
@@ -155,7 +155,7 @@ export class SyncManager {
   }
 
   _pushKey(key) {
-    const currentValue = storage.getItem(key, true);
+    const currentValue = storage.getItem(key, { returnTimestamp: true });
     if (!currentValue || currentValue.data === undefined) {
       logger.debug(`No data found for key: ${key}, removing from pending push`);
       this.removePendingPushIfUnchanged(key, currentValue?.data);
@@ -189,10 +189,13 @@ export class SyncManager {
   _pullKey(key) {
     this.request({ method: `pull.${key}`, params: {} })
       .then((res) => {
-        const currentValue = storage.getItem(key, true);
+        const currentValue = storage.getItem(key, { returnTimestamp: true });
 
         if (!currentValue || currentValue.timestamp < res.timestamp) {
-          storage.setItem(key, res.data, res.timestamp, false);
+          storage.setItem(key, res.data, {
+            timestamp: res.timestamp,
+            markForPush: false,
+          });
           this.removeFromPendingPush(key);
           logger.info(`Updated ${key} with newer data from setting app`);
         } else if (currentValue.timestamp > res.timestamp) {
@@ -216,7 +219,7 @@ export class SyncManager {
           return;
         }
 
-        const currentValue = storage.getItem(key, true);
+        const currentValue = storage.getItem(key, { returnTimestamp: true });
         if (currentValue && currentValue.timestamp >= timestamp) {
           logger.info("Local prayer times is newer, skipping pull!");
           return;

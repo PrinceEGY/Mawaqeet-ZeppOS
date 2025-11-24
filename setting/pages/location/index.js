@@ -25,8 +25,9 @@ export function locationSettingsPage(navigateBackCallback, props) {
 
   // --- Helper Methods ---
   function getLocationState() {
-    return props.storageService.getItem("locationPageState")
-      ? props.storageService.getItem("locationPageState")
+    const state = props.storageService.getItem("locationPageState");
+    return state
+      ? state
       : {
           step: "country",
           selectedCountry: null,

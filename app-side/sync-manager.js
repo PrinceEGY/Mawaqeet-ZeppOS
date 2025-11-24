@@ -50,7 +50,9 @@ export class SyncManager {
     }
 
     try {
-      const currentValue = storageService.getItem(key, true);
+      const currentValue = storageService.getItem(key, {
+        returnTimestamp: true,
+      });
 
       if (currentValue && currentValue.timestamp > timestamp) {
         this.addToPendingPull(key);
@@ -65,7 +67,7 @@ export class SyncManager {
       }
 
       if (!currentValue || currentValue.timestamp < timestamp) {
-        storageService.setItem(key, data, timestamp);
+        storageService.setItem(key, data, { timestamp });
         res(null, { updated: true });
       } else {
         res(null, { updated: false, reason: "Current data is up-to-date" });
@@ -126,7 +128,10 @@ export class SyncManager {
   }
 
   _handlePrayerTimesPull(key, req, res, chunkSize = 1024 * 8) {
-    const value = storageService.getItem(key, true, true);
+    const value = storageService.getItem(key, {
+      returnTimestamp: true,
+      stringify: true,
+    });
 
     const chunks = this._chunkString(value.data, chunkSize);
     const totalChunks = chunks.length;
@@ -184,7 +189,7 @@ export class SyncManager {
   }
 
   _handleRegularPull(key, res) {
-    const value = storageService.getItem(key, true);
+    const value = storageService.getItem(key, { returnTimestamp: true });
     res(null, value);
     this.removePendingPullIfUnchanged(key, value.data);
   }

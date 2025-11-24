@@ -3,7 +3,7 @@ export class StorageService {
     this.storage = storage;
   }
 
-  getItem(key, returnTimestamp = false, stringify = false) {
+  getItem(key, { returnTimestamp = false, stringify = false } = {}) {
     let value = this.storage.getItem(key);
 
     if (value === undefined || value === null) {
@@ -24,7 +24,7 @@ export class StorageService {
     }
   }
 
-  setItem(key, value, timestamp = Date.now()) {
+  setItem(key, value, { timestamp = Date.now() } = {}) {
     if (value === undefined) {
       console.warn(`Attempted to set undefined value for key "${key}".`);
       return;
@@ -66,7 +66,7 @@ export class StorageService {
   }
 
   isKeyOutdated(key, intervalMs) {
-    const item = this.getItem(key, true);
+    const item = this.getItem(key, { returnTimestamp: true });
     if (!item || !item.data || !item.timestamp) {
       return true;
     }

@@ -108,7 +108,10 @@ export class PrayersService {
       const data = JSON.parse(dataString);
 
       data.forEach((item) => {
-        storage.setItem(item.date, item.timings, Date.now(), markForPush);
+        storage.setItem(item.date, item.timings, {
+          timestamp: Date.now(),
+          markForPush,
+        });
       });
 
       logger.debug(
