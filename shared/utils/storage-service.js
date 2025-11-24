@@ -43,7 +43,7 @@ export class StorageService {
   }
 
   hasItem(key) {
-    const keys = this.storage.getAllKeys();
+    const keys = this.getAllKeys();
     return keys.includes(key);
   }
 
