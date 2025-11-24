@@ -14,15 +14,37 @@ import { prayersSettingsPage } from "./pages/prayers/index";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 let storageService = null;
+let prayerService = null;
+
+function handleFirstRunInitialization() {
+  const isFirstRun = !storageService.hasItem("__app_initialized__");
+
+  if (isFirstRun) {
+    console.info("First run detected. Initializing default settings...");
+    // Mark as uninitialized to trigger app-side initialization
+    // This prevents "rpc error [call] -1 setting storage not existed" on first run
+    storageService.setItem("__app_initialized__", false);
+
+    setTimeout(() => {
+      SettingInitializer.initDefaultSettings(storageService);
+      storageService.setItem("__app_initialized__", true);
+    }, 2000);
+    setTimeout(() => {
+      prayerService.updateOutdatedItems();
+    }, 4000);
+  } else {
+    prayerService.updateOutdatedItems();
+  }
+}
 
 AppSettingsPage({
   build(props) {
     storageService = new StorageService(props.settingsStorage);
-    const prayerService = new PrayersService(storageService);
+    prayerService = new PrayersService(storageService);
     props.storageService = storageService;
+    console.log(props);
 
-    SettingInitializer.initDefaultSettings(props);
-    prayerService.updateOutdatedItems();
+    handleFirstRunInitialization();
 
     const navState = this.getNavState();
 
@@ -108,7 +130,7 @@ AppSettingsPage({
 
   // --- Build Methods ---
   buildSyncingNotifyPanel() {
-    const pendingSync = storageService.getItem("pendingSync");
+    const pendingSync = storageService.getItem("pendingPull");
     if (!pendingSync || pendingSync.length === 0) return null;
 
     return Panel({

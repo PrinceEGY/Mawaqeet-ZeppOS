@@ -1,5 +1,6 @@
 import EasyStorage, { EasyFlashStorage } from "@silver-zepp/easy-storage";
 import { log as Logger } from "@zos/utils";
+import { SYNC_SETTINGS_LIST } from "../../shared/constants";
 
 const logger = Logger.getLogger("storage-service");
 
@@ -64,13 +65,12 @@ export class StorageService {
     return returnTimestamp ? value : value.data;
   }
 
-  setItem(key, value, timestamp = Date.now()) {
+  setItem(key, value, timestamp = Date.now(), markForPush = true) {
     if (value === undefined) {
       logger.warn(`Attempted to set undefined value for key "${key}".`);
       return;
     }
 
-    // TODO: sync items with settings app
     try {
       const wrappedValue = { data: value, timestamp };
       const finalValue =
@@ -78,8 +78,27 @@ export class StorageService {
 
       this.storage.setKey(key, finalValue);
       logger.debug(`Set item for key "${key}":`, finalValue);
+      if (markForPush) {
+        this._addKeyToPendingPush(key);
+      }
     } catch (error) {
       logger.error(`Error setting item for key "${key}":`, error);
+    }
+  }
+
+  _addKeyToPendingPush(key) {
+    try {
+      if (!SYNC_SETTINGS_LIST.includes(key)) return;
+
+      let pending = this.getItem("pendingPush");
+      if (!Array.isArray(pending)) pending = [];
+      logger.debug("Current pendingPush keys:", pending);
+      if (!pending.includes(key)) {
+        pending.push(key);
+        this.setItem("pendingPush", pending);
+      }
+    } catch (err) {
+      logger.error(`Error adding key "${key}" to pendingPush:`, err);
     }
   }
 

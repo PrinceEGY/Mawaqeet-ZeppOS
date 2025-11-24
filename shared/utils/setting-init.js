@@ -9,21 +9,22 @@ export class SettingInitializer {
     this._initDoneThisSession = false;
   }
 
-  static async initDefaultSettings(props) {
+  static initDefaultSettings(storageService) {
     if (this.isInitializing || this._initDoneThisSession) return;
 
     this.isInitializing = true;
 
     try {
-      props.storageService.setItem("navState", {
+      storageService.setItem("navState", {
         currentPage: "main",
         history: [],
       });
-      this.initLocationSettings(props);
-      this.initFetchingSettings(props);
-      this.initPrayerSettings(props);
-      this.initCalculationMethod(props);
+      this.initLocationSettings(storageService);
+      this.initFetchingSettings(storageService);
+      this.initPrayerSettings(storageService);
+      this.initCalculationMethod(storageService);
       this._initDoneThisSession = true;
+      console.debug("Default settings initialization completed.");
     } catch (error) {
       console.error("Error during settings initialization:", error);
     } finally {
@@ -31,14 +32,14 @@ export class SettingInitializer {
     }
   }
 
-  static initLocationSettings(props) {
-    if (!props.storageService.getItem("currentLocation")) {
+  static initLocationSettings(storageService) {
+    if (!storageService.getItem("currentLocation")) {
       const defaultLocation = GeoService.getCityByName(
         DEFAULT_SETTINGS.location.city
       );
 
       if (defaultLocation) {
-        props.storageService.setItem("currentLocation", {
+        storageService.setItem("currentLocation", {
           country: defaultLocation.country,
           city: defaultLocation.city,
           latitude: defaultLocation.latitude,
@@ -55,31 +56,25 @@ export class SettingInitializer {
     }
   }
 
-  static initPrayerSettings(props) {
+  static initPrayerSettings(storageService) {
     Object.keys(DEFAULT_SETTINGS.display).forEach((prayer) => {
       const displayKey = `display:${prayer}`;
-      const displayValue = props.storageService.getItem(displayKey);
+      const displayValue = storageService.getItem(displayKey);
       if (displayValue === undefined || displayValue === null) {
-        props.storageService.setItem(
-          displayKey,
-          DEFAULT_SETTINGS.display[prayer]
-        );
+        storageService.setItem(displayKey, DEFAULT_SETTINGS.display[prayer]);
       }
 
       const notifyKey = `notify:${prayer}`;
-      const notifyValue = props.storageService.getItem(notifyKey);
+      const notifyValue = storageService.getItem(notifyKey);
       if (notifyValue === undefined || notifyValue === null) {
-        props.storageService.setItem(
-          notifyKey,
-          DEFAULT_SETTINGS.notify[prayer]
-        );
+        storageService.setItem(notifyKey, DEFAULT_SETTINGS.notify[prayer]);
       }
     });
   }
 
-  static initCalculationMethod(props) {
-    if (!props.storageService.getItem("calculationMethod")) {
-      props.storageService.setItem(
+  static initCalculationMethod(storageService) {
+    if (!storageService.getItem("calculationMethod")) {
+      storageService.setItem(
         "calculationMethod",
         DEFAULT_SETTINGS.calculationMethod
       );
@@ -91,9 +86,9 @@ export class SettingInitializer {
     }
   }
 
-  static initFetchingSettings(props) {
-    if (!props.storageService.getItem("fetchMetaData")) {
-      if (!props.storageService.getItem("fetchMetaData")) {
+  static initFetchingSettings(storageService) {
+    if (!storageService.getItem("fetchMetaData")) {
+      if (!storageService.getItem("fetchMetaData")) {
         const defaultFetchMetaData = {
           beforeMonths: DEFAULT_SETTINGS.fetching.monthsBefore,
           afterMonths: DEFAULT_SETTINGS.fetching.monthsAfter,
@@ -103,7 +98,7 @@ export class SettingInitializer {
           fetchDate: null,
         };
 
-        props.storageService.setItem("fetchMetaData", defaultFetchMetaData);
+        storageService.setItem("fetchMetaData", defaultFetchMetaData);
         console.debug(
           `Default fetchMetaData set to ${JSON.stringify(defaultFetchMetaData)}`
         );

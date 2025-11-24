@@ -236,7 +236,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("manual_sync_btn"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            props.storageService.setItem("triggerSync", true);
+            props.storageService.setItem("triggerFullSync", true);
           },
         }),
       ],
@@ -270,7 +270,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           onClick: () => {
             props.storageService.clear();
             SettingInitializer.resetSessionFlag();
-            SettingInitializer.initDefaultSettings(props);
+            SettingInitializer.initDefaultSettings(props.storageService);
             console.log("Settings reset to default.");
           },
         }),

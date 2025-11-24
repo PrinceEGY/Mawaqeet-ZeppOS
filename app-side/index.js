@@ -6,21 +6,31 @@ import { StorageService } from "../shared/utils/storage-service";
 import { SyncManager } from "./sync-manager";
 
 const syncManager = new SyncManager();
-const storageService = new StorageService(settings.settingsStorage);
-const prayersService = new PrayersService(storageService);
+let storageService;
+let prayersService;
+
+function initializeServices() {
+  if (!storageService) {
+    storageService = new StorageService(settings.settingsStorage);
+    prayersService = new PrayersService(storageService);
+  }
+}
 
 AppSideService(
   BaseSideService({
     onInit() {
       console.debug("App side service initialized");
-      prayersService.updateOutdatedItems();
+      initializeServices();
     },
 
     onRun() {
       console.debug("App side service running");
-      setTimeout(() => {
-        this.triggerSync();
-      }, 1000);
+      isAppInitialized = storageService.getItem("__app_initialized__");
+      if (isAppInitialized) {
+        setTimeout(() => {
+          prayersService.updateOutdatedItems();
+        }, 2000);
+      }
     },
 
     onDestroy() {},
@@ -32,41 +42,52 @@ AppSideService(
             await prayersService.fetchAndSavePrayerTimes({});
             res(null, { status: "success" });
             break;
-          case "getCurrentLocation": {
-            const currentLocation = storageService.getItem("currentLocation");
-
-            res(null, { location: currentLocation });
+          case "updateOutdatedItems":
+            await prayersService.updateOutdatedItems();
+            res(null, { status: "success" });
             break;
-          }
           case "getCityByGeoLocation": {
             const { latitude, longitude } = req.params;
             const closestCity = GeoService.getClosestCity(latitude, longitude);
             res(null, { city: closestCity });
             break;
           }
-          case "getPendingSync":
-            keys = syncManager.getPendingSync();
+          case "getPendingPull": {
+            const keys = syncManager.getPendingPull();
             res(null, { keys });
             break;
+          }
           default:
-            if (req.method && req.method.startsWith("sync.")) {
+            if (req.method && req.method.startsWith("pull.")) {
               const key = req.method.split(".")[1];
-              await syncManager.handleSyncRequest(key, req, res);
+              await syncManager.handlePullRequest(key, req, res);
+            } else if (req.method && req.method.startsWith("push.")) {
+              const key = req.method.split(".")[1];
+              await syncManager.handlePushRequest(key, req, res);
             } else {
-              res({ error: "Unknown method" }, null);
+              res(
+                { name: "UnknownMethodError", message: "Unknown method" },
+                null
+              );
             }
         }
       } catch (error) {
-        console.error("onRequest error:", error);
-        res(error, null);
+        console.error("Error handling request:", error);
+        res(
+          {
+            name: "RequestHandlingError",
+            message: error.message || "Error handling request",
+          },
+          null
+        );
       }
     },
 
     async onSettingsChange({ key, newValue, oldValue }) {
       console.debug("Settings changed:", { key, newValue, oldValue });
 
-      if (key === "triggerSync") {
-        this.triggerSync();
+      if (key === "triggerFullSync") {
+        this.call({ method: "sync.triggerFullSync" });
       }
 
       if (
@@ -75,8 +96,8 @@ AppSideService(
         SYNC_SETTINGS_LIST.includes(key)
       ) {
         console.debug(`Syncing setting change for key: ${key}`);
-        syncManager.addToPendingSync(key);
-        this.triggerSync([key]);
+        syncManager.addToPendingPull(key);
+        this.triggerPull([key]);
       }
 
       if (
@@ -94,14 +115,14 @@ AppSideService(
       }
     },
 
-    async triggerSync(keys) {
-      const syncKeys = keys || syncManager.getPendingSync();
-      console.log("Triggering sync with keys:", syncKeys);
-      if (!syncKeys || syncKeys.length === 0) {
-        console.log("No pending sync keys to trigger.");
+    triggerPull(keys) {
+      const pullKeys = keys || syncManager.getPendingPull();
+      if (!pullKeys || pullKeys.length === 0) {
+        console.log("No pending pull keys to trigger.");
         return;
       }
-      this.call({ method: "sync.triggerSync", keys: syncKeys });
+      console.log("Triggering pull with keys:", pullKeys);
+      this.call({ method: "pull.trigger", keys: pullKeys });
     },
   })
 );

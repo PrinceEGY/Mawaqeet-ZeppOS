@@ -98,7 +98,7 @@ export class PrayersService {
     }
   }
 
-  static savePrayerTimes(dataString) {
+  static savePrayerTimes(dataString, markForPush = false) {
     this.clear();
 
     try {
@@ -108,7 +108,7 @@ export class PrayersService {
       const data = JSON.parse(dataString);
 
       data.forEach((item) => {
-        storage.setItem(item.date, item.timings);
+        storage.setItem(item.date, item.timings, Date.now(), markForPush);
       });
 
       logger.debug(
@@ -124,6 +124,22 @@ export class PrayersService {
 
   static clear() {
     storage.clear();
+  }
+
+  static hasPrayerTimesData() {
+    const keys = storage.getAllKeys();
+    return keys && keys.length > 0;
+  }
+
+  static isPrayerTimesExpired(currentDate = new Date()) {
+    if (!this.hasPrayerTimesData()) {
+      return true;
+    }
+
+    const today = DateUtils.dateToDateString(currentDate);
+    const keys = storage.getAllKeys();
+
+    return !keys.includes(today);
   }
 
   static _parseDate(date) {

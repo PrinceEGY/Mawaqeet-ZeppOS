@@ -6,105 +6,131 @@ const storageService = new StorageService(settingsLib);
 
 export class SyncManager {
   constructor() {
-    this.currentlySyncingKeys = new Set();
+    this.activeRequestKeys = new Set();
   }
 
-  getPendingSync() {
-    const pendingSync = storageService.getItem("pendingSync");
-    return pendingSync || [];
-  }
+  async handlePullRequest(key, req, res) {
+    if (this._isKeySyncing(key, res)) return;
+    this.activeRequestKeys.add(key);
 
-  setPendingSync(pendingSync) {
-    storageService.setItem("pendingSync", pendingSync);
-  }
-
-  addToPendingSync(key) {
-    const pendingSync = this.getPendingSync();
-    if (!pendingSync.includes(key)) {
-      pendingSync.push(key);
-      console.debug("Adding to pendingSync:", key);
-      this.setPendingSync(pendingSync);
-    }
-  }
-
-  removeFromPendingSync(key) {
-    const pendingSync = this.getPendingSync();
-    const index = pendingSync.indexOf(key);
-    if (index > -1) {
-      pendingSync.splice(index, 1);
-      this.setPendingSync(pendingSync);
-    }
-  }
-
-  clearPendingSync() {
-    storageService.removeItem("pendingSync");
-  }
-
-  removePendingIfUnchanged(key, originalValue) {
-    const currentStorageItem = storageService.getItem(key);
-    const currentValue = currentStorageItem;
-    console.debug(
-      `Checking if value for key "${key}" has changed. Original: ${JSON.stringify(
-        originalValue
-      )}, Current: ${JSON.stringify(currentValue)}`
-    );
-    if (_.isEqual(originalValue, currentValue)) {
-      console.debug(
-        `Value for key "${key}" has not changed, removing from pendingSync.`
-      );
-      this.removeFromPendingSync(key);
-      return true;
-    }
-    return false;
-  }
-
-  async handleSyncRequest(key, req, res) {
-    if (this.currentlySyncingKeys.has(key)) {
-      res(
-        { type: "already_syncing", error: "This key is already being synced." },
-        null
-      );
-      return;
-    }
-
-    const pendingSync = this.getPendingSync();
-    if (!pendingSync.includes(key)) {
+    try {
+      if (key === "prayerTimes") {
+        this._handlePrayerTimesPull(key, req, res);
+      } else {
+        this._handleRegularPull(key, res);
+      }
+    } catch (err) {
       res(
         {
-          type: "not_pending",
-          error: "Key is either not existing or already synced.",
+          name: "PullRequestError",
+          message: err.message || "Failed to handle pull request",
+        },
+        null
+      );
+    } finally {
+      this.activeRequestKeys.delete(key);
+    }
+  }
+
+  async handlePushRequest(key, req, res) {
+    if (this._isKeySyncing(key, res)) return;
+    this.activeRequestKeys.add(key);
+
+    const { data, timestamp } = req.params;
+
+    if (data === undefined || !timestamp) {
+      res(
+        {
+          name: "InvalidParametersError",
+          message: "Missing required parameters: data or timestamp",
         },
         null
       );
       return;
     }
 
-    this.currentlySyncingKeys.add(key);
-    console.debug("Syncing key: ", key);
-
     try {
-      if (key === "prayerTimes") {
-        this._handlePrayerTimesChunkSync(key, req, res);
-      } else {
-        this._handleRegularSync(key, res);
+      const currentValue = storageService.getItem(key, true);
+
+      if (currentValue && currentValue.timestamp > timestamp) {
+        this.addToPendingPull(key);
+        res(
+          {
+            name: "NewerDataExistsError",
+            message: `Setting App data for key "${key}" is newer than device data, consider pulling instead.`,
+          },
+          null
+        );
+        return;
       }
+
+      if (!currentValue || currentValue.timestamp < timestamp) {
+        storageService.setItem(key, data, timestamp);
+        res(null, { updated: true });
+      } else {
+        res(null, { updated: false, reason: "Current data is up-to-date" });
+      }
+
+      this.removeFromPendingPull(key);
     } catch (err) {
-      res({ type: "exception", error: err.message }, null);
-    } finally {
-      this.currentlySyncingKeys.delete(key);
+      console.error(`Error handling push from device for key: ${key}`, err);
+      res(
+        {
+          name: "PushRequestError",
+          message: err.message || "Failed to handle push request",
+        },
+        null
+      );
     }
   }
 
-  _handlePrayerTimesChunkSync(key, req, res, chunkSize = 1024 * 8) {
+  getPendingPull() {
+    const pendingPull = storageService.getItem("pendingPull");
+    return pendingPull || [];
+  }
+
+  setPendingPull(pendingPull) {
+    storageService.setItem("pendingPull", pendingPull);
+  }
+
+  addToPendingPull(key) {
+    const pendingPull = this.getPendingPull();
+    if (!pendingPull.includes(key)) {
+      pendingPull.push(key);
+      this.setPendingPull(pendingPull);
+    }
+  }
+
+  removeFromPendingPull(key) {
+    const pendingPull = this.getPendingPull();
+    const index = pendingPull.indexOf(key);
+    if (index > -1) {
+      pendingPull.splice(index, 1);
+      this.setPendingPull(pendingPull);
+    }
+  }
+
+  clearPendingPull() {
+    storageService.removeItem("pendingPull");
+  }
+
+  removePendingPullIfUnchanged(key, originalValue) {
+    const currentStorageItem = storageService.getItem(key);
+    const currentValue = currentStorageItem;
+
+    if (_.isEqual(originalValue, currentValue)) {
+      this.removeFromPendingPull(key);
+      return true;
+    }
+    return false;
+  }
+
+  _handlePrayerTimesPull(key, req, res, chunkSize = 1024 * 8) {
     const value = storageService.getItem(key, true, true);
 
     const chunks = this._chunkString(value.data, chunkSize);
     const totalChunks = chunks.length;
     const chunkIndex = req?.params?.chunkIndex ?? 0;
-
-    console.log(
-      `Syncing prayerTimes: totalChunks=${totalChunks}, chunkIndex=${chunkIndex}`
-    );
 
     // Metadata request
     if (chunkIndex == -1) {
@@ -119,12 +145,9 @@ export class SyncManager {
       return;
     }
 
-    // If the device notifies completion, remove from pendingSync only if value unchanged
     if (req?.params?.complete === true) {
-      if (this.removePendingIfUnchanged(key, JSON.parse(value.data))) {
-        console.log("Syncing complete for key:", key);
-      } else {
-        console.log("prayerTimes updated during sync, keeping in pendingSync");
+      if (this.removePendingPullIfUnchanged(key, JSON.parse(value.data))) {
+        console.log("Prayer times pull completed for:", key);
       }
       res(null, {
         dataLength: value.data.length,
@@ -138,7 +161,15 @@ export class SyncManager {
     }
 
     if (chunkIndex < 0 || chunkIndex >= totalChunks) {
-      res({ type: "invalid_chunk_index", error: "Invalid chunk index." }, null);
+      res(
+        {
+          name: "InvalidChunkIndexError",
+          message: `Chunk index ${chunkIndex} is out of range (0-${
+            totalChunks - 1
+          })`,
+        },
+        null
+      );
       return;
     }
 
@@ -152,10 +183,10 @@ export class SyncManager {
     });
   }
 
-  _handleRegularSync(key, res) {
+  _handleRegularPull(key, res) {
     const value = storageService.getItem(key, true);
     res(null, value);
-    this.removePendingIfUnchanged(key, value.data);
+    this.removePendingPullIfUnchanged(key, value.data);
   }
 
   _chunkString(str, size) {
@@ -164,5 +195,19 @@ export class SyncManager {
       results.push(str.slice(i, i + size));
     }
     return results;
+  }
+
+  _isKeySyncing(key, res) {
+    if (this.activeRequestKeys.has(key)) {
+      res(
+        {
+          name: "SyncInProgressError",
+          message: `Key "${key}" is already being synced`,
+        },
+        null
+      );
+      return true;
+    }
+    return false;
   }
 }
