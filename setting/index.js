@@ -20,10 +20,10 @@ function handleFirstRunInitialization() {
   const isFirstRun = !storageService.hasItem("__app_initialized__");
 
   if (isFirstRun) {
-    console.info("First run detected. Initializing default settings...");
     // Mark as uninitialized to trigger app-side initialization
     // This prevents "rpc error [call] -1 setting storage not existed" on first run
     storageService.setItem("__app_initialized__", false);
+    console.info("First run detected. Initializing default settings...");
 
     setTimeout(() => {
       SettingInitializer.initDefaultSettings(storageService);
@@ -32,7 +32,7 @@ function handleFirstRunInitialization() {
     setTimeout(() => {
       prayerService.updateOutdatedItems();
     }, 4000);
-  } else {
+  } else if (storageService.getItem("__app_initialized__") === true) {
     prayerService.updateOutdatedItems();
   }
 }
@@ -42,7 +42,6 @@ AppSettingsPage({
     storageService = new StorageService(props.settingsStorage);
     prayerService = new PrayersService(storageService);
     props.storageService = storageService;
-    console.log(props);
 
     handleFirstRunInitialization();
 
