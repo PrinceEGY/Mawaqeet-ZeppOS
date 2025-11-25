@@ -189,6 +189,17 @@ export class SyncManager {
   }
 
   _handleRegularPull(key, res) {
+    if (!storageService.hasItem(key)) {
+      res(
+        {
+          name: "KeyNotFoundError",
+          message: `Key "${key}" does not exist in storage`,
+        },
+        null
+      );
+      return;
+    }
+
     const value = storageService.getItem(key, { returnTimestamp: true });
     res(null, value);
     this.removePendingPullIfUnchanged(key, value.data);
