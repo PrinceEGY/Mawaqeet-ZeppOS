@@ -1,8 +1,8 @@
 import * as hmUI from "@zos/ui";
-import { log as Logger } from "@zos/utils";
+import { DeviceLogger } from "../../utils/device-logger";
 import { SHARED_UI_BUILDERS } from "../index.r.layout";
 
-const logger = Logger.getLogger("shared-text-widget");
+const logger = new DeviceLogger("shared-text-widget");
 
 export class TextWidget {
   constructor({

@@ -1,9 +1,9 @@
 import * as hmUI from "@zos/ui";
-import { log as Logger } from "@zos/utils";
 import { PRAYER_ICONS, getPrayerLabel } from "../../../shared/constants";
+import { DeviceLogger } from "../../utils/device-logger";
 import { PRAYER_STATUS_COLORS, UI_BUILDERS } from "../index.r.layout";
 
-const logger = Logger.getLogger("prayer-item-widget");
+const logger = new DeviceLogger("prayer-item-widget");
 
 export class PrayerItemWidget {
   constructor({ parentWidget, pageState, prayer = {}, yOffset = 0 }) {

@@ -1,11 +1,11 @@
 import * as hmUI from "@zos/ui";
-import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../../shared/utils/date-utils";
 import { ButtonWidget, TextWidget } from "../../shared/widgets";
+import { DeviceLogger } from "../../utils/device-logger";
 import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 import { DatePickerWidget } from "./date_picker_widget";
 
-const logger = Logger.getLogger("date-widget");
+const logger = new DeviceLogger("date-widget");
 
 export class DateWidget {
   constructor({ parentWidget, pageState }) {

@@ -9,9 +9,10 @@ import { HomePageState } from "./home_page_state";
 import { LAYOUT } from "./index.r.layout";
 
 import { replace } from "@zos/router";
+import { DeviceLogger } from "../utils/device-logger";
 import { DateWidget, PrayerListWidget } from "./widgets";
 
-const logger = Logger.getLogger("home-page");
+const logger = new DeviceLogger("home-page");
 
 let syncManager = null;
 

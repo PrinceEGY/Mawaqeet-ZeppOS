@@ -1,8 +1,8 @@
 import EasyStorage, { EasyFlashStorage } from "@silver-zepp/easy-storage";
-import { log as Logger } from "@zos/utils";
 import { SYNC_SETTINGS_LIST } from "../../shared/constants";
+import { DeviceLogger } from "./device-logger";
 
-const logger = Logger.getLogger("storage-service");
+const logger = new DeviceLogger("storage-service");
 
 export class StorageService {
   /**

@@ -1,10 +1,11 @@
-import { EventBus, log as Logger } from "@zos/utils";
+import { EventBus } from "@zos/utils";
 import { TIMINGS_LIST } from "../../shared/constants";
 import { DateUtils } from "../../shared/utils/date-utils";
+import { DeviceLogger } from "../utils/device-logger";
 import { PrayersService } from "../utils/prayers-service";
 import { StorageService } from "../utils/storage-service";
 
-const logger = Logger.getLogger("home-page-state");
+const logger = new DeviceLogger("home-page-state");
 
 export class HomePageState {
   constructor() {

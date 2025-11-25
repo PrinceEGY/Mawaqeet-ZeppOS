@@ -1,8 +1,8 @@
 import * as hmUI from "@zos/ui";
-import { log as Logger } from "@zos/utils";
+import { DeviceLogger } from "../../utils/device-logger";
 import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 
-const logger = Logger.getLogger("date-picker-widget");
+const logger = new DeviceLogger("date-picker-widget");
 
 export class DatePickerWidget {
   constructor({ parentWidget, pageState }) {

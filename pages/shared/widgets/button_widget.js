@@ -1,8 +1,8 @@
 import * as hmUI from "@zos/ui";
-import { log as Logger } from "@zos/utils";
+import { DeviceLogger } from "../../utils/device-logger";
 import { DEVICE_WIDTH, SHARED_UI_BUILDERS } from "../index.r.layout";
 
-const logger = Logger.getLogger("shared-button-widget");
+const logger = new DeviceLogger("shared-button-widget");
 
 export class ButtonWidget {
   constructor({
@@ -58,7 +58,7 @@ export class ButtonWidget {
     }
   }
 
-  update({ text, clickHandler, isEnabled, props = {} } = {}) {
+  update({ text, clickHandler, isEnabled, pageIndex, props = {} } = {}) {
     try {
       if (text !== undefined) {
         this.text = text;
@@ -70,6 +70,10 @@ export class ButtonWidget {
 
       if (isEnabled !== undefined) {
         this.isEnabled = isEnabled;
+      }
+
+      if (pageIndex !== undefined) {
+        this.pageIndex = pageIndex;
       }
 
       this.props = { ...this.props, ...props };

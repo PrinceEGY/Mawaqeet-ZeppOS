@@ -1,6 +1,6 @@
-import { log as Logger } from "@zos/utils";
+import { DeviceLogger } from "./device-logger";
 
-const logger = Logger.getLogger("refresh-manager");
+const logger = new DeviceLogger("refresh-manager");
 
 /**
  * RefreshManager - A static refresh system Providing responsive updates at 30fps (~33ms intervals)

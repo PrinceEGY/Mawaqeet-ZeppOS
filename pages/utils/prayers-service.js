@@ -1,8 +1,8 @@
-import { log as Logger } from "@zos/utils";
 import { DateUtils } from "../../shared/utils/date-utils";
+import { DeviceLogger } from "./device-logger";
 import { StorageService } from "./storage-service";
 
-const logger = Logger.getLogger("prayers-service");
+const logger = new DeviceLogger("prayers-service");
 
 const storage = new StorageService("file", "prayer-times");
 

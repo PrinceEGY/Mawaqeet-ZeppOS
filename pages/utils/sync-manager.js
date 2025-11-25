@@ -1,8 +1,8 @@
-import { log as Logger } from "@zos/utils";
+import { DeviceLogger } from "./device-logger";
 import { PrayersService } from "./prayers-service";
 import { StorageService } from "./storage-service";
 
-const logger = Logger.getLogger("sync-manager");
+const logger = new DeviceLogger("sync-manager");
 const storage = new StorageService();
 
 export class SyncManager {

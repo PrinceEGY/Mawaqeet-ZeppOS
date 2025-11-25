@@ -1,9 +1,10 @@
 import * as hmUI from "@zos/ui";
-import { log as Logger, px } from "@zos/utils";
+import { px } from "@zos/utils";
+import { DeviceLogger } from "../../utils/device-logger";
 import { UI_BUILDERS } from "../index.r.layout";
 import { PrayerItemWidget } from "./prayer_item_widget";
 
-const logger = Logger.getLogger("prayer-list-widget");
+const logger = new DeviceLogger("prayer-list-widget");
 
 export class PrayerListWidget {
   constructor({ parentWidget, pageState }) {
