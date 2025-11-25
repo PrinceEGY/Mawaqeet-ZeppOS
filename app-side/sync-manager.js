@@ -1,8 +1,7 @@
-import { settingsLib } from "@zeppos/zml/base-side";
 import _ from "lodash";
 import { StorageService } from "../shared/utils/storage-service";
 
-const storageService = new StorageService(settingsLib);
+const storageService = new StorageService(settings.settingsStorage);
 
 export class SyncManager {
   constructor() {
@@ -46,6 +45,7 @@ export class SyncManager {
         },
         null
       );
+      this.activeRequestKeys.delete(key);
       return;
     }
 
@@ -83,6 +83,8 @@ export class SyncManager {
         },
         null
       );
+    } finally {
+      this.activeRequestKeys.delete(key);
     }
   }
 
