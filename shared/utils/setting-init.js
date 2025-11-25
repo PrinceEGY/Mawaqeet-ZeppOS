@@ -15,10 +15,7 @@ export class SettingInitializer {
     this.isInitializing = true;
 
     try {
-      storageService.setItem("navState", {
-        currentPage: "main",
-        history: [],
-      });
+      this.initNavState(storageService);
       this.initLocationSettings(storageService);
       this.initFetchingSettings(storageService);
       this.initPrayerSettings(storageService);
@@ -30,6 +27,13 @@ export class SettingInitializer {
     } finally {
       this.isInitializing = false;
     }
+  }
+
+  static initNavState(storageService) {
+    storageService.setItem("navState", {
+      currentPage: "main",
+      history: [],
+    });
   }
 
   static initLocationSettings(storageService) {

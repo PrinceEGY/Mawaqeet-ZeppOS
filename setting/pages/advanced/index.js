@@ -262,7 +262,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
               marginBottom: SPACING.md,
             },
           },
-          gettext("calc_method_page_desc")
+          gettext("reset_settings_desc")
         ),
         Button({
           label: gettext("reset_settings_btn"),
@@ -270,7 +270,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           onClick: () => {
             props.storageService.clear();
             SettingInitializer.resetSessionFlag();
-            SettingInitializer.initDefaultSettings(props.storageService);
+            SettingInitializer.initNavState(props.storageService);
             console.log("Settings reset to default.");
           },
         }),
