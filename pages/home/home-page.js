@@ -1,37 +1,26 @@
 import * as hmUI from "@zos/ui";
 import { DateUtils } from "../../shared/utils/date-utils";
+import { BasePage } from "../shared/base_page";
 import { TextWidget } from "../shared/widgets";
-import { DeviceLogger } from "../utils/device-logger";
 import { HomePageState } from "./home_page_state";
 import { LAYOUT } from "./index.r.layout";
 import { DateWidget, PrayerListWidget } from "./widgets";
 
-const logger = new DeviceLogger("home-page");
-
-export class HomePage {
+export class HomePage extends BasePage {
   constructor(globalState) {
-    this.globalState = globalState;
-    this.pageState = null;
-    this.widgets = {};
+    super(globalState);
     this.scrollbar = null;
-    this.isBuilt = false;
-    this.isVisible = false;
-
     this.onRefresh = this.onRefresh.bind(this);
   }
 
-  init() {
+  onInit() {
     this.pageState = new HomePageState(this.globalState);
     this.pageState.updateEnabledPrayers();
     this.pageState.loadCurrentLocation();
     this.globalState.on("refresh", this.onRefresh);
-    logger.debug("HomePage initialized");
   }
 
-  build() {
-    if (this.isBuilt) return;
-    logger.debug("Building HomePage");
-
+  onBuild() {
     this.widgets = {
       date: new DateWidget({
         pageState: this.pageState,
@@ -50,67 +39,27 @@ export class HomePage {
         pageState: this.pageState,
       }),
     };
+  }
 
-    Object.values(this.widgets).forEach((widget) => widget.build());
-
+  onShow() {
     this.scrollbar = hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
       target: this.widgets.prayerList.widget,
     });
-
-    this.isBuilt = true;
-    logger.debug("HomePage built");
   }
 
-  show() {
-    if (!this.isBuilt || this.isVisible) return;
-    logger.debug("Showing HomePage");
-
-    Object.values(this.widgets).forEach((widget) => widget.show());
-    this.isVisible = true;
-  }
-
-  hide() {
-    if (!this.isVisible) return;
-    logger.debug("Hiding HomePage");
-
-    Object.values(this.widgets).forEach((widget) => widget.hide());
-    this.isVisible = false;
-  }
-
-  update() {
-    if (!this.isBuilt) return;
-    logger.debug("Updating HomePage");
-
+  onUpdate() {
     this.pageState.loadCurrentLocation();
     this.pageState.updateEnabledPrayers();
     this.pageState.loadPrayers();
-    Object.values(this.widgets).forEach((widget) => {
-      if (widget.updateView) widget.updateView();
-    });
   }
 
-  destroy() {
-    logger.debug("Destroying HomePage");
-
+  onDestroy() {
     this.globalState.off("refresh", this.onRefresh);
-
-    Object.values(this.widgets).forEach((widget) => {
-      try {
-        widget.destroy();
-      } catch (e) {
-        logger.error("Error destroying widget:", e);
-      }
-    });
 
     if (this.scrollbar) {
       hmUI.deleteWidget(this.scrollbar);
       this.scrollbar = null;
     }
-
-    this.pageState.destroy();
-    this.widgets = {};
-    this.isBuilt = false;
-    this.isVisible = false;
   }
 
   onRefresh() {

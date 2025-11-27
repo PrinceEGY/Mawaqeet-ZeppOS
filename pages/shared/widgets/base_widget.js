@@ -69,28 +69,28 @@ export class BaseWidget {
   // ─── SUBCLASS IMPLEMENTS (override these) ───
 
   onBuild() {
-    throw new Error("Subclass must implement onBuild()");
+    // create widgets, etc.
   }
 
   onUpdateView() {
-    throw new Error("Subclass must implement onUpdateView()");
+    //  sync state to UI elements.
   }
 
   // eslint-disable-next-line no-unused-vars
   onUpdate(props) {
-    // Optional: subclass can override to merge props
+    // subclass can override to merge props
   }
 
   onDestroy() {
-    // Optional: subclass can override for cleanup (unbind events, destroy children)
+    // subclass can override for cleanup (unbind events, destroy children)
   }
 
   onShow() {
-    // Optional: subclass can override for extra show logic
+    // subclass can override for extra show logic
   }
 
   onHide() {
-    // Optional: subclass can override for extra hide logic
+    // subclass can override for extra hide logic
   }
 
   // ─── PRIVATE HELPERS ───
