@@ -4,7 +4,14 @@ import { StorageService } from "./storage-service";
 
 const logger = new DeviceLogger("prayers-service");
 
-const storage = new StorageService("file", "prayer-times");
+let storage = null;
+
+function getStorage() {
+  if (!storage) {
+    storage = new StorageService("file", "prayer-times");
+  }
+  return storage;
+}
 
 export class PrayersService {
   static getDayPrayerTimes(date = new Date()) {
@@ -12,12 +19,12 @@ export class PrayersService {
     if (!parsedDate) return null;
 
     const key = DateUtils.dateToDateString(parsedDate);
-    if (!storage.hasItem(key)) {
+    if (!getStorage().hasItem(key)) {
       logger.error(`No prayer times found for date: ${key}`);
       return null;
     }
 
-    const timings = storage.getItem(key);
+    const timings = getStorage().getItem(key);
     return { date: parsedDate, timings };
   }
 
@@ -108,14 +115,16 @@ export class PrayersService {
       const data = JSON.parse(dataString);
 
       data.forEach((item) => {
-        storage.setItem(item.date, item.timings, {
+        getStorage().setItem(item.date, item.timings, {
           timestamp: Date.now(),
           markForPush,
         });
       });
 
       logger.debug(
-        `${storage.getAllKeys().length} prayer times saved in local storage.`
+        `${
+          getStorage().getAllKeys().length
+        } prayer times saved in local storage.`
       );
       logger.info("Prayer times data set in local storage.");
       return true;
@@ -126,11 +135,11 @@ export class PrayersService {
   }
 
   static clear() {
-    storage.clear();
+    getStorage().clear();
   }
 
   static hasPrayerTimesData() {
-    const keys = storage.getAllKeys();
+    const keys = getStorage().getAllKeys();
     return keys && keys.length > 0;
   }
 
@@ -140,9 +149,16 @@ export class PrayersService {
     }
 
     const today = DateUtils.dateToDateString(currentDate);
-    const keys = storage.getAllKeys();
+    const keys = getStorage().getAllKeys();
 
     return !keys.includes(today);
+  }
+
+  static destroy() {
+    if (storage) {
+      storage.destroy();
+      storage = null;
+    }
   }
 
   static _parseDate(date) {

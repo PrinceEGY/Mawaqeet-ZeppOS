@@ -3,12 +3,14 @@ import { TIMINGS_LIST } from "../../shared/constants";
 import { DateUtils } from "../../shared/utils/date-utils";
 import { DeviceLogger } from "../utils/device-logger";
 import { PrayersService } from "../utils/prayers-service";
-import { StorageService } from "../utils/storage-service";
 
 const logger = new DeviceLogger("home-page-state");
 
 export class HomePageState {
-  constructor() {
+  constructor(globalState) {
+    this.globalState = globalState;
+    this.storage = globalState.storage;
+    this.eventBus = new EventBus();
     this.state = {
       currentDate: new Date(),
       prayers: [],
@@ -18,21 +20,14 @@ export class HomePageState {
       isDataLoaded: false,
       currentLocation: null,
     };
-
-    this.storage = new StorageService();
-    this.eventBus = new EventBus();
-    this.updateEnabledPrayers();
-    this.loadCurrentLocation();
   }
 
   on(eventName, listener) {
     this.eventBus.on(eventName, listener);
-    logger.debug(`Listener registered for event: ${eventName}`);
   }
 
   off(eventName, listener) {
     this.eventBus.off(eventName, listener);
-    logger.debug(`Listener removed for event: ${eventName}`);
   }
 
   emit(eventName, ...args) {
@@ -66,7 +61,7 @@ export class HomePageState {
       prayers: this.getPrayers(),
     });
 
-    this.emit("prayersChanged", {
+    this.emit("prayersChange", {
       prayers: this.getPrayers(),
     });
 
@@ -176,15 +171,7 @@ export class HomePageState {
   loadCurrentLocation() {
     try {
       const location = this.storage.getItem("currentLocation");
-      const oldLocation = this.state.currentLocation;
       this.state.currentLocation = location || "Unknown";
-
-      if (oldLocation !== this.state.currentLocation) {
-        this.emit("locationChanged", {
-          currentLocation: this.getCurrentLocation(),
-        });
-        logger.debug(`Location changed to: ${this.state.currentLocation}`);
-      }
     } catch (error) {
       this.state.currentLocation = "Unknown";
       logger.error(`Failed to load location: ${error}`);
@@ -222,6 +209,8 @@ export class HomePageState {
     this.eventBus.clear();
     this.clearPrayersCache();
     this.state = null;
+    this.globalState = null;
+    this.storage = null;
     logger.debug("HomePageState destroyed");
   }
 }

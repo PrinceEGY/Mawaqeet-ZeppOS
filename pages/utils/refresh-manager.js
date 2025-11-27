@@ -16,6 +16,10 @@ export class RefreshManager {
       return;
     }
 
+    if (this.refreshCallback) {
+      logger.warn("RefreshManager: Overwriting existing callback");
+    }
+
     this.refreshCallback = callback;
 
     if (!this.isRunning) {

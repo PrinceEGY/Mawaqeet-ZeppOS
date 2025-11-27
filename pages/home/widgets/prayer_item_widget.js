@@ -1,115 +1,133 @@
 import * as hmUI from "@zos/ui";
 import { PRAYER_ICONS, getPrayerLabel } from "../../../shared/constants";
-import { DeviceLogger } from "../../utils/device-logger";
-import { PRAYER_STATUS_COLORS, UI_BUILDERS } from "../index.r.layout";
+import { BaseWidget, TextWidget } from "../../shared/widgets";
+import { LAYOUT, PRAYER_STATUS_COLORS, UI_BUILDERS } from "../index.r.layout";
 
-const logger = new DeviceLogger("prayer-item-widget");
-
-export class PrayerItemWidget {
+export class PrayerItemWidget extends BaseWidget {
   constructor({ parentWidget, pageState, prayer = {}, yOffset = 0 }) {
-    this.parentWidget = parentWidget;
-    this.pageState = pageState;
-    this.state = {
-      prayer: prayer,
-      yOffset: yOffset,
-      isBuilt: false,
-    };
-    this.widget = null;
+    super({ parentWidget, pageState });
+    this.prayer = prayer;
+    this.yOffset = yOffset;
+
+    this.icon = null;
+    this.nameText = null;
+    this.timeText = null;
+    this.remainingText = null;
   }
 
-  build() {
-    try {
-      if (this.state.isBuilt) {
-        logger.debug("Widget already built");
-        return;
-      }
+  onBuild() {
+    this.widget = UI_BUILDERS.createGroup({
+      parentWidget: this.parentWidget,
+      layout: LAYOUT.PRAYER_ITEM,
+      props: { y: this.yOffset },
+    });
 
-      this.widget = UI_BUILDERS.createPrayerItem({
-        parentWidget: this.parentWidget,
-        prayer: this.state.prayer,
-        yOffset: this.state.yOffset,
-      });
-
-      this.state.isBuilt = true;
-    } catch (error) {
-      this.handleError("Failed to build prayer item widget", error);
-    }
+    this._buildChildWidgets();
   }
 
-  update({ prayer } = {}) {
-    try {
-      if (!this.state.isBuilt) {
-        this.build();
-      }
-
-      if (prayer !== undefined) {
-        this.state.prayer = prayer;
-      }
-
-      this.updateView();
-    } catch (error) {
-      this.handleError("Failed to update prayer item widget", error);
-    }
+  onUpdate({ prayer } = {}) {
+    if (prayer !== undefined) this.prayer = prayer;
   }
 
-  updateView() {
-    if (!this.widget) return;
-
-    const prayer = this.state.prayer;
+  onUpdateView() {
     const colors =
-      PRAYER_STATUS_COLORS[prayer.status] || PRAYER_STATUS_COLORS.upcoming;
+      PRAYER_STATUS_COLORS[this.prayer.status] || PRAYER_STATUS_COLORS.upcoming;
 
-    this.widget.name.setProperty(hmUI.prop.TEXT, getPrayerLabel(prayer.name));
-    this.widget.name.setProperty(hmUI.prop.COLOR, colors.name);
+    this.icon.setProperty(
+      hmUI.prop.SRC,
+      PRAYER_ICONS[this.prayer.name] || PRAYER_ICONS.fajr
+    );
 
-    this.widget.time.setProperty(hmUI.prop.TEXT, prayer.time);
-    this.widget.time.setProperty(hmUI.prop.COLOR, colors.time);
+    this.nameText.update({
+      text: getPrayerLabel(this.prayer.name),
+      props: { color: colors.name },
+    });
 
-    const timeRemaining = this.calculateTimeRemaining(prayer.timestamp);
-    this.widget.remaining.setProperty(hmUI.prop.TEXT, timeRemaining);
-    this.widget.remaining.setProperty(hmUI.prop.COLOR, colors.remaining);
+    this.timeText.update({
+      text: this.prayer.time,
+      props: { color: colors.time },
+    });
 
-    const iconPath = PRAYER_ICONS[prayer.name] || PRAYER_ICONS.fajr;
-    this.widget.icon.setProperty(hmUI.prop.SRC, iconPath);
+    this.remainingText.update({
+      text: this._calculateTimeRemaining(this.prayer.timestamp),
+      props: { color: colors.remaining },
+    });
   }
 
-  calculateTimeRemaining(prayerTimestamp, now = new Date()) {
-    try {
-      const prayerTime = new Date(prayerTimestamp);
-      const timeDiff = prayerTime - now;
+  onDestroy() {
+    this.nameText?.destroy();
+    this.timeText?.destroy();
+    this.remainingText?.destroy();
 
-      if (timeDiff <= 0) {
-        return "--:--:--";
-      }
+    if (this.icon) hmUI.deleteWidget(this.icon);
 
-      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-      const hoursStr = hours.toString().padStart(2, "0");
-      const minutesStr = minutes.toString().padStart(2, "0");
-      const secondsStr = seconds.toString().padStart(2, "0");
-
-      return `${hoursStr}:${minutesStr}:${secondsStr}`;
-    } catch (error) {
-      logger.error(`Error calculating time remaining: ${error}`);
-      return "--:--:--";
-    }
+    this.icon = null;
+    this.nameText = null;
+    this.timeText = null;
+    this.remainingText = null;
   }
 
-  handleError(message, error) {
-    logger.error(`${message}: ${error}`);
+  updateRemainingTime(now = new Date()) {
+    if (!this.state.isBuilt) return;
+
+    const timeRemaining = this._calculateTimeRemaining(
+      this.prayer.timestamp,
+      now
+    );
+    this.remainingText.update({ text: timeRemaining });
   }
 
-  destroy() {
-    try {
-      if (this.widget) {
-        hmUI.deleteWidget(this.widget);
-      }
-      this.widget = null;
-      this.state.isBuilt = false;
-    } catch (error) {
-      this.handleError("Failed to destroy prayer item widget", error);
-    }
+  _buildChildWidgets() {
+    const colors =
+      PRAYER_STATUS_COLORS[this.prayer.status] || PRAYER_STATUS_COLORS.upcoming;
+
+    this.icon = this.widget.createWidget(hmUI.widget.IMG, {
+      ...LAYOUT.PRAYER_ITEM.ICON,
+      src: PRAYER_ICONS[this.prayer.name] || PRAYER_ICONS.fajr,
+    });
+
+    this.nameText = new TextWidget({
+      parentWidget: this.widget,
+      pageState: this.pageState,
+      layout: LAYOUT.PRAYER_ITEM.NAME,
+      text: getPrayerLabel(this.prayer.name),
+      props: { color: colors.name },
+    });
+    this.nameText.build();
+
+    this.timeText = new TextWidget({
+      parentWidget: this.widget,
+      pageState: this.pageState,
+      layout: LAYOUT.PRAYER_ITEM.TIME,
+      text: this.prayer.time,
+      props: { color: colors.time },
+    });
+    this.timeText.build();
+
+    this.remainingText = new TextWidget({
+      parentWidget: this.widget,
+      pageState: this.pageState,
+      layout: LAYOUT.PRAYER_ITEM.REMAINING,
+      text: this._calculateTimeRemaining(this.prayer.timestamp),
+      props: { color: colors.remaining },
+    });
+    this.remainingText.build();
+  }
+
+  _calculateTimeRemaining(prayerTimestamp, now = new Date()) {
+    const prayerTime = new Date(prayerTimestamp);
+    const timeDiff = prayerTime - now;
+
+    if (timeDiff <= 0) return "--:--:--";
+
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+    const hoursStr = hours.toString().padStart(2, "0");
+    const minutesStr = minutes.toString().padStart(2, "0");
+    const secondsStr = seconds.toString().padStart(2, "0");
+
+    return `${hoursStr}:${minutesStr}:${secondsStr}`;
   }
 }

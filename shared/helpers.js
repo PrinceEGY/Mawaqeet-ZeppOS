@@ -4,10 +4,18 @@ export async function sleep(ms) {
 
 export function debounce(func, delay) {
   let timeoutId;
-  return function (...args) {
+
+  function debounced(...args) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func.apply(this, args), delay);
+  }
+
+  debounced.cancel = function () {
+    clearTimeout(timeoutId);
+    timeoutId = null;
   };
+
+  return debounced;
 }
 
 export function debounceAsync(func, delay) {

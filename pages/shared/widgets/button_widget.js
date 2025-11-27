@@ -1,131 +1,82 @@
 import * as hmUI from "@zos/ui";
-import { DeviceLogger } from "../../utils/device-logger";
 import { DEVICE_WIDTH, SHARED_UI_BUILDERS } from "../index.r.layout";
+import { BaseWidget } from "./base_widget";
 
-const logger = new DeviceLogger("shared-button-widget");
-
-export class ButtonWidget {
+export class ButtonWidget extends BaseWidget {
   constructor({
     parentWidget,
     pageState,
-    text,
     layout,
+    text,
+    clickHandler = null,
+    isEnabled = true,
     disabledLayout = null,
     pageIndex = 0,
     props = {},
-    clickHandler = null,
-    isEnabled = true,
   }) {
-    this.parentWidget = parentWidget;
-    this.pageState = pageState;
-    this.text = text;
+    super({ parentWidget, pageState });
     this.layout = layout;
+    this.text = text !== undefined ? text : layout.text || "";
+    this.clickHandler = clickHandler;
+    this.isEnabled = isEnabled;
     this.disabledLayout = disabledLayout;
     this.pageIndex = pageIndex;
     this.props = props;
-    this.clickHandler = clickHandler;
-    this.isEnabled = isEnabled;
-    this.state = {
-      isBuilt: false,
+  }
+
+  onBuild() {
+    const currentLayout = this.isEnabled
+      ? this.layout
+      : this.disabledLayout || this.layout;
+
+    this.widget = SHARED_UI_BUILDERS.createButton({
+      parentWidget: this.parentWidget,
+      layout: currentLayout,
+      text: this.text,
+      pageIndex: this.pageIndex,
+      props: this.props,
+    });
+
+    if (this.isEnabled && this.clickHandler) {
+      this.widget.addEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+    }
+  }
+
+  onUpdate({ text, clickHandler, isEnabled, pageIndex, props = {} } = {}) {
+    if (text !== undefined) this.text = text;
+    if (clickHandler !== undefined) {
+      if (this.widget && this.clickHandler) {
+        this.widget.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+      }
+      this.clickHandler = clickHandler;
+      if (this.widget && this.clickHandler && this.isEnabled) {
+        this.widget.addEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+      }
+    }
+    if (isEnabled !== undefined) this.isEnabled = isEnabled;
+    if (pageIndex !== undefined) this.pageIndex = pageIndex;
+    this.props = { ...this.props, ...props };
+  }
+
+  onUpdateView() {
+    const currentLayout = this.isEnabled
+      ? this.layout
+      : this.disabledLayout || this.layout;
+
+    const finalProps = {
+      ...currentLayout,
+      x: currentLayout.x + (this.pageIndex || 0) * DEVICE_WIDTH,
+      ...this.props,
+      text: this.text,
     };
-    this.widget = null;
+
+    this.widget.setProperty(hmUI.prop.MORE, finalProps);
   }
 
-  build() {
-    try {
-      if (this.state.isBuilt) {
-        logger.debug("Widget already built");
-        return;
-      }
-
-      const currentLayout = this.isEnabled
-        ? this.layout
-        : this.disabledLayout || this.layout;
-      const currentClickHandler = this.isEnabled ? this.clickHandler : null;
-
-      this.widget = SHARED_UI_BUILDERS.createButton({
-        parentWidget: this.parentWidget,
-        layout: currentLayout,
-        text: this.text,
-        clickHandler: currentClickHandler,
-        pageIndex: this.pageIndex,
-        props: this.props,
-      });
-
-      this.state.isBuilt = true;
-    } catch (error) {
-      this.handleError("Failed to build button widget", error);
+  onDestroy() {
+    if (this.widget && this.clickHandler) {
+      this.widget.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
     }
-  }
-
-  update({ text, clickHandler, isEnabled, pageIndex, props = {} } = {}) {
-    try {
-      if (text !== undefined) {
-        this.text = text;
-      }
-
-      if (clickHandler !== undefined) {
-        this.clickHandler = clickHandler;
-      }
-
-      if (isEnabled !== undefined) {
-        this.isEnabled = isEnabled;
-      }
-
-      if (pageIndex !== undefined) {
-        this.pageIndex = pageIndex;
-      }
-
-      this.props = { ...this.props, ...props };
-
-      if (!this.state.isBuilt) {
-        this.build();
-        return;
-      }
-
-      this.updateView();
-    } catch (error) {
-      this.handleError("Failed to update button widget", error);
-    }
-  }
-
-  updateView() {
-    try {
-      if (!this.widget) return;
-
-      const currentLayout = this.isEnabled
-        ? this.layout
-        : this.disabledLayout || this.layout;
-      const currentClickHandler = this.isEnabled ? this.clickHandler : null;
-
-      const finalProps = {
-        ...currentLayout,
-        x: currentLayout.x + (this.pageIndex || 0) * DEVICE_WIDTH,
-        ...this.props,
-        text: this.text,
-        click_func: currentClickHandler,
-      };
-
-      this.widget.setProperty(hmUI.prop.MORE, finalProps);
-    } catch (error) {
-      this.handleError("Failed to update button view", error);
-    }
-  }
-
-  handleError(message, error) {
-    logger.error(`${message}: ${error}`);
-  }
-
-  destroy() {
-    try {
-      if (this.widget) {
-        hmUI.deleteWidget(this.widget);
-      }
-      this.widget = null;
-      this.state.isBuilt = false;
-      this.clickHandler = null;
-    } catch (error) {
-      this.handleError("Failed to destroy button widget", error);
-    }
+    this.clickHandler = null;
   }
 }

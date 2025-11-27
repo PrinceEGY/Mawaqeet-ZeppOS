@@ -26,7 +26,6 @@ export const SHARED_UI_BUILDERS = {
     parentWidget = hmUI,
     layout,
     text,
-    clickHandler = null,
     pageIndex = 0,
     props = {},
   }) => {
@@ -34,7 +33,6 @@ export const SHARED_UI_BUILDERS = {
       ...layout,
       x: layout.x + (pageIndex || 0) * DEVICE_WIDTH,
       text,
-      click_func: clickHandler,
       ...props,
     };
 
@@ -53,5 +51,30 @@ export const SHARED_UI_BUILDERS = {
       w: px(10),
       h: height,
     });
+  },
+
+  createGroup: ({ parentWidget = hmUI, layout, pageIndex = 0, props = {} }) => {
+    const finalProps = {
+      ...layout,
+      x: (layout.x || 0) + (pageIndex || 0) * DEVICE_WIDTH,
+      ...props,
+    };
+
+    return parentWidget.createWidget(hmUI.widget.GROUP, finalProps);
+  },
+
+  createViewContainer: ({
+    parentWidget = hmUI,
+    layout,
+    pageIndex = 0,
+    props = {},
+  }) => {
+    const finalProps = {
+      ...layout,
+      x: (layout.x || 0) + (pageIndex || 0) * DEVICE_WIDTH,
+      ...props,
+    };
+
+    return parentWidget.createWidget(hmUI.widget.VIEW_CONTAINER, finalProps);
   },
 };

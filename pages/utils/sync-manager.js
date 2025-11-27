@@ -1,17 +1,18 @@
 import { DeviceLogger } from "./device-logger";
 import { PrayersService } from "./prayers-service";
-import { StorageService } from "./storage-service";
 
 const logger = new DeviceLogger("sync-manager");
-const storage = new StorageService();
 
 export class SyncManager {
-  constructor(request, call) {
+  constructor(request, call, storage) {
     this.request = request;
     this.call = call;
+    this.storage = storage;
     this.activePullKeys = new Set(); // Keys currently being pulled
     this.activePushKeys = new Set(); // Keys currently being pushed
+    this.syncCheckInterval = null;
   }
+
   /**
    * Pull data from setting app for specified keys
    * @param {string|string[]} keys - Optional single key or array of keys to pull. If not provided, fetches pending pull keys from setting app.
@@ -95,10 +96,15 @@ export class SyncManager {
 
     this.pullFromSettingApp();
 
+    if (this.syncCheckInterval) {
+      clearInterval(this.syncCheckInterval);
+    }
+
     // Wait for pull operations to complete
-    const checkInterval = setInterval(() => {
+    this.syncCheckInterval = setInterval(() => {
       if (this.activePullKeys.size === 0) {
-        clearInterval(checkInterval);
+        clearInterval(this.syncCheckInterval);
+        this.syncCheckInterval = null;
 
         this.pushToSettingApp();
       }
@@ -106,12 +112,12 @@ export class SyncManager {
   }
 
   getPendingPush() {
-    const pendingPush = storage.getItem("pendingPush");
+    const pendingPush = this.storage.getItem("pendingPush");
     return pendingPush || [];
   }
 
   setPendingPush(pendingPush) {
-    storage.setItem("pendingPush", pendingPush);
+    this.storage.setItem("pendingPush", pendingPush);
   }
 
   addToPendingPush(key) {
@@ -132,11 +138,13 @@ export class SyncManager {
   }
 
   clearPendingPush() {
-    storage.removeItem("pendingPush");
+    this.storage.removeItem("pendingPush");
   }
 
   removePendingPushIfUnchanged(key, originalValue) {
-    const currentStorageItem = storage.getItem(key, { returnTimestamp: true });
+    const currentStorageItem = this.storage.getItem(key, {
+      returnTimestamp: true,
+    });
     const currentValue = currentStorageItem?.data;
 
     const originalStr = JSON.stringify(originalValue);
@@ -149,13 +157,26 @@ export class SyncManager {
     return false;
   }
 
+  destroy() {
+    if (this.syncCheckInterval) {
+      clearInterval(this.syncCheckInterval);
+      this.syncCheckInterval = null;
+    }
+    this.activePullKeys.clear();
+    this.activePushKeys.clear();
+    this.request = null;
+    this.call = null;
+    this.storage = null;
+    logger.debug("SyncManager destroyed");
+  }
+
   _normalizeKeys(keys) {
     if (!keys) return [];
     return Array.isArray(keys) ? keys : [keys];
   }
 
   _pushKey(key) {
-    const currentValue = storage.getItem(key, { returnTimestamp: true });
+    const currentValue = this.storage.getItem(key, { returnTimestamp: true });
     if (!currentValue || currentValue.data === undefined) {
       logger.debug(`No data found for key: ${key}, removing from pending push`);
       this.removePendingPushIfUnchanged(key, currentValue?.data);
@@ -189,10 +210,12 @@ export class SyncManager {
   _pullKey(key) {
     this.request({ method: `pull.${key}`, params: {} })
       .then((res) => {
-        const currentValue = storage.getItem(key, { returnTimestamp: true });
+        const currentValue = this.storage.getItem(key, {
+          returnTimestamp: true,
+        });
 
         if (!currentValue || currentValue.timestamp < res.timestamp) {
-          storage.setItem(key, res.data, {
+          this.storage.setItem(key, res.data, {
             timestamp: res.timestamp,
             markForPush: false,
           });
@@ -219,7 +242,9 @@ export class SyncManager {
           return;
         }
 
-        const currentValue = storage.getItem(key, { returnTimestamp: true });
+        const currentValue = this.storage.getItem(key, {
+          returnTimestamp: true,
+        });
         if (currentValue && currentValue.timestamp >= timestamp) {
           logger.info("Local prayer times is newer, skipping pull!");
           return;

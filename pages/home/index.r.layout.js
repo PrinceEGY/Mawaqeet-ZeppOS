@@ -1,7 +1,6 @@
 import { getDeviceInfo } from "@zos/device";
 import * as hmUI from "@zos/ui";
 import { px } from "@zos/utils";
-import { PRAYER_ICONS, getPrayerLabel } from "../../shared/constants";
 import { SHARED_UI_BUILDERS } from "../shared/index.r.layout";
 
 export const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
@@ -177,8 +176,8 @@ export const LAYOUT = {
       h: px(60),
       text_size: px(24),
       color: 0xffffff,
-      normal_color: 0x00ff00,
-      press_color: 0x00aa00,
+      normal_color: 0x00aa00,
+      press_color: 0x007700,
       radius: px(10),
       text: "Confirm",
     },
@@ -200,71 +199,19 @@ export const LAYOUT = {
 
 export const UI_BUILDERS = {
   createText: SHARED_UI_BUILDERS.createText,
-
   createSpacer: SHARED_UI_BUILDERS.createSpacer,
+  createGroup: SHARED_UI_BUILDERS.createGroup,
+  createViewContainer: SHARED_UI_BUILDERS.createViewContainer,
 
-  createDateContainer: ({ parentWidget = hmUI }) => {
-    return parentWidget.createWidget(hmUI.widget.GROUP, {
-      ...LAYOUT.DATE_NAVIGATION.CONTAINER,
-    });
-  },
-
-  createPrayersContainer: ({ parentWidget = hmUI }) => {
-    return parentWidget.createWidget(hmUI.widget.VIEW_CONTAINER, {
-      ...LAYOUT.PRAYERS_CONTAINER,
-    });
-  },
-
-  createPrayerItem: ({ parentWidget = hmUI, prayer, yOffset }) => {
-    const colors =
-      PRAYER_STATUS_COLORS[prayer.status] || PRAYER_STATUS_COLORS.upcoming;
-
-    const prayerGroup = parentWidget.createWidget(hmUI.widget.GROUP, {
-      ...LAYOUT.PRAYER_ITEM,
-      y: yOffset,
-    });
-
-    const icon = prayerGroup.createWidget(hmUI.widget.IMG, {
-      ...LAYOUT.PRAYER_ITEM.ICON,
-      src: PRAYER_ICONS[prayer.name] || PRAYER_ICONS.fajr,
-    });
-
-    const name = prayerGroup.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.PRAYER_ITEM.NAME,
-      text: getPrayerLabel(prayer.name),
-      color: colors.name,
-    });
-
-    const time = prayerGroup.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.PRAYER_ITEM.TIME,
-      text: prayer.time,
-      color: colors.time,
-    });
-
-    const remaining = prayerGroup.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.PRAYER_ITEM.REMAINING,
-      text: prayer.remaining,
-      color: colors.remaining,
-    });
-
-    return { group: prayerGroup, icon, name, time, remaining };
-  },
-
-  createDatePickerUI: ({
-    parentWidget,
-    currentDate,
-    dateRange,
-    onConfirm,
-    onCancel,
-  }) => {
-    parentWidget.createWidget(hmUI.widget.FILL_RECT, {
+  createDatePicker: ({ parentWidget, currentDate, dateRange }) => {
+    const backgroundRect = parentWidget.createWidget(hmUI.widget.FILL_RECT, {
       x: 0,
       y: 100,
       w: DEVICE_WIDTH,
       h: DEVICE_HEIGHT,
     });
 
-    const datePicker = parentWidget.createWidget(hmUI.widget.PICK_DATE, {
+    const picker = parentWidget.createWidget(hmUI.widget.PICK_DATE, {
       ...LAYOUT.DATE_PICKER.PICKER,
       startYear: dateRange.startYear,
       endYear: dateRange.endYear,
@@ -273,28 +220,6 @@ export const UI_BUILDERS = {
       initDay: currentDate.getDate(),
     });
 
-    const hintText = `Prayer times are available from (${dateRange.startDate.toLocaleDateString()} - ${dateRange.endDate.toLocaleDateString()})`;
-
-    const hint = parentWidget.createWidget(hmUI.widget.TEXT, {
-      ...LAYOUT.DATE_PICKER.HINT_TEXT,
-      text: hintText,
-    });
-
-    const confirmButton = parentWidget.createWidget(hmUI.widget.BUTTON, {
-      ...LAYOUT.DATE_PICKER.CONFIRM_BUTTON,
-      click_func: onConfirm,
-    });
-
-    const cancelButton = parentWidget.createWidget(hmUI.widget.BUTTON, {
-      ...LAYOUT.DATE_PICKER.CANCEL_BUTTON,
-      click_func: onCancel,
-    });
-
-    return {
-      datePicker,
-      hint,
-      confirmButton,
-      cancelButton,
-    };
+    return { picker, backgroundRect };
   },
 };

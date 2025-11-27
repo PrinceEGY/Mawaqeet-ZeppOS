@@ -1,4 +1,5 @@
 import EasyStorage, { EasyFlashStorage } from "@silver-zepp/easy-storage";
+import { EventBus } from "@zos/utils";
 import { SYNC_SETTINGS_LIST } from "../../shared/constants";
 import { DeviceLogger } from "./device-logger";
 
@@ -18,6 +19,19 @@ export class StorageService {
   constructor(type = "memory", directory) {
     this.type = this.validateStorageType(type);
     this.storage = this.initializeStorage(this.type, directory);
+    this.eventBus = new EventBus();
+  }
+
+  on(eventName, listener) {
+    this.eventBus.on(eventName, listener);
+  }
+
+  off(eventName, listener) {
+    this.eventBus.off(eventName, listener);
+  }
+
+  emit(eventName, ...args) {
+    this.eventBus.emit(eventName, ...args);
   }
 
   validateStorageType(type) {
@@ -78,6 +92,9 @@ export class StorageService {
 
       this.storage.setKey(key, finalValue);
       logger.debug(`Set item for key "${key}":`, finalValue);
+
+      this.emit("change", { key, value, timestamp });
+
       if (markForPush) {
         this._addKeyToPendingPush(key);
       }
@@ -143,5 +160,16 @@ export class StorageService {
     const currentTime = Date.now();
     const elapsedTime = currentTime - item.timestamp;
     return elapsedTime > intervalMs;
+  }
+
+  destroy() {
+    this.eventBus.clear();
+
+    if (this.type === "memory" && this.storage.saveAll) {
+      this.storage.saveAll();
+    }
+
+    this.storage = null;
+    this.eventBus = null;
   }
 }
