@@ -207,6 +207,10 @@ export class SyncManager {
     this.removePendingPullIfUnchanged(key, value.data);
   }
 
+  isSyncing() {
+    return this.activeRequestKeys.size > 0;
+  }
+
   _chunkString(str, size) {
     const results = [];
     for (let i = 0; i < str.length; i += size) {

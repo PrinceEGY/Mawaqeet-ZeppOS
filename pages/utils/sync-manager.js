@@ -23,6 +23,8 @@ export class SyncManager {
         if (pendingKeys.length > 0) {
           logger.debug("Pulling pending keys from setting app:", pendingKeys);
           this._executePull(pendingKeys);
+        } else {
+          logger.debug("No pending keys to pull from setting app");
         }
       });
       return;
@@ -155,6 +157,10 @@ export class SyncManager {
       return true;
     }
     return false;
+  }
+
+  isSyncing() {
+    return this.activePullKeys.size > 0 || this.activePushKeys.size > 0;
   }
 
   destroy() {
