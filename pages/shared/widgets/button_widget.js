@@ -9,19 +9,43 @@ export class ButtonWidget extends BaseWidget {
     layout,
     text,
     clickHandler = null,
+    longPressHandler = null,
     isEnabled = true,
     disabledLayout = null,
     pageIndex = 0,
-    props = {},
+    x,
+    y,
+    w,
+    h,
+    color,
+    textSize,
+    textW,
+    normalColor,
+    pressColor,
+    radius,
+    normalSrc,
+    pressSrc,
   }) {
     super({ parentWidget, pageState });
     this.layout = layout;
     this.text = text !== undefined ? text : layout.text || "";
     this.clickHandler = clickHandler;
+    this.longPressHandler = longPressHandler;
     this.isEnabled = isEnabled;
     this.disabledLayout = disabledLayout;
     this.pageIndex = pageIndex;
-    this.props = props;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.color = color;
+    this.textSize = textSize;
+    this.textW = textW;
+    this.normalColor = normalColor;
+    this.pressColor = pressColor;
+    this.radius = radius;
+    this.normalSrc = normalSrc;
+    this.pressSrc = pressSrc;
   }
 
   onBuild() {
@@ -34,28 +58,64 @@ export class ButtonWidget extends BaseWidget {
       layout: currentLayout,
       text: this.text,
       pageIndex: this.pageIndex,
-      props: this.props,
+      props: this._buildProps(),
     });
 
-    if (this.isEnabled && this.clickHandler) {
-      this.widget.addEventListener(hmUI.event.CLICK_UP, this.clickHandler);
-    }
+    this._bindHandlers();
   }
 
-  onUpdate({ text, clickHandler, isEnabled, pageIndex, props = {} } = {}) {
+  onUpdate({
+    text,
+    clickHandler,
+    longPressHandler,
+    isEnabled,
+    pageIndex,
+    x,
+    y,
+    w,
+    h,
+    color,
+    textSize,
+    textW,
+    normalColor,
+    pressColor,
+    radius,
+    normalSrc,
+    pressSrc,
+  } = {}) {
     if (text !== undefined) this.text = text;
     if (clickHandler !== undefined) {
-      if (this.widget && this.clickHandler) {
-        this.widget.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
-      }
+      this._unbindClickHandler();
       this.clickHandler = clickHandler;
-      if (this.widget && this.clickHandler && this.isEnabled) {
-        this.widget.addEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+    }
+    if (longPressHandler !== undefined) {
+      this._unbindLongPressHandler();
+      this.longPressHandler = longPressHandler;
+    }
+    if (isEnabled !== undefined) {
+      const wasEnabled = this.isEnabled;
+      this.isEnabled = isEnabled;
+      if (wasEnabled !== isEnabled) {
+        if (isEnabled) {
+          this._bindHandlers();
+        } else {
+          this._unbindHandlers();
+        }
       }
     }
-    if (isEnabled !== undefined) this.isEnabled = isEnabled;
     if (pageIndex !== undefined) this.pageIndex = pageIndex;
-    this.props = { ...this.props, ...props };
+    if (x !== undefined) this.x = x;
+    if (y !== undefined) this.y = y;
+    if (w !== undefined) this.w = w;
+    if (h !== undefined) this.h = h;
+    if (color !== undefined) this.color = color;
+    if (textSize !== undefined) this.textSize = textSize;
+    if (textW !== undefined) this.textW = textW;
+    if (normalColor !== undefined) this.normalColor = normalColor;
+    if (pressColor !== undefined) this.pressColor = pressColor;
+    if (radius !== undefined) this.radius = radius;
+    if (normalSrc !== undefined) this.normalSrc = normalSrc;
+    if (pressSrc !== undefined) this.pressSrc = pressSrc;
   }
 
   onUpdateView() {
@@ -63,20 +123,67 @@ export class ButtonWidget extends BaseWidget {
       ? this.layout
       : this.disabledLayout || this.layout;
 
-    const finalProps = {
+    this.widget.setProperty(hmUI.prop.MORE, {
       ...currentLayout,
       x: currentLayout.x + (this.pageIndex || 0) * DEVICE_WIDTH,
-      ...this.props,
       text: this.text,
-    };
-
-    this.widget.setProperty(hmUI.prop.MORE, finalProps);
+      ...this._buildProps(),
+    });
   }
 
   onDestroy() {
+    this._unbindHandlers();
+    this.clickHandler = null;
+    this.longPressHandler = null;
+  }
+
+  _buildProps() {
+    const props = {};
+    if (this.x !== undefined) props.x = this.x;
+    if (this.y !== undefined) props.y = this.y;
+    if (this.w !== undefined) props.w = this.w;
+    if (this.h !== undefined) props.h = this.h;
+    if (this.color !== undefined) props.color = this.color;
+    if (this.textSize !== undefined) props.text_size = this.textSize;
+    if (this.textW !== undefined) props.text_w = this.textW;
+    if (this.normalColor !== undefined) props.normal_color = this.normalColor;
+    if (this.pressColor !== undefined) props.press_color = this.pressColor;
+    if (this.radius !== undefined) props.radius = this.radius;
+    if (this.normalSrc !== undefined) props.normal_src = this.normalSrc;
+    if (this.pressSrc !== undefined) props.press_src = this.pressSrc;
+    return props;
+  }
+
+  _bindHandlers() {
+    if (!this.widget || !this.isEnabled) return;
+    if (this.clickHandler) {
+      this.widget.addEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+    }
+    if (this.longPressHandler) {
+      this.widget.addEventListener(
+        hmUI.event.LONG_PRESS,
+        this.longPressHandler
+      );
+    }
+  }
+
+  _unbindHandlers() {
+    this._unbindClickHandler();
+    this._unbindLongPressHandler();
+  }
+
+  _unbindClickHandler() {
     if (this.widget && this.clickHandler) {
       this.widget.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
     }
-    this.clickHandler = null;
+  }
+
+  _unbindLongPressHandler() {
+    if (this.widget && this.longPressHandler) {
+      this.widget.removeEventListener(
+        hmUI.event.LONG_PRESS,
+        this.longPressHandler
+      );
+    }
   }
 }
