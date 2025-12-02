@@ -77,4 +77,21 @@ export const SHARED_UI_BUILDERS = {
 
     return parentWidget.createWidget(hmUI.widget.VIEW_CONTAINER, finalProps);
   },
+
+  createImage: ({
+    parentWidget = hmUI,
+    layout,
+    src,
+    pageIndex = 0,
+    props = {},
+  }) => {
+    const finalProps = {
+      ...layout,
+      x: (layout.x || 0) + (pageIndex || 0) * DEVICE_WIDTH,
+      src,
+      ...props,
+    };
+
+    return parentWidget.createWidget(hmUI.widget.IMG, finalProps);
+  },
 };
