@@ -40,17 +40,17 @@ export class PrayerItemWidget extends BaseWidget {
 
     this.nameText.update({
       text: getPrayerLabel(this.prayer.name),
-      props: { color: colors.name },
+      color: colors.name,
     });
 
     this.timeText.update({
       text: this.prayer.time,
-      props: { color: colors.time },
+      color: colors.time,
     });
 
     this.remainingText.update({
       text: this._calculateTimeRemaining(this.prayer.timestamp),
-      props: { color: colors.remaining },
+      color: colors.remaining,
     });
   }
 
@@ -91,7 +91,7 @@ export class PrayerItemWidget extends BaseWidget {
       pageState: this.pageState,
       layout: LAYOUT.PRAYER_ITEM.NAME,
       text: getPrayerLabel(this.prayer.name),
-      props: { color: colors.name },
+      color: colors.name,
     });
     this.nameText.build();
 
@@ -100,7 +100,7 @@ export class PrayerItemWidget extends BaseWidget {
       pageState: this.pageState,
       layout: LAYOUT.PRAYER_ITEM.TIME,
       text: this.prayer.time,
-      props: { color: colors.time },
+      color: colors.time,
     });
     this.timeText.build();
 
@@ -109,7 +109,7 @@ export class PrayerItemWidget extends BaseWidget {
       pageState: this.pageState,
       layout: LAYOUT.PRAYER_ITEM.REMAINING,
       text: this._calculateTimeRemaining(this.prayer.timestamp),
-      props: { color: colors.remaining },
+      color: colors.remaining,
     });
     this.remainingText.build();
   }

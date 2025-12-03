@@ -4,6 +4,28 @@ import { px } from "@zos/utils";
 
 export const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
 
+/**
+ * Unified color palette for the entire device app
+ */
+export const COLORS = {
+  // Primary app color
+  PRIMARY: 0x399e5a,
+  PRIMARY_PRESSED: 0x2d7e48,
+
+  // Warning/Error colors
+  ERROR: 0xe54f03,
+  ERROR_PRESSED: 0xb83f02,
+
+  // Text colors
+  TITLE: 0xffffff, // White - for titles and main text
+  SUBTITLE: 0xb8b8b8, // Light grey - for subtitles and descriptions
+  SECONDARY: 0x7f7f7f, // Medium grey - for secondary information
+
+  // Link/Button colors
+  LINK: 0x059af7,
+  LINK_PRESSED: 0x047ac4,
+};
+
 export const SHARED_UI_BUILDERS = {
   createText: ({
     parentWidget = hmUI,

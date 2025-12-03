@@ -1,28 +1,25 @@
 import { getDeviceInfo } from "@zos/device";
 import * as hmUI from "@zos/ui";
 import { px } from "@zos/utils";
-import { SHARED_UI_BUILDERS } from "../shared/index.r.layout";
+import { COLORS, SHARED_UI_BUILDERS } from "../shared/index.r.layout";
 
 export const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
 
 export const PRAYER_STATUS_COLORS = {
   passed: {
-    name: 0x666666, // Gray for passed prayers
-    time: 0x666666,
-    remaining: 0x444444,
-    background: 0x1a1a1a, // Darker background
+    name: COLORS.SECONDARY,
+    time: COLORS.SECONDARY,
+    remaining: COLORS.SECONDARY,
   },
   next: {
-    name: 0x00ff00, // Green for next prayer
-    time: 0x00ff00,
-    remaining: 0x00cc00,
-    background: 0x003300, // Dark green background
+    name: COLORS.PRIMARY,
+    time: COLORS.PRIMARY,
+    remaining: COLORS.PRIMARY_PRESSED,
   },
   upcoming: {
-    name: 0xffffff, // White for upcoming prayers
-    time: 0xffffff,
-    remaining: 0x888888,
-    background: 0x000000, // Black background
+    name: COLORS.TITLE,
+    time: COLORS.TITLE,
+    remaining: COLORS.SECONDARY,
   },
 };
 
@@ -35,7 +32,7 @@ export const LAYOUT = {
     align_h: hmUI.align.CENTER_H,
     align_v: hmUI.align.CENTER_V,
     text_size: px(24),
-    color: 0xffffff,
+    color: COLORS.TITLE,
   },
 
   DATE_NAVIGATION: {
@@ -54,7 +51,7 @@ export const LAYOUT = {
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
       text_size: px(20),
-      color: 0xffffff,
+      color: COLORS.TITLE,
     },
 
     TIME_TEXT: {
@@ -65,7 +62,7 @@ export const LAYOUT = {
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
       text_size: px(24),
-      color: 0xffffff,
+      color: COLORS.TITLE,
     },
 
     LEFT_ARROW: {
@@ -114,7 +111,7 @@ export const LAYOUT = {
       w: px(160),
       h: px(40),
       text_size: px(26),
-      color: 0xffffff,
+      color: COLORS.TITLE,
       align_v: hmUI.align.CENTER_V,
     },
 
@@ -124,7 +121,7 @@ export const LAYOUT = {
       w: px(160),
       h: px(35),
       text_size: px(24),
-      color: 0xffffff,
+      color: COLORS.TITLE,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
     },
@@ -135,7 +132,7 @@ export const LAYOUT = {
       w: px(160),
       h: px(35),
       text_size: px(20),
-      color: 0x888888,
+      color: COLORS.SECONDARY,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
     },
@@ -164,7 +161,7 @@ export const LAYOUT = {
       w: DEVICE_WIDTH - px(20),
       h: px(60),
       text_size: px(16),
-      color: 0xaaaaaa,
+      color: COLORS.SUBTITLE,
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
     },
@@ -175,9 +172,9 @@ export const LAYOUT = {
       w: px(140),
       h: px(60),
       text_size: px(24),
-      color: 0xffffff,
-      normal_color: 0x00aa00,
-      press_color: 0x007700,
+      color: COLORS.TITLE,
+      normal_color: COLORS.PRIMARY,
+      press_color: COLORS.PRIMARY_PRESSED,
       radius: px(10),
       text: "Confirm",
     },
@@ -188,9 +185,9 @@ export const LAYOUT = {
       w: px(140),
       h: px(60),
       text_size: px(24),
-      color: 0xffffff,
-      normal_color: 0xff0000,
-      press_color: 0xaa0000,
+      color: COLORS.TITLE,
+      normal_color: COLORS.ERROR,
+      press_color: COLORS.ERROR_PRESSED,
       radius: px(10),
       text: "Cancel",
     },
