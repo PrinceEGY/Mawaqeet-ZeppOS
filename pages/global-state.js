@@ -1,3 +1,4 @@
+import { connectStatus } from "@zos/ble";
 import { EventBus } from "@zos/utils";
 import { debounce } from "../shared/helpers";
 import { DeviceLogger } from "./utils/device-logger";
@@ -16,6 +17,10 @@ export class GlobalState {
     this.currentPage = null;
     this.pages = {};
     this.debouncedEmitSettingsChange = null;
+
+    this._isConnected = false;
+    this._connectionCheckInterval = null;
+    this._isNavigating = false;
   }
 
   init() {
@@ -26,6 +31,9 @@ export class GlobalState {
 
     this.storage.on("change", this.debouncedEmitSettingsChange);
     RefreshManager.setRefreshCallback(() => this.emit("refresh"));
+
+    this._isConnected = connectStatus();
+    this._startConnectionMonitoring();
 
     setTimeout(() => {
       this.syncManager.triggerFullSync();
@@ -43,19 +51,98 @@ export class GlobalState {
       logger.error(`Page not found: ${pageName}`);
       return;
     }
+    this._navigateToPage(pageName);
+  }
 
-    if (this.currentPage) {
-      this.currentPage.hide();
+  _navigateToPage(pageName) {
+    if (this._isNavigating) {
+      logger.debug(`Already navigating, skipping navigation to: ${pageName}`);
+      return;
     }
+
+    this._isNavigating = true;
+    this.currentPage?.hide();
 
     const page = this.pages[pageName];
     if (!page.isBuilt) {
       page.init();
       page.build();
     }
+
     page.show();
     this.currentPage = page;
+    this._isNavigating = false;
     logger.debug(`Navigated to: ${pageName}`);
+
+    this._checkConnectionRequirement();
+  }
+
+  isConnected() {
+    return this._isConnected;
+  }
+
+  _startConnectionMonitoring(intervalMs = 2000) {
+    this._stopConnectionMonitoring();
+
+    this._connectionCheckInterval = setInterval(() => {
+      this._checkConnection();
+    }, intervalMs);
+
+    logger.debug("Started connection monitoring");
+  }
+
+  _stopConnectionMonitoring() {
+    if (this._connectionCheckInterval) {
+      clearInterval(this._connectionCheckInterval);
+      this._connectionCheckInterval = null;
+    }
+  }
+
+  _checkConnection() {
+    const wasConnected = this._isConnected;
+    this._isConnected = connectStatus();
+
+    if (wasConnected !== this._isConnected) {
+      logger.debug(`Connection status changed: ${this._isConnected}`);
+      this.emit("connectionChanged", this._isConnected);
+    }
+
+    this._checkConnectionRequirement();
+  }
+
+  _checkConnectionRequirement() {
+    if (this._isNavigating) return;
+
+    const requirement = this.getConnectionRequirement();
+    const currentPage = this.getCurrentPageName();
+
+    if (!requirement) return;
+
+    if (this._isConnected && currentPage === "connectionRequirement") {
+      logger.debug(
+        `Connection restored, returning to: ${requirement.returnPage}`
+      );
+      this._navigateToPage(requirement.returnPage);
+    } else if (!this._isConnected && currentPage !== "connectionRequirement") {
+      logger.debug(`Connection required, showing connection requirement page`);
+      this._navigateToPage("connectionRequirement");
+    }
+  }
+
+  getConnectionRequirement() {
+    return this.storage.getItem("connectionRequired");
+  }
+
+  setConnectionRequirement(reason, returnPage) {
+    this.storage.setItem(
+      "connectionRequired",
+      { reason, returnPage },
+      { markForPush: false }
+    );
+  }
+
+  clearConnectionRequirement() {
+    this.storage.removeItem("connectionRequired");
   }
 
   getCurrentPageName() {
@@ -87,6 +174,7 @@ export class GlobalState {
 
   destroy() {
     RefreshManager.clear();
+    this._stopConnectionMonitoring();
 
     if (this.debouncedEmitSettingsChange) {
       this.debouncedEmitSettingsChange.cancel();
