@@ -201,6 +201,7 @@ export class HomePageState {
   }
 
   clearPrayersCache() {
+    if (!this.state) return;
     this.state.cachedPrayers = null;
     this.state.lastCachedDate = null;
   }
