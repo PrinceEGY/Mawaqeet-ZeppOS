@@ -2,7 +2,7 @@ import * as hmUI from "@zos/ui";
 import { DateUtils } from "../../shared/utils/date-utils";
 import { BasePage } from "../shared/base_page";
 import { TextWidget } from "../shared/widgets";
-import { HomePageState } from "./home_page_state";
+import { HomePageState } from "./home_state";
 import { LAYOUT } from "./index.r.layout";
 import { DateWidget, PrayerListWidget } from "./widgets";
 
