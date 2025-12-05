@@ -8,7 +8,7 @@
       "code": 1,
       "name": "1.0.0"
     },
-    "icon": "icon.png",
+    "icon": "app_icon.png",
     "vender": "Ahmed Mohsen (PrinceEGY)",
     "description": "Mawaqeet is a prayer time application that provides accurate prayer times based on your location.",
     "homepage": "https://github.com/PrinceEGY/Mawaqeet-ZeppOS",
