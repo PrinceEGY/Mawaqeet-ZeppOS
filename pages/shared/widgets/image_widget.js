@@ -19,7 +19,7 @@ export class ImageWidget extends BaseWidget {
     centerX,
     centerY,
     alpha,
-    autoScale,
+    autoScale = true,
     autoScaleObjFit,
   }) {
     super({ parentWidget, pageState });
