@@ -1,6 +1,8 @@
 import { BasePage } from "@zeppos/zml/base-page";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
+import { OnboardingPage } from "./onboarding/onboarding-page";
+import { COLORS, DEVICE_WIDTH, TYPOGRAPHY } from "./shared/index.r.layout";
 import { DeviceLogger } from "./utils/device-logger";
 const logger = new DeviceLogger("main-page");
 
@@ -31,7 +33,9 @@ Page(
     },
 
     navigateToInitialPage() {
-      const initialPage = "home";
+      const initialPage = globalState.isOnboardingCompleted()
+        ? "home"
+        : "onboarding";
       logger.debug(`Initial page: ${initialPage}`);
 
       if (globalState.pages[initialPage]) {
