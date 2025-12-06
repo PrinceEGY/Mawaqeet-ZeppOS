@@ -96,6 +96,29 @@ export const LAYOUT = {
     scroll_enable: 1,
   },
 
+  NO_DATA: {
+    TITLE: {
+      x: px(20),
+      y: px(60),
+      w: DEVICE_WIDTH - px(40),
+      h: TYPOGRAPHY.SUBTITLE.lineHeight,
+      text_size: TYPOGRAPHY.SUBTITLE.size,
+      color: COLORS.SUBTITLE,
+      align_h: hmUI.align.CENTER_H,
+      align_v: hmUI.align.CENTER_V,
+    },
+    RANGE: {
+      x: px(20),
+      y: px(110),
+      w: DEVICE_WIDTH - px(40),
+      h: px(80),
+      text_size: TYPOGRAPHY.BODY_SECONDARY.size,
+      color: COLORS.BODY,
+      align_h: hmUI.align.CENTER_H,
+      align_v: hmUI.align.TOP,
+    },
+  },
+
   PRAYER_ITEM: {
     x: px(10),
     w: DEVICE_WIDTH - px(20),
@@ -204,23 +227,27 @@ export const UI_BUILDERS = {
   createGroup: SHARED_UI_BUILDERS.createGroup,
   createViewContainer: SHARED_UI_BUILDERS.createViewContainer,
 
-  createDatePicker: ({ parentWidget, currentDate, dateRange }) => {
-    const backgroundRect = parentWidget.createWidget(hmUI.widget.FILL_RECT, {
+  createDatePickerBackground: ({ parentWidget }) => {
+    return parentWidget.createWidget(hmUI.widget.FILL_RECT, {
       x: 0,
       y: 100,
       w: DEVICE_WIDTH,
       h: DEVICE_HEIGHT,
     });
+  },
 
-    const picker = parentWidget.createWidget(hmUI.widget.PICK_DATE, {
+  createDatePicker: ({ parentWidget, currentDate, dateRange }) => {
+    const currentYear = new Date().getFullYear();
+    const startYear = dateRange?.startDate?.getFullYear() ?? currentYear - 1;
+    const endYear = dateRange?.endDate?.getFullYear() ?? currentYear + 1;
+
+    return parentWidget.createWidget(hmUI.widget.PICK_DATE, {
       ...LAYOUT.DATE_PICKER.PICKER,
-      startYear: dateRange.startYear,
-      endYear: dateRange.endYear,
+      startYear,
+      endYear,
       initYear: currentDate.getFullYear(),
       initMonth: currentDate.getMonth() + 1,
       initDay: currentDate.getDate(),
     });
-
-    return { picker, backgroundRect };
   },
 };

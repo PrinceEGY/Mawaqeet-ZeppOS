@@ -1,5 +1,7 @@
 import * as hmUI from "@zos/ui";
+import { DateUtils } from "../../../shared/utils/date-utils";
 import { BaseWidget, ButtonWidget, TextWidget } from "../../shared/widgets";
+import { PrayersService } from "../../utils/prayers-service";
 import { LAYOUT, UI_BUILDERS } from "../index.r.layout";
 
 export class DatePickerWidget extends BaseWidget {
@@ -23,22 +25,28 @@ export class DatePickerWidget extends BaseWidget {
     });
 
     const currentDate = this.pageState.getCurrentDate();
-    const fetchMetaData = this.pageState.storage.getItem("fetchMetaData");
-    const dateRange = this._getAvailableDateRange(fetchMetaData);
+    this.dateRange = PrayersService.getEffectiveAvailableDateRange();
 
-    const datePickerWidgets = UI_BUILDERS.createDatePicker({
+    this.backgroundRect = UI_BUILDERS.createDatePickerBackground({
+      parentWidget: this.widget,
+    });
+
+    this.datePicker = UI_BUILDERS.createDatePicker({
       parentWidget: this.widget,
       currentDate,
-      dateRange,
+      dateRange: this.dateRange,
     });
-    this.datePicker = datePickerWidgets.picker;
-    this.backgroundRect = datePickerWidgets.backgroundRect;
 
-    this._buildHintText(dateRange);
+    this._buildHintText();
     this._buildButtons();
   }
 
   onShow() {
+    if (!this.dateRange) {
+      hmUI.showToast({ text: "No prayer data available." });
+      return;
+    }
+
     this.backgroundRect?.setProperty(hmUI.prop.VISIBLE, true);
     this.datePicker?.setProperty(hmUI.prop.VISIBLE, true);
     this.hintText?.show();
@@ -54,8 +62,37 @@ export class DatePickerWidget extends BaseWidget {
     this.cancelButton?.hide();
   }
 
+  onUpdate({ dateRange, currentDate } = {}) {
+    if (dateRange !== undefined) this.dateRange = dateRange;
+    else this.dateRange = PrayersService.getEffectiveAvailableDateRange();
+
+    if (currentDate !== undefined && this.datePicker) {
+      // Bug in hmUI: setProperty doesn't render properly for PICK_DATE
+      // Workaround: delete and recreate only the picker widget
+      hmUI.deleteWidget(this.datePicker);
+
+      this.datePicker = UI_BUILDERS.createDatePicker({
+        parentWidget: this.widget,
+        currentDate,
+        dateRange: this.dateRange,
+      });
+
+      // Restore visibility state if widget was visible
+      if (!this.state.isVisible) {
+        this.datePicker?.setProperty(hmUI.prop.VISIBLE, false);
+      }
+    }
+  }
+
   onUpdateView() {
-    // Nothing to update dynamically
+    const text =
+      this.dateRange?.startDate && this.dateRange?.endDate
+        ? `Available: ${DateUtils.dateToDateString(
+            this.dateRange.startDate,
+            "/"
+          )} - ${DateUtils.dateToDateString(this.dateRange.endDate, "/")}`
+        : "";
+    this.hintText?.update({ text });
   }
 
   onDestroy() {
@@ -73,10 +110,13 @@ export class DatePickerWidget extends BaseWidget {
     this.cancelButton = null;
   }
 
-  _buildHintText(dateRange) {
+  _buildHintText() {
     const text =
-      dateRange.startDate && dateRange.endDate
-        ? `Prayer times are available from (${dateRange.startDate.toLocaleDateString()} - ${dateRange.endDate.toLocaleDateString()})`
+      this.dateRange?.startDate && this.dateRange?.endDate
+        ? `Available: ${DateUtils.dateToDateString(
+            this.dateRange.startDate,
+            "/"
+          )} - ${DateUtils.dateToDateString(this.dateRange.endDate, "/")}`
         : "";
 
     this.hintText = new TextWidget({
@@ -111,7 +151,7 @@ export class DatePickerWidget extends BaseWidget {
     const { year, month, day } = dateObj;
     const selectedDate = new Date(year, month - 1, day);
 
-    if (!this._isDateInRange(selectedDate)) {
+    if (!PrayersService.isDateInValidRange(selectedDate)) {
       hmUI.showToast({
         text: "Selected date is outside the available prayer times.",
       });
@@ -124,35 +164,5 @@ export class DatePickerWidget extends BaseWidget {
 
   _onCancel() {
     this.hide();
-  }
-
-  _getAvailableDateRange(fetchMetaData) {
-    if (!fetchMetaData || !fetchMetaData.startDate || !fetchMetaData.endDate) {
-      const currentYear = new Date().getFullYear();
-      return { startYear: currentYear - 1, endYear: currentYear + 1 };
-    }
-
-    const startDate = new Date(fetchMetaData.startDate);
-    const endDate = new Date(fetchMetaData.endDate);
-
-    return {
-      startYear: startDate.getFullYear(),
-      endYear: endDate.getFullYear(),
-      startDate,
-      endDate,
-    };
-  }
-
-  _isDateInRange(selectedDate) {
-    const fetchMetaData = this.pageState.storage.getItem("fetchMetaData");
-
-    if (!fetchMetaData || !fetchMetaData.startDate || !fetchMetaData.endDate) {
-      return true;
-    }
-
-    const startDate = new Date(fetchMetaData.startDate);
-    const endDate = new Date(fetchMetaData.endDate);
-
-    return selectedDate >= startDate && selectedDate <= endDate;
   }
 }

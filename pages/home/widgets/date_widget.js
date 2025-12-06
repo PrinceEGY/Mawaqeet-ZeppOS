@@ -59,7 +59,7 @@ export class DateWidget extends BaseWidget {
       this.dateTextClickHandler
     );
 
-    this.pageState.on("dateChanged", this._onDateChanged);
+    this.pageState.on("dateChange", this._onDateChanged);
   }
 
   onUpdateView() {
@@ -71,7 +71,7 @@ export class DateWidget extends BaseWidget {
   }
 
   onDestroy() {
-    this.pageState.off("dateChanged", this._onDateChanged);
+    this.pageState.off("dateChange", this._onDateChanged);
 
     if (this.dateTextWidget?.widget && this.dateTextClickHandler) {
       this.dateTextWidget.widget.removeEventListener(
@@ -109,7 +109,8 @@ export class DateWidget extends BaseWidget {
     this.pageState.setCurrentDate(newDate);
   }
 
-  _onDateChanged() {
+  _onDateChanged({ currentDate }) {
     this.updateView();
+    this.datePicker?.update({ currentDate });
   }
 }

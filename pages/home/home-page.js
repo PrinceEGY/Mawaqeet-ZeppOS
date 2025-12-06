@@ -4,20 +4,23 @@ import { BasePage } from "../shared/base_page";
 import { TextWidget } from "../shared/widgets";
 import { HomePageState } from "./home_state";
 import { LAYOUT } from "./index.r.layout";
-import { DateWidget, PrayerListWidget } from "./widgets";
+import { DateWidget, NoDataWidget, PrayerListWidget } from "./widgets";
 
 export class HomePage extends BasePage {
   constructor(globalState) {
     super(globalState);
     this.scrollbar = null;
     this.onRefresh = this.onRefresh.bind(this);
+    this.onDateChange = this.onDateChange.bind(this);
   }
 
   onInit() {
     this.pageState = new HomePageState(this.globalState);
     this.pageState.updateEnabledPrayers();
     this.pageState.loadCurrentLocation();
+    this.pageState.loadPrayers();
     this.globalState.on("refresh", this.onRefresh);
+    this.pageState.on("dateChange", this.onDateChange);
   }
 
   onBuild() {
@@ -38,13 +41,14 @@ export class HomePage extends BasePage {
       prayerList: new PrayerListWidget({
         pageState: this.pageState,
       }),
+      noData: new NoDataWidget({
+        pageState: this.pageState,
+      }),
     };
   }
 
   onShow() {
-    this.scrollbar = hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
-      target: this.widgets.prayerList.widget,
-    });
+    this._updateContentVisibility();
   }
 
   onUpdate() {
@@ -55,6 +59,7 @@ export class HomePage extends BasePage {
 
   onDestroy() {
     this.globalState.off("refresh", this.onRefresh);
+    this.pageState.off("dateChange", this.onDateChange);
 
     if (this.scrollbar) {
       hmUI.deleteWidget(this.scrollbar);
@@ -67,8 +72,42 @@ export class HomePage extends BasePage {
     if (this.widgets.timeText) {
       this.widgets.timeText.update({ text: this.getCurrentTimeText(now) });
     }
-    if (this.widgets.prayerList) {
+    if (this.widgets.prayerList && this.pageState.hasDataForCurrentDate()) {
       this.widgets.prayerList.updateRemainingTime(now);
+    }
+  }
+
+  onDateChange() {
+    this._updateContentVisibility();
+  }
+
+  _updateContentVisibility() {
+    const hasData = this.pageState.hasDataForCurrentDate();
+
+    if (hasData) {
+      this.widgets.noData?.hide();
+      this.widgets.prayerList?.show();
+      this._updateScrollbar();
+    } else {
+      this.widgets.prayerList?.hide();
+      this.widgets.noData?.show();
+      this._removeScrollbar();
+    }
+  }
+
+  _updateScrollbar() {
+    this._removeScrollbar();
+    if (this.widgets.prayerList?.widget) {
+      this.scrollbar = hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
+        target: this.widgets.prayerList.widget,
+      });
+    }
+  }
+
+  _removeScrollbar() {
+    if (this.scrollbar) {
+      hmUI.deleteWidget(this.scrollbar);
+      this.scrollbar = null;
     }
   }
 

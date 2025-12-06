@@ -50,13 +50,14 @@ export class PrayersService {
 
     const effectiveTimings = { ...todayPrayerTimes.timings };
 
-    for (const [prayer, timestamp] of Object.entries(
-      yesterdayPrayerTimes.timings
-    )) {
-      const yesterdayPrayerTime = new Date(timestamp);
-      // Check if yesterday's prayer time extends into today
-      if (yesterdayPrayerTime > now) {
-        effectiveTimings[prayer] = timestamp;
+    if (yesterdayPrayerTimes?.timings) {
+      for (const [prayer, timestamp] of Object.entries(
+        yesterdayPrayerTimes.timings
+      )) {
+        const yesterdayPrayerTime = new Date(timestamp);
+        if (yesterdayPrayerTime > now) {
+          effectiveTimings[prayer] = timestamp;
+        }
       }
     }
 
@@ -141,6 +142,71 @@ export class PrayersService {
   static hasPrayerTimesData() {
     const keys = getStorage().getAllKeys();
     return keys && keys.length > 0;
+  }
+
+  static getAvailableDateRange() {
+    const keys = getStorage().getAllKeys();
+    if (!keys || keys.length === 0) {
+      return null;
+    }
+
+    let minDate = null;
+    let maxDate = null;
+
+    keys.forEach((key) => {
+      const date = DateUtils.dateStringToDate(key);
+      if (!date || isNaN(date.getTime())) {
+        return;
+      }
+
+      if (!minDate || date < minDate) {
+        minDate = date;
+      }
+      if (!maxDate || date > maxDate) {
+        maxDate = date;
+      }
+    });
+
+    if (!minDate || !maxDate) {
+      return null;
+    }
+
+    return {
+      startDate: minDate,
+      endDate: maxDate,
+    };
+  }
+
+  static getEffectiveAvailableDateRange() {
+    const range = this.getAvailableDateRange();
+    if (!range) return null;
+
+    const effectiveStart = new Date(range.startDate);
+    effectiveStart.setDate(effectiveStart.getDate() + 1);
+
+    if (effectiveStart > range.endDate) {
+      return null;
+    }
+
+    return {
+      startDate: effectiveStart,
+      endDate: range.endDate,
+    };
+  }
+
+  static isDateInValidRange(date) {
+    const range = this.getEffectiveAvailableDateRange();
+    if (!range) return false;
+
+    const targetDate = this._parseDate(date);
+    if (!targetDate) return false;
+
+    const target = new Date(
+      targetDate.getFullYear(),
+      targetDate.getMonth(),
+      targetDate.getDate()
+    );
+    return target >= range.startDate && target <= range.endDate;
   }
 
   static isPrayerTimesExpired(currentDate = new Date()) {

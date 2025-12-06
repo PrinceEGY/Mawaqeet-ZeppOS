@@ -19,19 +19,21 @@ export class HomePageState {
       lastCachedDate: null,
       isDataLoaded: false,
       currentLocation: null,
+      hasDataForCurrentDate: true,
+      availableDateRange: null,
     };
   }
 
   on(eventName, listener) {
-    this.eventBus.on(eventName, listener);
+    this.eventBus?.on(eventName, listener);
   }
 
   off(eventName, listener) {
-    this.eventBus.off(eventName, listener);
+    this.eventBus?.off(eventName, listener);
   }
 
   emit(eventName, ...args) {
-    this.eventBus.emit(eventName, ...args);
+    this.eventBus?.emit(eventName, ...args);
   }
 
   getCurrentDate() {
@@ -56,7 +58,7 @@ export class HomePageState {
 
     this.loadPrayers();
 
-    this.emit("dateChanged", {
+    this.emit("dateChange", {
       currentDate: this.getCurrentDate(),
       prayers: this.getPrayers(),
     });
@@ -84,35 +86,39 @@ export class HomePageState {
         return this.state.prayers;
       }
 
-      const prayerTimes = this.fetchPrayerTimes();
-      if (!prayerTimes || !prayerTimes.timings) {
+      this.state.availableDateRange =
+        PrayersService.getEffectiveAvailableDateRange();
+
+      const isDateValid = PrayersService.isDateInValidRange(
+        this.state.currentDate
+      );
+      const prayerTimes = isDateValid ? this.fetchPrayerTimes() : null;
+
+      if (!prayerTimes?.timings) {
+        this.state.hasDataForCurrentDate = false;
         this.state.prayers = [];
-        this.cachePrayers([], currentDateString);
-        return this.state.prayers;
+      } else {
+        this.state.hasDataForCurrentDate = true;
+        this.state.prayers = this._buildPrayersForCurrentDate(prayerTimes);
       }
 
-      const now = new Date();
-      const nextPrayer = PrayersService.getNextPrayerTime(
-        this.state.currentDate,
-        now,
-        this.state.enabledPrayers
-      );
-
-      const formattedPrayers = this.buildPrayersList(
-        prayerTimes.timings,
-        now,
-        nextPrayer
-      );
-
-      this.state.prayers = formattedPrayers;
-      this.cachePrayers(formattedPrayers, currentDateString);
-
+      this.cachePrayers(this.state.prayers, currentDateString);
       return this.state.prayers;
     } catch (error) {
       logger.error(`Error loading prayers: ${error}`);
       this.state.prayers = [];
       return this.state.prayers;
     }
+  }
+
+  _buildPrayersForCurrentDate(prayerTimes) {
+    const now = new Date();
+    const nextPrayer = PrayersService.getNextPrayerTime(
+      this.state.currentDate,
+      now,
+      this.state.enabledPrayers
+    );
+    return this.buildPrayersList(prayerTimes.timings, now, nextPrayer);
   }
 
   fetchPrayerTimes() {
@@ -162,6 +168,14 @@ export class HomePageState {
     return [...this.state.enabledPrayers];
   }
 
+  hasDataForCurrentDate() {
+    return this.state.hasDataForCurrentDate;
+  }
+
+  getAvailableDateRange() {
+    return this.state.availableDateRange;
+  }
+
   getCurrentLocation() {
     return this.state.currentLocation || "Unknown";
   }
@@ -205,7 +219,10 @@ export class HomePageState {
   }
 
   destroy() {
-    this.eventBus.clear();
+    if (this.eventBus) {
+      this.eventBus.clear();
+      this.eventBus = null;
+    }
     this.clearPrayersCache();
     this.state = null;
     this.globalState = null;
