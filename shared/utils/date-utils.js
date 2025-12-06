@@ -49,13 +49,17 @@ export class DateUtils {
   }
 
   /**
-   * Converts a Date object to a string in the format "DD-MM-YYYY".
+   * Converts a Date object to a string in the format "DD{sep}MM{sep}YYYY".
    *
    * @param {Date} date - The date to convert.
-   * @returns {string} The date string in "DD-MM-YYYY" format.
+   * @param {string} [separator="-"] - The separator to use between date parts.
+   * @returns {string} The date string in "DD{sep}MM{sep}YYYY" format.
    */
-  static dateToDateString(date) {
-    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  static dateToDateString(date, separator = "-") {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}${separator}${month}${separator}${year}`;
   }
 
   /**
@@ -90,18 +94,18 @@ export class DateUtils {
       "Saturday",
     ];
     const months = [
-      "January",
-      "February",
-      "March",
-      "April",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
       "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
     const dayName = days[date.getDay()];
