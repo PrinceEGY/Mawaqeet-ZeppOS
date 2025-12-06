@@ -19,11 +19,23 @@ export const COLORS = {
   // Text colors
   TITLE: 0xffffff, // White - for titles and main text
   SUBTITLE: 0xb8b8b8, // Light grey - for subtitles and descriptions
-  SECONDARY: 0x7f7f7f, // Medium grey - for secondary information
+  BODY: 0x7f7f7f, // Medium grey - for secondary information
 
   // Link/Button colors
   LINK: 0x059af7,
   LINK_PRESSED: 0x047ac4,
+};
+
+/**
+ * Typography sizes for consistent text styling
+ * Line height defines the vertical space the text occupies.
+ * Padding = (lineHeight - size) / 2 — minimum spacing above/below text.
+ */
+export const TYPOGRAPHY = {
+  TITLE: { size: 32, lineHeight: 40 },
+  SUBTITLE: { size: 28, lineHeight: 35 },
+  BODY: { size: 24, lineHeight: 30 },
+  BODY_SECONDARY: { size: 20, lineHeight: 25 },
 };
 
 export const SHARED_UI_BUILDERS = {

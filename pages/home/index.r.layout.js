@@ -1,15 +1,19 @@
 import { getDeviceInfo } from "@zos/device";
 import * as hmUI from "@zos/ui";
 import { px } from "@zos/utils";
-import { COLORS, SHARED_UI_BUILDERS } from "../shared/index.r.layout";
+import {
+  COLORS,
+  SHARED_UI_BUILDERS,
+  TYPOGRAPHY,
+} from "../shared/index.r.layout";
 
 export const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
 
 export const PRAYER_STATUS_COLORS = {
   passed: {
-    name: COLORS.SECONDARY,
-    time: COLORS.SECONDARY,
-    remaining: COLORS.SECONDARY,
+    name: COLORS.BODY,
+    time: COLORS.BODY,
+    remaining: COLORS.BODY,
   },
   next: {
     name: COLORS.PRIMARY,
@@ -19,7 +23,7 @@ export const PRAYER_STATUS_COLORS = {
   upcoming: {
     name: COLORS.TITLE,
     time: COLORS.TITLE,
-    remaining: COLORS.SECONDARY,
+    remaining: COLORS.BODY,
   },
 };
 
@@ -28,10 +32,10 @@ export const LAYOUT = {
     x: px(120),
     y: px(15),
     w: DEVICE_WIDTH - px(240),
-    h: px(40),
+    h: TYPOGRAPHY.BODY.lineHeight,
     align_h: hmUI.align.CENTER_H,
     align_v: hmUI.align.CENTER_V,
-    text_size: px(24),
+    text_size: TYPOGRAPHY.BODY.size,
     color: COLORS.TITLE,
   },
 
@@ -50,7 +54,7 @@ export const LAYOUT = {
       h: px(90),
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
-      text_size: px(20),
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.TITLE,
     },
 
@@ -58,10 +62,10 @@ export const LAYOUT = {
       x: px(80),
       y: px(130),
       w: DEVICE_WIDTH - px(160),
-      h: px(40),
+      h: TYPOGRAPHY.BODY.lineHeight,
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
-      text_size: px(24),
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.TITLE,
     },
 
@@ -109,8 +113,8 @@ export const LAYOUT = {
       x: px(80),
       y: px(30),
       w: px(160),
-      h: px(40),
-      text_size: px(26),
+      h: TYPOGRAPHY.BODY.lineHeight,
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.TITLE,
       align_v: hmUI.align.CENTER_V,
     },
@@ -119,8 +123,8 @@ export const LAYOUT = {
       x: DEVICE_WIDTH - px(190),
       y: px(20),
       w: px(160),
-      h: px(35),
-      text_size: px(24),
+      h: TYPOGRAPHY.BODY.lineHeight,
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.TITLE,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
@@ -130,9 +134,9 @@ export const LAYOUT = {
       x: DEVICE_WIDTH - px(190),
       y: px(55),
       w: px(160),
-      h: px(35),
-      text_size: px(20),
-      color: COLORS.SECONDARY,
+      h: TYPOGRAPHY.BODY_SECONDARY.lineHeight,
+      text_size: TYPOGRAPHY.BODY_SECONDARY.size,
+      color: COLORS.BODY,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
     },
@@ -152,7 +156,7 @@ export const LAYOUT = {
       x: px(40),
       y: px(100),
       w: DEVICE_WIDTH - px(80),
-      font_size: px(24),
+      font_size: TYPOGRAPHY.BODY_SECONDARY.size,
     },
 
     HINT_TEXT: {
@@ -160,7 +164,7 @@ export const LAYOUT = {
       y: px(290),
       w: DEVICE_WIDTH - px(20),
       h: px(60),
-      text_size: px(16),
+      text_size: TYPOGRAPHY.BODY_SECONDARY.size,
       color: COLORS.SUBTITLE,
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
@@ -171,7 +175,7 @@ export const LAYOUT = {
       y: px(350),
       w: px(140),
       h: px(60),
-      text_size: px(24),
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.TITLE,
       normal_color: COLORS.PRIMARY,
       press_color: COLORS.PRIMARY_PRESSED,
@@ -184,7 +188,7 @@ export const LAYOUT = {
       y: px(350),
       w: px(140),
       h: px(60),
-      text_size: px(24),
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.TITLE,
       normal_color: COLORS.ERROR,
       press_color: COLORS.ERROR_PRESSED,
