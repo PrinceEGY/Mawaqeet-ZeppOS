@@ -48,6 +48,7 @@ export class HomePage extends BasePage {
   }
 
   onShow() {
+    this._createScrollbar();
     this._updateContentVisibility();
   }
 
@@ -81,33 +82,29 @@ export class HomePage extends BasePage {
     this._updateContentVisibility();
   }
 
+  _createScrollbar() {
+    if (!this.scrollbar && this.widgets.prayerList?.widget) {
+      this.scrollbar = hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
+        target: this.widgets.prayerList.widget,
+      });
+    }
+  }
+
   _updateContentVisibility() {
     const hasData = this.pageState.hasDataForCurrentDate();
 
     if (hasData) {
       this.widgets.noData?.hide();
       this.widgets.prayerList?.show();
-      this._updateScrollbar();
+      if (this.scrollbar) {
+        this.scrollbar.setProperty(hmUI.prop.VISIBLE, true);
+      }
     } else {
       this.widgets.prayerList?.hide();
       this.widgets.noData?.show();
-      this._removeScrollbar();
-    }
-  }
-
-  _updateScrollbar() {
-    this._removeScrollbar();
-    this.scrollbar = this.widgets.prayerList?.widget
-      ? hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
-          target: this.widgets.prayerList.widget,
-        })
-      : null;
-  }
-
-  _removeScrollbar() {
-    if (this.scrollbar) {
-      hmUI.deleteWidget(this.scrollbar);
-      this.scrollbar = null;
+      if (this.scrollbar) {
+        this.scrollbar.setProperty(hmUI.prop.VISIBLE, false);
+      }
     }
   }
 

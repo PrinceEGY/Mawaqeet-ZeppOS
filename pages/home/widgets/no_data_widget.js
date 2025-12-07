@@ -12,9 +12,9 @@ export class NoDataWidget extends BaseWidget {
   }
 
   onBuild() {
-    this.widget = UI_BUILDERS.createViewContainer({
+    this.widget = UI_BUILDERS.createGroup({
       parentWidget: this.parentWidget,
-      layout: LAYOUT.PRAYERS_CONTAINER,
+      layout: LAYOUT.NO_DATA.CONTAINER,
     });
 
     this.titleWidget = UI_BUILDERS.createText({

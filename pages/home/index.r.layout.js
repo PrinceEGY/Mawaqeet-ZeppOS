@@ -97,6 +97,12 @@ export const LAYOUT = {
   },
 
   NO_DATA: {
+    CONTAINER: {
+      x: px(0),
+      y: px(180),
+      w: DEVICE_WIDTH,
+      h: DEVICE_HEIGHT - px(180),
+    },
     TITLE: {
       x: px(20),
       y: px(60),
@@ -227,7 +233,7 @@ export const UI_BUILDERS = {
   createGroup: SHARED_UI_BUILDERS.createGroup,
   createViewContainer: SHARED_UI_BUILDERS.createViewContainer,
 
-  createDatePickerBackground: ({ parentWidget }) => {
+  createDatePickerBackground: ({ parentWidget = hmUI }) => {
     return parentWidget.createWidget(hmUI.widget.FILL_RECT, {
       x: 0,
       y: 100,
@@ -236,7 +242,7 @@ export const UI_BUILDERS = {
     });
   },
 
-  createDatePicker: ({ parentWidget, currentDate, dateRange }) => {
+  createDatePicker: ({ parentWidget = hmUI, currentDate, dateRange }) => {
     const currentYear = new Date().getFullYear();
     const startYear = dateRange?.startDate?.getFullYear() ?? currentYear - 1;
     const endYear = dateRange?.endDate?.getFullYear() ?? currentYear + 1;

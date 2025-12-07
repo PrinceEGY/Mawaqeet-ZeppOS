@@ -24,17 +24,10 @@ export class DatePickerWidget extends BaseWidget {
       layout: LAYOUT.DATE_PICKER.CONTAINER,
     });
 
-    const currentDate = this.pageState.getCurrentDate();
     this.dateRange = PrayersService.getEffectiveAvailableDateRange();
 
     this.backgroundRect = UI_BUILDERS.createDatePickerBackground({
       parentWidget: this.widget,
-    });
-
-    this.datePicker = UI_BUILDERS.createDatePicker({
-      parentWidget: this.widget,
-      currentDate,
-      dateRange: this.dateRange,
     });
 
     this._buildHintText();
@@ -47,16 +40,16 @@ export class DatePickerWidget extends BaseWidget {
       return;
     }
 
+    this._buildDatePickerComponents();
     this.backgroundRect?.setProperty(hmUI.prop.VISIBLE, true);
-    this.datePicker?.setProperty(hmUI.prop.VISIBLE, true);
     this.hintText?.show();
     this.confirmButton?.show();
     this.cancelButton?.show();
   }
 
   onHide() {
+    this._destroyDatePickerComponents();
     this.backgroundRect?.setProperty(hmUI.prop.VISIBLE, false);
-    this.datePicker?.setProperty(hmUI.prop.VISIBLE, false);
     this.hintText?.hide();
     this.confirmButton?.hide();
     this.cancelButton?.hide();
@@ -65,23 +58,6 @@ export class DatePickerWidget extends BaseWidget {
   onUpdate({ dateRange, currentDate } = {}) {
     if (dateRange !== undefined) this.dateRange = dateRange;
     else this.dateRange = PrayersService.getEffectiveAvailableDateRange();
-
-    if (currentDate !== undefined && this.datePicker) {
-      // Bug in hmUI: setProperty doesn't render properly for PICK_DATE
-      // Workaround: delete and recreate only the picker widget
-      hmUI.deleteWidget(this.datePicker);
-
-      this.datePicker = UI_BUILDERS.createDatePicker({
-        parentWidget: this.widget,
-        currentDate,
-        dateRange: this.dateRange,
-      });
-
-      // Restore visibility state if widget was visible
-      if (!this.state.isVisible) {
-        this.datePicker?.setProperty(hmUI.prop.VISIBLE, false);
-      }
-    }
   }
 
   onUpdateView() {
@@ -144,6 +120,24 @@ export class DatePickerWidget extends BaseWidget {
       clickHandler: this._onCancel,
     });
     this.cancelButton.build();
+  }
+
+  _buildDatePickerComponents() {
+    this._destroyDatePickerComponents();
+
+    const currentDate = this.pageState.getCurrentDate();
+    this.datePicker = UI_BUILDERS.createDatePicker({
+      parentWidget: this.widget,
+      currentDate,
+      dateRange: this.dateRange,
+    });
+  }
+
+  _destroyDatePickerComponents() {
+    if (this.datePicker) {
+      hmUI.deleteWidget(this.datePicker);
+      this.datePicker = null;
+    }
   }
 
   _onConfirm() {
