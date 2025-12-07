@@ -219,10 +219,8 @@ export class HomePageState {
   }
 
   destroy() {
-    if (this.eventBus) {
-      this.eventBus.clear();
-      this.eventBus = null;
-    }
+    this.eventBus?.clear();
+    this.eventBus = null;
     this.clearPrayersCache();
     this.state = null;
     this.globalState = null;

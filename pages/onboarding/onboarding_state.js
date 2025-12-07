@@ -148,10 +148,8 @@ export class OnboardingPageState {
       clearInterval(this.syncCheckInterval);
       this.syncCheckInterval = null;
     }
-    if (this.eventBus) {
-      this.eventBus.clear();
-      this.eventBus = null;
-    }
+    this.eventBus?.clear();
+    this.eventBus = null;
     this.state = null;
     this.globalState = null;
     this.storage = null;

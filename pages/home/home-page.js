@@ -58,8 +58,8 @@ export class HomePage extends BasePage {
   }
 
   onDestroy() {
-    this.globalState.off("refresh", this.onRefresh);
-    this.pageState.off("dateChange", this.onDateChange);
+    this.globalState?.off("refresh", this.onRefresh);
+    this.pageState?.off("dateChange", this.onDateChange);
 
     if (this.scrollbar) {
       hmUI.deleteWidget(this.scrollbar);
@@ -97,11 +97,11 @@ export class HomePage extends BasePage {
 
   _updateScrollbar() {
     this._removeScrollbar();
-    if (this.widgets.prayerList?.widget) {
-      this.scrollbar = hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
-        target: this.widgets.prayerList.widget,
-      });
-    }
+    this.scrollbar = this.widgets.prayerList?.widget
+      ? hmUI.createWidget(hmUI.widget.PAGE_SCROLLBAR, {
+          target: this.widgets.prayerList.widget,
+        })
+      : null;
   }
 
   _removeScrollbar() {

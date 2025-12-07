@@ -176,26 +176,20 @@ export class GlobalState {
     RefreshManager.clear();
     this._stopConnectionMonitoring();
 
-    if (this.debouncedEmitSettingsChange) {
-      this.debouncedEmitSettingsChange.cancel();
-    }
-    this.storage.off("change", this.debouncedEmitSettingsChange);
-    this.eventBus.clear();
+    this.debouncedEmitSettingsChange?.cancel();
+    this.storage?.off("change", this.debouncedEmitSettingsChange);
+    this.eventBus?.clear();
 
     Object.values(this.pages).forEach((page) => {
-      if (page.destroy) {
-        page.destroy();
-      }
+      page?.destroy?.();
     });
 
-    if (this.syncManager) {
-      this.syncManager.destroy();
-      this.syncManager = null;
-    }
+    this.syncManager?.destroy();
+    this.syncManager = null;
 
     PrayersService.destroy();
 
-    this.storage.destroy();
+    this.storage?.destroy();
     this.storage = null;
 
     this.pages = {};

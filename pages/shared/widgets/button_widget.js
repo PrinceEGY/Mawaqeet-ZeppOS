@@ -173,14 +173,14 @@ export class ButtonWidget extends BaseWidget {
   }
 
   _unbindClickHandler() {
-    if (this.widget && this.clickHandler) {
-      this.widget.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+    if (this.clickHandler) {
+      this.widget?.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
     }
   }
 
   _unbindLongPressHandler() {
-    if (this.widget && this.longPressHandler) {
-      this.widget.removeEventListener(
+    if (this.longPressHandler) {
+      this.widget?.removeEventListener(
         hmUI.event.LONG_PRESS,
         this.longPressHandler
       );

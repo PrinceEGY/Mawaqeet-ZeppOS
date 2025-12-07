@@ -221,10 +221,8 @@ export class PrayersService {
   }
 
   static destroy() {
-    if (storage) {
-      storage.destroy();
-      storage = null;
-    }
+    storage?.destroy();
+    storage = null;
   }
 
   static _parseDate(date) {

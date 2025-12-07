@@ -64,11 +64,9 @@ Page(
     onDestroy() {
       logger.debug("Destroying main page");
 
-      if (globalState) {
-        globalState.off("settingsChange", this.onSettingsChange);
-        globalState.destroy();
-        globalState = null;
-      }
+      globalState?.off("settingsChange", this.onSettingsChange);
+      globalState?.destroy();
+      globalState = null;
 
       logger.debug("Main page destroyed");
     },

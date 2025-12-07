@@ -163,10 +163,10 @@ export class StorageService {
   }
 
   destroy() {
-    this.eventBus.clear();
+    this.eventBus?.clear();
 
-    if (this.type === "memory" && this.storage.saveAll) {
-      this.storage.saveAll();
+    if (this.type === "memory") {
+      this.storage?.saveAll();
     }
 
     this.storage = null;

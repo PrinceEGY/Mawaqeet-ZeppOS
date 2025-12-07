@@ -120,9 +120,9 @@ export class OnboardingPage extends BasePage {
   }
 
   onDestroy() {
-    this.pageState.off("settingsValidation", this.onSettingsValidation);
-    this.pageState.off("pageChanged", this.onPageChanged);
-    this.pageState.off("syncStateChanged", this.onSyncStateChanged);
+    this.pageState?.off("settingsValidation", this.onSettingsValidation);
+    this.pageState?.off("pageChanged", this.onPageChanged);
+    this.pageState?.off("syncStateChanged", this.onSyncStateChanged);
 
     if (this.navigationTimeout) {
       clearTimeout(this.navigationTimeout);
