@@ -37,13 +37,13 @@ export class DateUtils {
     }
   }
 
-  static calculateDateRange(monthsBefore, monthsAfter) {
+  static calculateDateRange(daysBefore, daysAfter) {
     const today = new Date();
     const startDate = new Date(today);
-    startDate.setMonth(today.getMonth() - monthsBefore);
+    startDate.setDate(today.getDate() - daysBefore);
 
     const endDate = new Date(today);
-    endDate.setMonth(today.getMonth() + monthsAfter);
+    endDate.setDate(today.getDate() + daysAfter);
 
     return { startDate, endDate };
   }

@@ -1,3 +1,4 @@
+import { DEFAULT_SETTINGS } from "../constants.js";
 import { DateUtils } from "./date-utils";
 import { PrayersApi } from "./prayers-api";
 
@@ -9,21 +10,27 @@ export class PrayersService {
   async fetchAndSavePrayerTimes({
     location = null,
     calculationMethodId = null,
-    monthsBefore = null,
-    monthsAfter = null,
+    daysBefore = null,
+    daysAfter = null,
   } = {}) {
     location = location || this.storageService.getItem("currentLocation");
     calculationMethodId =
       calculationMethodId ||
       this.storageService.getItem("calculationMethod")?.id;
 
-    const fetchMetaData = this.storageService.getItem("fetchMetaData");
-    monthsBefore = monthsBefore ?? fetchMetaData?.beforeMonths;
-    monthsAfter = monthsAfter ?? fetchMetaData?.afterMonths;
+    const fetchMetaData = this.storageService.getItem("fetchMetaData") || {};
+    const defaultDaysBefore = DEFAULT_SETTINGS.fetching.daysBefore;
+    const defaultDaysAfter = DEFAULT_SETTINGS.fetching.daysAfter;
+    const autoFetchInterval =
+      fetchMetaData.autoFetchInterval ??
+      DEFAULT_SETTINGS.fetching.autoFetchInterval;
+
+    daysBefore = daysBefore ?? fetchMetaData.beforeDays ?? defaultDaysBefore;
+    daysAfter = daysAfter ?? fetchMetaData.afterDays ?? defaultDaysAfter;
 
     const { startDate, endDate } = DateUtils.calculateDateRange(
-      monthsBefore,
-      monthsAfter
+      daysBefore,
+      daysAfter
     );
 
     try {
@@ -38,9 +45,9 @@ export class PrayersService {
       this.storageService.setItem("prayerTimes", prayerTimesData);
 
       const updatedFetchMetaData = {
-        beforeMonths: monthsBefore,
-        afterMonths: monthsAfter,
-        autoFetchInterval: fetchMetaData.autoFetchInterval,
+        beforeDays: daysBefore,
+        afterDays: daysAfter,
+        autoFetchInterval,
         startDate: startDate.getTime(),
         endDate: endDate.getTime(),
         fetchDate: Date.now(),
@@ -115,9 +122,11 @@ export class PrayersService {
   }
 
   isPrayerTimesOutdated() {
-    const fetchMetaData = this.storageService.getItem("fetchMetaData");
+    const fetchMetaData = this.storageService.getItem("fetchMetaData") || {};
 
-    const autoFetchInterval = fetchMetaData.autoFetchInterval;
+    const autoFetchInterval =
+      fetchMetaData.autoFetchInterval ??
+      DEFAULT_SETTINGS.fetching.autoFetchInterval;
     const msPerDay = 24 * 60 * 60 * 1000;
     if (
       this.storageService.isKeyOutdated(
@@ -133,8 +142,10 @@ export class PrayersService {
   }
 
   isCalculationMethodsListOutdated() {
-    const fetchMetaData = this.storageService.getItem("fetchMetaData");
-    const autoFetchInterval = fetchMetaData.autoFetchInterval;
+    const fetchMetaData = this.storageService.getItem("fetchMetaData") || {};
+    const autoFetchInterval =
+      fetchMetaData.autoFetchInterval ??
+      DEFAULT_SETTINGS.fetching.autoFetchInterval;
     const msPerDay = 24 * 60 * 60 * 1000;
     if (
       this.storageService.isKeyOutdated(

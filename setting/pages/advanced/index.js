@@ -16,7 +16,7 @@ import {
 
 export function advancedSettingsPage(navigateBackCallback, props) {
   const prayersService = new PrayersService(props.storageService);
-  const fetchMetaData = props.storageService.getItem("fetchMetaData");
+  const fetchMetaData = props.storageService.getItem("fetchMetaData") || {};
   const lastUpdateText = DateUtils.getTimeAgo(fetchMetaData.fetchDate);
 
   return Section({ style: LAYOUT_STYLES.mainContainer }, [
@@ -50,15 +50,18 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   ]);
 
   // --- Helper Methods ---
-  function validateMonthsInput(value) {
+  function validateDaysInput(
+    value,
+    fallbackValue = DEFAULT_SETTINGS.fetching.daysBefore
+  ) {
     const numValue = parseInt(value);
 
     if (isNaN(numValue)) {
-      return DEFAULT_SETTINGS.fetching.monthsBefore;
+      return fallbackValue;
     }
 
-    const { monthsMin, monthsMax } = DEFAULT_SETTINGS.fetching;
-    return Math.max(monthsMin, Math.min(monthsMax, numValue));
+    const { daysMin, daysMax } = DEFAULT_SETTINGS.fetching;
+    return Math.max(daysMin, Math.min(daysMax, numValue));
   }
 
   function validateFetchIntervalInput(value) {
@@ -68,9 +71,8 @@ export function advancedSettingsPage(navigateBackCallback, props) {
       return DEFAULT_SETTINGS.fetching.autoFetchInterval;
     }
 
-    const { monthsMax } = DEFAULT_SETTINGS.fetching;
-    const maxDays = monthsMax * 30 - 1;
-    return Math.max(1, Math.min(maxDays, numValue));
+    const { daysMax } = DEFAULT_SETTINGS.fetching;
+    return Math.max(1, Math.min(daysMax, numValue));
   }
 
   // --- Build Methods ---
@@ -116,9 +118,11 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   function buildFetchWindowPanel(props) {
-    const fetchMetaData = props.storageService.getItem("fetchMetaData");
-    const monthsBefore = fetchMetaData.beforeMonths;
-    const monthsAfter = fetchMetaData.afterMonths;
+    const fetchMetaData = props.storageService.getItem("fetchMetaData") || {};
+    const daysBefore =
+      fetchMetaData.beforeDays ?? DEFAULT_SETTINGS.fetching.daysBefore;
+    const daysAfter =
+      fetchMetaData.afterDays ?? DEFAULT_SETTINGS.fetching.daysAfter;
 
     return Panel({
       children: [
@@ -142,26 +146,26 @@ export function advancedSettingsPage(navigateBackCallback, props) {
         ),
 
         Input({
-          label: gettext("months_before"),
-          value: monthsBefore,
+          label: gettext("days_before"),
+          value: daysBefore,
           onChange: (value) => {
-            const validatedValue = validateMonthsInput(value);
+            const validatedValue = validateDaysInput(value);
             const updatedFetchMetaData = {
               ...fetchMetaData,
-              beforeMonths: validatedValue,
+              beforeDays: validatedValue,
             };
             props.storageService.setItem("fetchMetaData", updatedFetchMetaData);
           },
         }),
 
         Input({
-          label: gettext("months_after"),
-          value: monthsAfter,
+          label: gettext("days_after"),
+          value: daysAfter,
           onChange: (value) => {
-            const validatedValue = validateMonthsInput(value);
+            const validatedValue = validateDaysInput(value);
             const updatedFetchMetaData = {
               ...fetchMetaData,
-              afterMonths: validatedValue,
+              afterDays: validatedValue,
             };
             props.storageService.setItem("fetchMetaData", updatedFetchMetaData);
           },
@@ -171,8 +175,10 @@ export function advancedSettingsPage(navigateBackCallback, props) {
   }
 
   function buildAutoFetchPanel(props) {
-    const fetchMetaData = props.storageService.getItem("fetchMetaData");
-    const autoFetchInterval = fetchMetaData.autoFetchInterval;
+    const fetchMetaData = props.storageService.getItem("fetchMetaData") || {};
+    const autoFetchInterval =
+      fetchMetaData.autoFetchInterval ??
+      DEFAULT_SETTINGS.fetching.autoFetchInterval;
 
     return Panel({
       children: [

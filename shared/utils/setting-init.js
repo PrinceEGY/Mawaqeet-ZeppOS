@@ -94,8 +94,8 @@ export class SettingInitializer {
     if (!storageService.getItem("fetchMetaData")) {
       if (!storageService.getItem("fetchMetaData")) {
         const defaultFetchMetaData = {
-          beforeMonths: DEFAULT_SETTINGS.fetching.monthsBefore,
-          afterMonths: DEFAULT_SETTINGS.fetching.monthsAfter,
+          beforeDays: DEFAULT_SETTINGS.fetching.daysBefore,
+          afterDays: DEFAULT_SETTINGS.fetching.daysAfter,
           autoFetchInterval: DEFAULT_SETTINGS.fetching.autoFetchInterval,
           startDate: null,
           endDate: null,

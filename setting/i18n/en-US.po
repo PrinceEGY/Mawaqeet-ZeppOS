@@ -130,13 +130,13 @@ msgid "fetch_window_size"
 msgstr "Prayer Times Data Range"
 
 msgid "fetch_window_desc"
-msgstr "Set how many months of prayer times data to fetch before and after the current date (range: 1-120 months)."
+msgstr "Set how many days of prayer times data to fetch before and after the current date (range: 1-120 days)."
 
-msgid "months_before"
-msgstr "Months Before"
+msgid "days_before"
+msgstr "Days Before"
 
-msgid "months_after"
-msgstr "Months After"
+msgid "days_after"
+msgstr "Days After"
 
 msgid "auto_fetch_interval"
 msgstr "Automatic Update Interval"

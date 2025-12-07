@@ -75,10 +75,10 @@ export const DEFAULT_SETTINGS = {
   },
 
   fetching: {
-    monthsMax: 120,
-    monthsMin: 1,
-    monthsBefore: 1,
-    monthsAfter: 1,
+    daysMax: 120,
+    daysMin: 1,
+    daysBefore: 7,
+    daysAfter: 21,
     autoFetchInterval: 30,
   },
 };
