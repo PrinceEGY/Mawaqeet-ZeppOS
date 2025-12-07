@@ -44,7 +44,13 @@ export class BasePage {
   update() {
     if (!this.isBuilt) return;
     this.onUpdate();
-    Object.values(this.widgets).forEach((w) => w.updateView?.());
+    Object.values(this.widgets).forEach((w) => w.update());
+  }
+
+  updateView() {
+    if (!this.isBuilt) return;
+    this.onUpdateView();
+    Object.values(this.widgets).forEach((w) => w.updateView());
   }
 
   destroy() {
@@ -76,6 +82,10 @@ export class BasePage {
 
   onUpdate() {
     //  extra update logic if needed.
+  }
+
+  onUpdateView() {
+    //  extra updateView logic if needed.
   }
 
   onDestroy() {
