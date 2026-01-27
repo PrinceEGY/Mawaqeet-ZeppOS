@@ -126,7 +126,7 @@ export class ButtonWidget extends BaseWidget {
     this.widget.setProperty(hmUI.prop.MORE, {
       ...currentLayout,
       x: currentLayout.x + (this.pageIndex || 0) * DEVICE_WIDTH,
-      text: this.text,
+      text: currentLayout.text || this.text,
       ...this._buildProps(),
     });
   }
