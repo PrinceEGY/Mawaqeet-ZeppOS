@@ -19,12 +19,13 @@ export class PrayersService {
     if (!parsedDate) return null;
 
     const key = DateUtils.dateToDateString(parsedDate);
-    if (!getStorage().hasItem(key)) {
+    const timings = getStorage().getItem(key);
+    
+    if (timings === null || timings === undefined) {
       logger.error(`No prayer times found for date: ${key}`);
       return null;
     }
 
-    const timings = getStorage().getItem(key);
     return { date: parsedDate, timings };
   }
 
