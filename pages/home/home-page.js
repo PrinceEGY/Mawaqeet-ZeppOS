@@ -12,6 +12,7 @@ export class HomePage extends BasePage {
     this.scrollbar = null;
     this.onRefresh = this.onRefresh.bind(this);
     this.onDateChange = this.onDateChange.bind(this);
+    this.onLocationChange = this.onLocationChange.bind(this);
   }
 
   onInit() {
@@ -21,6 +22,7 @@ export class HomePage extends BasePage {
     this.pageState.loadPrayers();
     this.globalState.on("refresh", this.onRefresh);
     this.pageState.on("dateChange", this.onDateChange);
+    this.pageState.on("locationChange", this.onLocationChange);
   }
 
   onBuild() {
@@ -61,6 +63,7 @@ export class HomePage extends BasePage {
   onDestroy() {
     this.globalState?.off("refresh", this.onRefresh);
     this.pageState?.off("dateChange", this.onDateChange);
+    this.pageState?.off("locationChange", this.onLocationChange);
 
     if (this.scrollbar) {
       hmUI.deleteWidget(this.scrollbar);
@@ -80,6 +83,10 @@ export class HomePage extends BasePage {
 
   onDateChange() {
     this._updateContentVisibility();
+  }
+
+  onLocationChange() {
+    this.widgets.cityText?.update({ text: this.getCurrentCityText() });
   }
 
   _createScrollbar() {

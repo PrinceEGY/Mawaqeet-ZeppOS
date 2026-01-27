@@ -183,7 +183,15 @@ export class HomePageState {
   loadCurrentLocation() {
     try {
       const location = this.storage.getItem("currentLocation");
-      this.state.currentLocation = location || "Unknown";
+      const newLocation = location || "Unknown";
+      const oldCity = this.state.currentLocation?.city;
+      const newCity = newLocation?.city;
+
+      this.state.currentLocation = newLocation;
+
+      if (oldCity !== newCity) {
+        this.emit("locationChange", { location: newLocation });
+      }
     } catch (error) {
       this.state.currentLocation = "Unknown";
       logger.error(`Failed to load location: ${error}`);
