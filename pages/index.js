@@ -32,7 +32,13 @@ Page(
     },
 
     initializePages() {
+      globalState.registerPage(
+        "connectionRequirement",
+        new ConnectionRequirementPage(globalState)
+      );
       globalState.registerPage("home", new HomePage(globalState));
+      globalState.registerPage("onboarding", new OnboardingPage(globalState));
+    },
     },
 
     navigateToInitialPage() {
