@@ -11,6 +11,7 @@ export class SyncManager {
     this.activePullKeys = new Set(); // Keys currently being pulled
     this.activePushKeys = new Set(); // Keys currently being pushed
     this.syncCheckInterval = null;
+    this.onSyncStateChange = null;
   }
 
   /**
@@ -37,6 +38,8 @@ export class SyncManager {
   }
 
   _executePull(syncKeys) {
+    const wasIdle = this.activePullKeys.size === 0 && this.activePushKeys.size === 0;
+    
     syncKeys.forEach((key) => {
       if (this.activePullKeys.has(key)) {
         logger.warn(`Already pulling key: ${key}`);
@@ -50,6 +53,10 @@ export class SyncManager {
         this._pullKey(key);
       }
     });
+
+    if (wasIdle && this.activePullKeys.size > 0) {
+      this.onSyncStateChange?.(true);
+    }
   }
 
   /**
@@ -66,6 +73,8 @@ export class SyncManager {
   }
 
   _executePush(syncKeys) {
+    const wasIdle = this.activePullKeys.size === 0 && this.activePushKeys.size === 0;
+
     syncKeys.forEach((key) => {
       if (this.activePushKeys.has(key)) {
         logger.warn(`Already pushing key: ${key}`);
@@ -74,6 +83,10 @@ export class SyncManager {
       this.activePushKeys.add(key);
       this._pushKey(key);
     });
+
+    if (wasIdle && this.activePushKeys.size > 0) {
+      this.onSyncStateChange?.(true);
+    }
   }
 
   /**
@@ -181,6 +194,12 @@ export class SyncManager {
     return Array.isArray(keys) ? keys : [keys];
   }
 
+  _checkSyncComplete() {
+    if (this.activePullKeys.size === 0 && this.activePushKeys.size === 0) {
+      this.onSyncStateChange?.(false);
+    }
+  }
+
   _pushKey(key) {
     const currentValue = this.storage.getItem(key, { returnTimestamp: true });
     if (!currentValue || currentValue.data === undefined) {
@@ -210,6 +229,7 @@ export class SyncManager {
       })
       .finally(() => {
         this.activePushKeys.delete(key);
+        this._checkSyncComplete();
       });
   }
 
@@ -238,6 +258,7 @@ export class SyncManager {
       .catch((error) => logger.error(`Error pulling ${key}:`, error))
       .finally(() => {
         this.activePullKeys.delete(key);
+        this._checkSyncComplete();
       });
   }
 
@@ -267,6 +288,7 @@ export class SyncManager {
       })
       .finally(() => {
         this.activePullKeys.delete(key);
+        this._checkSyncComplete();
       });
   }
 
@@ -286,18 +308,34 @@ export class SyncManager {
   _pullPrayerTimesChunks(key, totalChunks) {
     const chunks = new Array(totalChunks).fill("");
 
-    const chunkPromises = Array.from({ length: totalChunks }, (_, i) =>
-      this.request({ method: `pull.${key}`, params: { chunkIndex: i } })
-        .then((chunkRes) => {
-          chunks[i] = chunkRes.data || "";
-        })
-        .catch((error) => {
-          logger.error(`Error pulling prayer times chunk ${i + 1}: `, error);
-          throw error;
-        })
-    );
+    const pullChunk = (index) => {
+      if (index >= totalChunks) {
+        return Promise.resolve(chunks);
+      }
 
-    return Promise.all(chunkPromises).then(() => chunks);
+      return this.request({
+        method: `pull.${key}`,
+        params: { chunkIndex: index },
+      })
+        .then((chunkRes) => {
+          chunks[index] = chunkRes.data || "";
+          return this._delay(100);
+        })
+        .then(() => pullChunk(index + 1))
+        .catch((error) => {
+          logger.error(
+            `Error pulling prayer times chunk ${index + 1}: `,
+            error
+          );
+          throw error;
+        });
+    };
+
+    return pullChunk(0);
+  }
+
+  _delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   _processPrayerTimesData(key, chunks, expectedDataLength) {
@@ -314,6 +352,7 @@ export class SyncManager {
 
     if (success) {
       this.request({ method: `pull.${key}`, params: { complete: true } });
+      this.storage.emit("change", { key: "prayerTimes" });
       logger.info("Prayer times pull completed successfully");
     } else {
       logger.error("Failed to save prayer times data");

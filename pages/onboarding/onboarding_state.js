@@ -15,10 +15,12 @@ export class OnboardingPageState {
       totalPages: 3,
       isAllRequirementsValid: false,
       requirementsStatus: null,
-      isSyncDisabled: false,
+      isSyncing: false,
     };
 
-    this.syncCheckInterval = null;
+    this._onGlobalSyncStateChange = this._onGlobalSyncStateChange.bind(this);
+    this.globalState.on("syncStateChanged", this._onGlobalSyncStateChange);
+
     this.validateRequiredSettings();
   }
 
@@ -58,29 +60,22 @@ export class OnboardingPageState {
     return this.state.currentPageIndex < this.state.totalPages - 1;
   }
 
-  get isSyncDisabled() {
-    return this.state.isSyncDisabled;
+  get isSyncing() {
+    return this.state.isSyncing;
   }
 
   triggerSync() {
-    if (this.state.isSyncDisabled || this.state.isAllRequirementsValid) return;
+    if (this.state.isSyncing || this.state.isAllRequirementsValid) return;
 
     const syncManager = this.globalState.syncManager;
     if (!syncManager) return;
 
-    this.state.isSyncDisabled = true;
-    this.emit("syncStateChanged", true);
-
     syncManager.pullFromSettingApp();
+  }
 
-    this.syncCheckInterval = setInterval(() => {
-      if (!syncManager.isSyncing()) {
-        clearInterval(this.syncCheckInterval);
-        this.syncCheckInterval = null;
-        this.state.isSyncDisabled = false;
-        this.emit("syncStateChanged", false);
-      }
-    }, 200);
+  _onGlobalSyncStateChange(isSyncing) {
+    this.state.isSyncing = isSyncing;
+    this.emit("syncStateChanged", isSyncing);
   }
 
   setCurrentPageIndex(pageIndex) {
@@ -144,10 +139,7 @@ export class OnboardingPageState {
   }
 
   destroy() {
-    if (this.syncCheckInterval) {
-      clearInterval(this.syncCheckInterval);
-      this.syncCheckInterval = null;
-    }
+    this.globalState?.off("syncStateChanged", this._onGlobalSyncStateChange);
     this.eventBus?.clear();
     this.eventBus = null;
     this.state = null;

@@ -143,9 +143,17 @@ export class OnboardingPage extends BasePage {
     this._hideNavigationButtons();
   }
 
-  onSyncStateChanged(isDisabled) {
-    if (this.widgets.syncButton) {
-      this.widgets.syncButton.update({ isEnabled: !isDisabled });
+  onSyncStateChanged(isSyncing) {
+    if (!this.widgets.syncButton) return;
+
+    if (isSyncing) {
+      this.widgets.syncButton.update({ isEnabled: false });
+    } else {
+      setTimeout(() => {
+        if (!this.pageState.isSyncing) {
+          this.widgets.syncButton?.update({ isEnabled: true });
+        }
+      }, 1000);
     }
   }
 
@@ -204,6 +212,14 @@ export class OnboardingPage extends BasePage {
   }
 
   _handleSync() {
+    this.widgets.syncButton?.update({ isEnabled: false });
+
+    setTimeout(() => {
+      if (!this.pageState.isSyncing) {
+        this.widgets.syncButton?.update({ isEnabled: true });
+      }
+    }, 1000);
+
     this.pageState.triggerSync();
     logger.debug("Sync triggered from onboarding");
   }

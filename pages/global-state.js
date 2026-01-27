@@ -27,10 +27,14 @@ export class GlobalState {
     this.debouncedEmitSettingsChange = debounce(() => {
       logger.debug("Emitting settingsChange");
       this.emit("settingsChange");
-    }, 2000);
+    }, 1000);
 
     this.storage.on("change", this.debouncedEmitSettingsChange);
     RefreshManager.setRefreshCallback(() => this.emit("refresh"));
+
+    this.syncManager.onSyncStateChange = (isSyncing) => {
+      this.emit("syncStateChanged", isSyncing);
+    };
 
     this._isConnected = connectStatus();
     this._startConnectionMonitoring();
