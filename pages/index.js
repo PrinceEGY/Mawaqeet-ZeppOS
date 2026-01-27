@@ -1,4 +1,5 @@
 import { BasePage } from "@zeppos/zml/base-page";
+import * as display from "@zos/display";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
 import { OnboardingPage } from "./onboarding/onboarding-page";
@@ -7,18 +8,20 @@ import { DeviceLogger } from "./utils/device-logger";
 const logger = new DeviceLogger("main-page");
 
 let globalState = null;
+let originalAutoBrightness = null;
+let originalBrightness = null;
+
 
 Page(
   BasePage({
     onInit() {
       logger.debug("Main page initialized");
-
+      setupDisplay();
       globalState = new GlobalState(
         this.request.bind(this),
         this.call.bind(this)
       );
       globalState.init();
-
       globalState.on("settingsChange", this.onSettingsChange);
     },
 
@@ -63,6 +66,12 @@ Page(
 
     onDestroy() {
       logger.debug("Destroying main page");
+      restoreDisplay();
+
+      debugButtons.forEach((btn) => {
+        hmUI.deleteWidget(btn);
+      });
+      debugButtons = [];
 
       globalState?.off("settingsChange", this.onSettingsChange);
       globalState?.destroy();
@@ -79,3 +88,26 @@ Page(
     },
   })
 );
+
+
+function setupDisplay() {
+  originalAutoBrightness = display.getAutoBrightness();
+  originalBrightness = display.getBrightness();
+
+  display.setPageBrightTime({ brightTime: 60000 });
+  display.setAutoBrightness({ autoBright: false });
+  display.setBrightness({ brightness: 100 });
+  display.pauseDropWristScreenOff({ duration: 0 });
+  display.pausePalmScreenOff({ duration: 0 });
+}
+
+function restoreDisplay() {
+  display.resetDropWristScreenOff();
+  display.resetPalmScreenOff();
+  if (originalAutoBrightness !== null) {
+    display.setAutoBrightness({ autoBright: originalAutoBrightness });
+  }
+  if (originalBrightness !== null && !originalAutoBrightness) {
+    display.setBrightness({ brightness: originalBrightness });
+  }
+}
