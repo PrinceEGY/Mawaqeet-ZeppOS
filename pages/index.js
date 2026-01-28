@@ -1,5 +1,9 @@
 import { BasePage } from "@zeppos/zml/base-page";
 import * as display from "@zos/display";
+import * as hmUI from "@zos/ui";
+import { px } from "@zos/utils";
+import { ConnectionRequirementPage } from "./connection-requirement/connection-requirement-page";
+import { DebugPage } from "./debug/debug-page";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
 import { OnboardingPage } from "./onboarding/onboarding-page";
@@ -8,6 +12,7 @@ import { DeviceLogger } from "./utils/device-logger";
 const logger = new DeviceLogger("main-page");
 
 let globalState = null;
+let debugButtons = [];
 let originalAutoBrightness = null;
 let originalBrightness = null;
 
@@ -28,6 +33,7 @@ Page(
     build() {
       logger.debug("Building main page");
       this.initializePages();
+      this.createDebugButtons();
       this.navigateToInitialPage();
     },
 
@@ -36,9 +42,39 @@ Page(
         "connectionRequirement",
         new ConnectionRequirementPage(globalState)
       );
+      globalState.registerPage("debug", new DebugPage(globalState));
       globalState.registerPage("home", new HomePage(globalState));
       globalState.registerPage("onboarding", new OnboardingPage(globalState));
     },
+
+    createDebugButtons() {
+      const debugBtn = hmUI.createWidget(hmUI.widget.BUTTON, {
+        x: (DEVICE_WIDTH - px(80)) / 2,
+        y: px(10),
+        w: px(80),
+        h: px(40),
+        text: "Debug",
+        text_size: TYPOGRAPHY.BODY_SECONDARY.size,
+        color: COLORS.TITLE,
+        normal_color: COLORS.PRIMARY,
+        press_color: COLORS.PRIMARY_PRESSED,
+        radius: px(8),
+      });
+      debugBtn.addEventListener(hmUI.event.CLICK_UP, () => {
+        logger.debug("Opening Debug page");
+        debugBtn.setProperty(hmUI.prop.VISIBLE, false);
+        globalState?.currentPage?.destroy();
+        if (globalState) {
+          globalState.currentPage = null;
+          globalState.navigate("debug");
+        }
+      });
+      debugButtons.push(debugBtn);
+
+      globalState.on("pageChanged", (pageName) => {
+        const isDebugPage = pageName === "debug";
+        debugBtn.setProperty(hmUI.prop.VISIBLE, !isDebugPage);
+      });
     },
 
     navigateToInitialPage() {
