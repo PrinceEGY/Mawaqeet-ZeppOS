@@ -2,8 +2,11 @@ import { DeviceLogger } from "./device-logger";
 
 const logger = new DeviceLogger("refresh-manager");
 
+const TARGET_FPS = 15;
+const REFRESH_INTERVAL = 1000 / TARGET_FPS;
+
 /**
- * RefreshManager - A static refresh system Providing responsive updates at 30fps (~33ms intervals)
+ * RefreshManager - A static refresh system Providing responsive updates at configurable fps.
  */
 export class RefreshManager {
   static refreshCallback = null;
@@ -46,7 +49,7 @@ export class RefreshManager {
 
     this.refreshInterval = setInterval(() => {
       this.runRefresh();
-    }, 1000 / 30); // 33ms for ~30fps
+    }, REFRESH_INTERVAL);
 
     this.isRunning = true;
     logger.debug("RefreshManager: Started refresh loop");
