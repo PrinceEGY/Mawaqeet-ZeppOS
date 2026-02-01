@@ -20,7 +20,6 @@ export class HomePage extends BasePage {
     this.pageState.updateEnabledPrayers();
     this.pageState.loadCurrentLocation();
     this.pageState.loadPrayers();
-    this.globalState.on("refresh", this.onRefresh);
     this.pageState.on("dateChange", this.onDateChange);
     this.pageState.on("locationChange", this.onLocationChange);
   }
@@ -61,7 +60,6 @@ export class HomePage extends BasePage {
   }
 
   onDestroy() {
-    this.globalState?.off("refresh", this.onRefresh);
     this.pageState?.off("dateChange", this.onDateChange);
     this.pageState?.off("locationChange", this.onLocationChange);
 
