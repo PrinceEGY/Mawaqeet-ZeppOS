@@ -124,8 +124,7 @@ export class PrayersService {
       });
 
       logger.debug(
-        `${
-          getStorage().getAllKeys().length
+        `${getStorage().getAllKeys().length
         } prayer times saved in local storage.`
       );
       logger.info("Prayer times data set in local storage.");
@@ -242,5 +241,16 @@ export class PrayersService {
       logger.error(`Error parsing date: ${error}`);
       return null;
     }
+  }
+  static getNotifyEnabledPrayers(storage) {
+    return TIMINGS_LIST.filter(
+      (t) => storage.getItem(`notify:${t.name}`) !== false
+    ).map((t) => t.name);
+  }
+
+  static getDisplayEnabledPrayers(storage) {
+    return TIMINGS_LIST.filter(
+      (t) => storage.getItem(`display:${t.name}`) !== false
+    ).map((t) => t.name);
   }
 }

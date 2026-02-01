@@ -199,15 +199,9 @@ export class HomePageState {
   }
 
   updateEnabledPrayers() {
-    const enabledPrayers = [];
-    TIMINGS_LIST.forEach((timing) => {
-      const displaySetting = this.storage.getItem(`display:${timing.name}`);
-      if (displaySetting !== false) {
-        enabledPrayers.push(timing.name);
-      }
-    });
-
-    this.state.enabledPrayers = enabledPrayers;
+    this.state.enabledPrayers = PrayersService.getDisplayEnabledPrayers(
+      this.storage
+    );
     this.clearPrayersCache();
   }
 
