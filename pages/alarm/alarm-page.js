@@ -43,8 +43,9 @@ export class AlarmPage extends BasePage {
 
     onShow() {
         this.pageState.startVibration();
+        this.pageState.startSound();
         this.pageState.startAutoDismiss(this._dismiss);
-        logger.debug("AlarmPage shown, vibration and auto-dismiss started");
+        logger.debug("AlarmPage shown, vibration, sound, and auto-dismiss started");
     }
 
     onDestroy() {

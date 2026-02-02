@@ -1,5 +1,8 @@
 import { Vibrator, VIBRATOR_SCENE_CALL } from "@zos/sensor";
+import { create, id } from "@zos/media";
 import { DeviceLogger } from "../utils/device-logger";
+import { getPrayerLabel } from "../../shared/constants";
+import { DateUtils } from "../../shared/utils/date-utils";
 
 const logger = new DeviceLogger("alarm-page-state");
 
@@ -12,6 +15,7 @@ export class AlarmPageState {
             prayerTime: "--:--",
         };
         this.vibrator = null;
+        this.player = null;
         this.dismissTimer = null;
         this.dismissCallback = null;
     }
@@ -30,11 +34,17 @@ export class AlarmPageState {
     }
 
     getPrayerName() {
-        return this.state.prayerName;
+        return getPrayerLabel(this.state.prayerName);
     }
 
     getPrayerTime() {
-        return this.state.prayerTime;
+        try {
+            const date = new Date(this.state.prayerTime);
+            return DateUtils.formatCurrentTime(date, false);
+        } catch (e) {
+            logger.error("Failed to parse prayer time: " + e);
+            return this.state.prayerTime;
+        }
     }
 
     startVibration() {
@@ -60,6 +70,38 @@ export class AlarmPageState {
         }
     }
 
+    startSound() {
+        try {
+            this.player = create(id.PLAYER);
+            this.player.addEventListener(this.player.event.PREPARE, (result) => {
+                if (result) {
+                    logger.debug("Audio prepared, starting playback");
+                    this.player.start();
+                } else {
+                    logger.warn("Audio prepare failed");
+                }
+            });
+            this.player.setSource(this.player.source.FILE, { file: "notify.mp3" });
+            this.player.prepare();
+            logger.debug("Audio player created");
+        } catch (e) {
+            logger.warn("Failed to create audio player: " + e.message);
+            this.player = null;
+        }
+    }
+
+    stopSound() {
+        if (this.player) {
+            try {
+                this.player.stop();
+                logger.debug("Audio stopped");
+            } catch (e) {
+                logger.warn("Failed to stop audio: " + e.message);
+            }
+            this.player = null;
+        }
+    }
+
     startAutoDismiss(callback) {
         this.dismissCallback = callback;
         this.dismissTimer = setTimeout(() => {
@@ -79,6 +121,7 @@ export class AlarmPageState {
 
     cleanup() {
         this.stopVibration();
+        this.stopSound();
         this.clearAutoDismiss();
         logger.debug("AlarmPageState cleanup complete");
     }
