@@ -1,11 +1,11 @@
 import { connectStatus } from "@zos/ble";
 import { EventBus } from "@zos/utils";
-import { debounce } from "../shared/helpers";
 import { DeviceLogger } from "./utils/device-logger";
 import { PrayersService } from "./utils/prayers-service";
 import { RefreshManager } from "./utils/refresh-manager";
 import { StorageService } from "./utils/storage-service";
 import { SyncManager } from "./utils/sync-manager";
+import { AlarmScheduler } from "./utils/alarm-scheduler";
 
 const logger = new DeviceLogger("global-state");
 
@@ -14,9 +14,9 @@ export class GlobalState {
     this.storage = new StorageService();
     this.eventBus = new EventBus();
     this.syncManager = new SyncManager(request, call, this.storage);
+    this.alarmScheduler = new AlarmScheduler(this.storage);
     this.currentPage = null;
     this.pages = {};
-    this.debouncedEmitSettingsChange = null;
 
     this._isConnected = false;
     this._connectionCheckInterval = null;
@@ -24,13 +24,11 @@ export class GlobalState {
   }
 
   init() {
-    this.debouncedEmitSettingsChange = debounce(() => {
-      logger.debug("Emitting settingsChange");
-      this.emit("settingsChange");
-    }, 1000);
-
-    this.storage.on("change", this.debouncedEmitSettingsChange);
-    RefreshManager.setRefreshCallback(() => this.emit("refresh"));
+    this.storage.on("change", this._onStorageChange);
+    this.alarmScheduler.rescheduleAlarms();
+    RefreshManager.setRefreshCallback(() => {
+      this.currentPage?.refresh?.();
+    });
 
     this.syncManager.onSyncStateChange = (isSyncing) => {
       this.emit("syncStateChanged", isSyncing);
@@ -44,6 +42,15 @@ export class GlobalState {
     }, 3000);
     logger.debug("GlobalState initialized");
   }
+
+  _onStorageChange = (data) => {
+    this.emit("settingsChange", data);
+
+    if (data.key === "prayerTimes" || data.key?.startsWith("notify:")) {
+      logger.debug(`Prayer times changed, rescheduling alarms`);
+      this.alarmScheduler.rescheduleAlarms({ force: true });
+    }
+  };
 
   registerPage(name, pageInstance) {
     this.pages[name] = pageInstance;
@@ -78,6 +85,7 @@ export class GlobalState {
     this._isNavigating = false;
     logger.debug(`Navigated to: ${pageName}`);
 
+    this.emit("pageChanged", pageName);
     this._checkConnectionRequirement();
   }
 
@@ -121,6 +129,8 @@ export class GlobalState {
     const currentPage = this.getCurrentPageName();
 
     if (!requirement) return;
+
+    if (currentPage === "debug") return;
 
     if (this._isConnected && currentPage === "connectionRequirement") {
       logger.debug(
@@ -180,8 +190,7 @@ export class GlobalState {
     RefreshManager.clear();
     this._stopConnectionMonitoring();
 
-    this.debouncedEmitSettingsChange?.cancel();
-    this.storage?.off("change", this.debouncedEmitSettingsChange);
+    this.storage?.off("change", this._onStorageChange);
     this.eventBus?.clear();
 
     Object.values(this.pages).forEach((page) => {
@@ -198,7 +207,6 @@ export class GlobalState {
 
     this.pages = {};
     this.currentPage = null;
-    this.debouncedEmitSettingsChange = null;
 
     logger.debug("GlobalState destroyed");
   }
