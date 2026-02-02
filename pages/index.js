@@ -49,16 +49,16 @@ Page(
 
     createDebugButtons() {
       const debugBtn = hmUI.createWidget(hmUI.widget.BUTTON, {
-        x: (DEVICE_WIDTH - px(80)) / 2,
+        x: px(10),
         y: px(10),
-        w: px(80),
-        h: px(40),
+        w: DEVICE_WIDTH - px(20),
+        h: px(80),
         text: "Debug",
-        text_size: TYPOGRAPHY.BODY_SECONDARY.size,
+        text_size: TYPOGRAPHY.SUBTITLE.size,
         color: COLORS.TITLE,
         normal_color: COLORS.PRIMARY,
         press_color: COLORS.PRIMARY_PRESSED,
-        radius: px(8),
+        radius: px(12),
       });
       debugBtn.addEventListener(hmUI.event.CLICK_UP, () => {
         logger.debug("Opening Debug page");

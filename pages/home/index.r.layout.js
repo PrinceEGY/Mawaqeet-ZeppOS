@@ -30,7 +30,7 @@ export const PRAYER_STATUS_COLORS = {
 export const LAYOUT = {
   CITY_TEXT: {
     x: px(120),
-    y: px(15),
+    y: px(100),
     w: DEVICE_WIDTH - px(240),
     h: TYPOGRAPHY.BODY.lineHeight,
     align_h: hmUI.align.CENTER_H,
@@ -42,7 +42,7 @@ export const LAYOUT = {
   DATE_NAVIGATION: {
     CONTAINER: {
       x: 0,
-      y: px(45),
+      y: px(130),
       w: DEVICE_WIDTH,
       h: px(90),
     },
@@ -60,7 +60,7 @@ export const LAYOUT = {
 
     TIME_TEXT: {
       x: px(80),
-      y: px(130),
+      y: px(215),
       w: DEVICE_WIDTH - px(160),
       h: TYPOGRAPHY.BODY.lineHeight,
       align_h: hmUI.align.CENTER_H,
@@ -71,7 +71,7 @@ export const LAYOUT = {
 
     LEFT_ARROW: {
       x: px(90),
-      y: px(15),
+      y: px(20),
       w: px(50),
       h: px(50),
       normal_src: "left_arrow.png",
@@ -80,7 +80,7 @@ export const LAYOUT = {
 
     RIGHT_ARROW: {
       x: DEVICE_WIDTH - px(140),
-      y: px(15),
+      y: px(20),
       w: px(50),
       h: px(50),
       normal_src: "right_arrow.png",
@@ -90,18 +90,18 @@ export const LAYOUT = {
 
   PRAYERS_CONTAINER: {
     x: px(0),
-    y: px(180),
+    y: px(260),
     w: DEVICE_WIDTH,
-    h: DEVICE_HEIGHT - px(180),
+    h: DEVICE_HEIGHT - px(260),
     scroll_enable: 1,
   },
 
   NO_DATA: {
     CONTAINER: {
       x: px(0),
-      y: px(180),
+      y: px(260),
       w: DEVICE_WIDTH,
-      h: DEVICE_HEIGHT - px(180),
+      h: DEVICE_HEIGHT - px(260),
     },
     TITLE: {
       x: px(20),
