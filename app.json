@@ -18,13 +18,14 @@
   "permissions": [
     "data:os.device.info",
     "device:os.local_storage",
-    "device:os.geolocation"
+    "device:os.alarm",
+    "device:os.bg_service"
   ],
   "runtime": {
     "apiVersion": {
-      "compatible": "3.0.0",
-      "target": "3.0.0",
-      "minVersion": "3.0.0"
+      "compatible": "3.5.0",
+      "target": "3.5.0",
+      "minVersion": "3.5.0"
     }
   },
   "targets": {
@@ -32,7 +33,8 @@
       "module": {
         "page": {
           "pages": [
-            "pages/index"
+            "pages/index",
+            "pages/alarm/index"
           ]
         },
         "app-side": {
@@ -40,6 +42,11 @@
         },
         "setting": {
           "path": "setting/index"
+        },
+        "app-service": {
+          "services": [
+            "app-service/debug-service"
+          ]
         }
       },
       "platforms": [
