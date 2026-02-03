@@ -136,16 +136,14 @@ function setupDisplay() {
   originalAutoBrightness = display.getAutoBrightness();
   originalBrightness = display.getBrightness();
 
-  display.setPageBrightTime({ brightTime: 60000 });
+  display.setPageBrightTime({ brightTime: 30000 });
   display.setAutoBrightness({ autoBright: false });
   display.setBrightness({ brightness: 100 });
-  display.pauseDropWristScreenOff({ duration: 0 });
-  display.pausePalmScreenOff({ duration: 0 });
+  display.pauseDropWristScreenOff({ duration: 15000 });
 }
 
 function restoreDisplay() {
   display.resetDropWristScreenOff();
-  display.resetPalmScreenOff();
   if (originalAutoBrightness !== null) {
     display.setAutoBrightness({ autoBright: originalAutoBrightness });
   }
