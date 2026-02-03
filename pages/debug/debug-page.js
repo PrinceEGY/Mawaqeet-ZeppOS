@@ -1,5 +1,5 @@
 import * as hmUI from "@zos/ui";
-import * as sensor from "@zos/sensor";
+
 import { set, REPEAT_ONCE } from "@zos/alarm";
 import { push } from "@zos/router";
 import { px } from "@zos/utils";
@@ -32,7 +32,7 @@ export class DebugPage extends BasePage {
             { text: "Test Alarm", handler: () => this._scheduleTestAlarm() },
             { text: "Test Service (5s)", handler: () => this._scheduleService() },
             { text: "Local Inc", handler: () => this.localIncrement() },
-            { text: "Test Buzzer", handler: () => this._testBuzzer() },
+
         ];
     }
 
@@ -75,15 +75,7 @@ export class DebugPage extends BasePage {
             },
         });
 
-        this.widgets.buzzerStatus = new TextWidget({
-            parentWidget: container,
-            pageState: null,
-            text: "Status: Ready",
-            layout: {
-                ...LAYOUT.BUZZER_STATUS,
-                y: lastBtnY + px(45),
-            },
-        });
+
 
         this.widgets.schedulerStatus = new TextWidget({
             parentWidget: container,
@@ -91,7 +83,7 @@ export class DebugPage extends BasePage {
             text: `Last Sched: ${this.getLastScheduleTime()}`,
             layout: {
                 ...LAYOUT.LAST_SCHEDULED_TEXT,
-                y: lastBtnY + px(75),
+                y: lastBtnY + px(45),
             },
         });
 
@@ -101,7 +93,7 @@ export class DebugPage extends BasePage {
             text: "Last Key: -",
             layout: {
                 ...LAYOUT.LAST_KEY_TEXT,
-                y: lastBtnY + px(105),
+                y: lastBtnY + px(75),
             },
         });
 
@@ -149,30 +141,7 @@ export class DebugPage extends BasePage {
         });
     }
 
-    _testBuzzer() {
-        logger.debug("Debug: Testing Buzzer");
-        try {
-            if (!sensor || !sensor.Buzzer) {
-                this.widgets.buzzerStatus.update({ text: "Buzzer API Missing" });
-                logger.warn("sensor.Buzzer is undefined");
-                return;
-            }
 
-            const buzzer = new sensor.Buzzer();
-            if (buzzer.isEnabled()) {
-                const type = buzzer.getSourceType().ALARM;
-                buzzer.start(type);
-                this.widgets.buzzerStatus.update({ text: "Buzzer Playing" });
-                logger.debug("Buzzer started");
-            } else {
-                this.widgets.buzzerStatus.update({ text: "Buzzer Disabled" });
-                logger.warn("Buzzer disabled");
-            }
-        } catch (e) {
-            logger.error("Buzzer error", e);
-            this.widgets.buzzerStatus.update({ text: "Err: " + e.message });
-        }
-    }
 
     localIncrement() {
         try {
