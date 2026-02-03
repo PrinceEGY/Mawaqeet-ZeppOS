@@ -1,4 +1,4 @@
-import { connectStatus } from "@zos/ble";
+import { connectStatus, addListener, removeListener } from "@zos/ble";
 import { EventBus } from "@zos/utils";
 import { DeviceLogger } from "./utils/device-logger";
 import { PrayersService } from "./utils/prayers-service";
@@ -19,7 +19,7 @@ export class GlobalState {
     this.pages = {};
 
     this._isConnected = false;
-    this._connectionCheckInterval = null;
+    this._onConnectionChange = this._onConnectionChange.bind(this);
     this._isNavigating = false;
   }
 
@@ -35,7 +35,7 @@ export class GlobalState {
     };
 
     this._isConnected = connectStatus();
-    this._startConnectionMonitoring();
+    addListener(this._onConnectionChange);
 
     setTimeout(() => {
       this.syncManager.triggerFullSync();
@@ -93,34 +93,20 @@ export class GlobalState {
     return this._isConnected;
   }
 
-  _startConnectionMonitoring(intervalMs = 2000) {
-    this._stopConnectionMonitoring();
-
-    this._connectionCheckInterval = setInterval(() => {
-      this._checkConnection();
-    }, intervalMs);
-
-    logger.debug("Started connection monitoring");
-  }
-
   _stopConnectionMonitoring() {
-    if (this._connectionCheckInterval) {
-      clearInterval(this._connectionCheckInterval);
-      this._connectionCheckInterval = null;
-    }
+    removeListener(this._onConnectionChange);
   }
 
-  _checkConnection() {
-    const wasConnected = this._isConnected;
-    this._isConnected = connectStatus();
-
-    if (wasConnected !== this._isConnected) {
+  _onConnectionChange(status) {
+    if (this._isConnected !== status) {
+      this._isConnected = status;
       logger.debug(`Connection status changed: ${this._isConnected}`);
       this.emit("connectionChanged", this._isConnected);
+      this._checkConnectionRequirement();
     }
-
-    this._checkConnectionRequirement();
   }
+
+
 
   _checkConnectionRequirement() {
     if (this._isNavigating) return;
