@@ -244,8 +244,8 @@ export const UI_BUILDERS = {
 
   createDatePicker: ({ parentWidget = hmUI, currentDate, dateRange }) => {
     const currentYear = new Date().getFullYear();
-    const startYear = dateRange?.startDate?.getFullYear() ?? currentYear - 1;
-    const endYear = dateRange?.endDate?.getFullYear() ?? currentYear + 1;
+    const startYear = dateRange?.startDate?.getFullYear() ?? currentYear - 100;
+    const endYear = dateRange?.endDate?.getFullYear() ?? currentYear + 100;
 
     return parentWidget.createWidget(hmUI.widget.PICK_DATE, {
       ...LAYOUT.DATE_PICKER.PICKER,
