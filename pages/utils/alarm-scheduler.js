@@ -1,6 +1,7 @@
 import { set, cancel, getAllAlarms, REPEAT_ONCE } from "@zos/alarm";
 import { DeviceLogger } from "./device-logger";
 import { PrayersService } from "./prayers-service";
+import { StorageService } from "./storage-service";
 
 const logger = new DeviceLogger("alarm-scheduler");
 
@@ -8,13 +9,9 @@ const THROTTLE_DURATION = 3 * 24 * 60 * 60 * 1000; // 3 days
 const SCHEDULE_WINDOW = 7; // days
 
 export class AlarmScheduler {
-    constructor(storage) {
-        this.storage = storage;
-    }
-
-    rescheduleAlarms({ force = false } = {}) {
+    static rescheduleAlarms({ force = false } = {}) {
         try {
-            const lastTime = this.storage.getItem('lastAlarmScheduleTime') || 0;
+            const lastTime = StorageService.getItem('lastAlarmScheduleTime') || 0;
             const now = Date.now();
 
             if (!force && (now - lastTime < THROTTLE_DURATION)) {
@@ -31,7 +28,7 @@ export class AlarmScheduler {
                 this.scheduleAlarmsForDay(date);
             }
 
-            this.storage.setItem('lastAlarmScheduleTime', now);
+            StorageService.setItem('lastAlarmScheduleTime', now, { markForPush: false });
             logger.info('Alarm rescheduling complete');
 
         } catch (error) {
@@ -39,7 +36,7 @@ export class AlarmScheduler {
         }
     }
 
-    cancelAllAlarms() {
+    static cancelAllAlarms() {
         try {
             const alarms = getAllAlarms();
             alarms.forEach((id) => cancel(id));
@@ -49,8 +46,8 @@ export class AlarmScheduler {
         }
     }
 
-    scheduleAlarmsForDay(date = new Date()) {
-        const prayers = PrayersService.getNotifyEnabledPrayers(this.storage);
+    static scheduleAlarmsForDay(date = new Date()) {
+        const prayers = PrayersService.getNotifyEnabledPrayers();
         const times = PrayersService.getEffectiveDayPrayerTimes(date);
 
         if (!times?.timings) {
@@ -74,7 +71,7 @@ export class AlarmScheduler {
         });
     }
 
-    _scheduleAlarm(prayerName, time) {
+    static _scheduleAlarm(prayerName, time) {
         try {
             set({
                 url: "pages/alarm/index",

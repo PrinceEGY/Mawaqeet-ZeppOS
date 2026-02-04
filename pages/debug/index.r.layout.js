@@ -49,15 +49,7 @@ export const LAYOUT = {
         text_size: TYPOGRAPHY.BODY_SECONDARY.size,
     },
 
-    BUZZER_STATUS: {
-        x: px(0),
-        y: px(440),
-        w: DEVICE_WIDTH,
-        h: px(40),
-        color: COLORS.TITLE,
-        align_h: align.CENTER_H,
-        text_size: TYPOGRAPHY.BODY_SECONDARY.size,
-    },
+
 
     LAST_SCHEDULED_TEXT: {
         x: px(0),

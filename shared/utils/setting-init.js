@@ -17,7 +17,6 @@ export class SettingInitializer {
     try {
       this.initNavState(storageService);
       this.initLocationSettings(storageService);
-      this.initFetchingSettings(storageService);
       this.initPrayerSettings(storageService);
       this.initCalculationMethod(storageService);
       this._initDoneThisSession = true;
@@ -87,26 +86,6 @@ export class SettingInitializer {
           DEFAULT_SETTINGS.calculationMethod
         )}`
       );
-    }
-  }
-
-  static initFetchingSettings(storageService) {
-    if (!storageService.getItem("fetchMetaData")) {
-      if (!storageService.getItem("fetchMetaData")) {
-        const defaultFetchMetaData = {
-          beforeDays: DEFAULT_SETTINGS.fetching.daysBefore,
-          afterDays: DEFAULT_SETTINGS.fetching.daysAfter,
-          autoFetchInterval: DEFAULT_SETTINGS.fetching.autoFetchInterval,
-          startDate: null,
-          endDate: null,
-          fetchDate: null,
-        };
-
-        storageService.setItem("fetchMetaData", defaultFetchMetaData);
-        console.debug(
-          `Default fetchMetaData set to ${JSON.stringify(defaultFetchMetaData)}`
-        );
-      }
     }
   }
 }

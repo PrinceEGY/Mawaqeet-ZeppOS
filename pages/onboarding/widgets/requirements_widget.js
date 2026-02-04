@@ -15,7 +15,7 @@ export class RequirementsWidget extends BaseWidget {
     this.statusImageWidget = null;
     this.titleWidget = null;
     this.locationWidget = null;
-    this.prayerTimesWidget = null;
+
     this.onSettingsValidation = this.onSettingsValidation.bind(this);
   }
 
@@ -48,15 +48,7 @@ export class RequirementsWidget extends BaseWidget {
     });
     this.locationWidget.build();
 
-    this.prayerTimesWidget = new TextWidget({
-      parentWidget: this.parentWidget,
-      pageState: this.pageState,
-      text: "",
-      layout: LAYOUT.STATUS.REQUIREMENT_ITEM,
-      pageIndex: this.pageIndex,
-      y: px(290) + TYPOGRAPHY.BODY_SECONDARY.lineHeight,
-    });
-    this.prayerTimesWidget.build();
+
 
     this.pageState.on("settingsValidation", this.onSettingsValidation);
   }
@@ -65,7 +57,7 @@ export class RequirementsWidget extends BaseWidget {
     const requirements = this.pageState.requirementsStatus;
     if (!requirements) return;
 
-    const { location, prayerTimes } = requirements;
+    const { location } = requirements;
 
     const locSymbol = location.isValid
       ? STATUS_SYMBOLS.valid
@@ -76,30 +68,20 @@ export class RequirementsWidget extends BaseWidget {
       text: `${locSymbol} Location: ${locText}`,
       color: locColor,
     });
-
-    const ptSymbol = prayerTimes.isValid
-      ? STATUS_SYMBOLS.valid
-      : STATUS_SYMBOLS.invalid;
-    const ptColor = prayerTimes.isValid ? COLORS.PRIMARY : COLORS.ERROR;
-    const ptText = prayerTimes.isValid ? "Loaded" : "Waiting for sync";
-    this.prayerTimesWidget?.update({
-      text: `${ptSymbol} Prayer Times: ${ptText}`,
-      color: ptColor,
-    });
   }
 
   onShow() {
     this.statusImageWidget?.show();
     this.titleWidget?.show();
     this.locationWidget?.show();
-    this.prayerTimesWidget?.show();
+
   }
 
   onHide() {
     this.statusImageWidget?.hide();
     this.titleWidget?.hide();
     this.locationWidget?.hide();
-    this.prayerTimesWidget?.hide();
+
   }
 
   onDestroy() {
@@ -107,11 +89,10 @@ export class RequirementsWidget extends BaseWidget {
     this.statusImageWidget?.destroy();
     this.titleWidget?.destroy();
     this.locationWidget?.destroy();
-    this.prayerTimesWidget?.destroy();
     this.statusImageWidget = null;
     this.titleWidget = null;
     this.locationWidget = null;
-    this.prayerTimesWidget = null;
+
   }
 
   onSettingsValidation() {

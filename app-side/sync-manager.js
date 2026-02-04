@@ -13,11 +13,20 @@ export class SyncManager {
     this.activeRequestKeys.add(key);
 
     try {
-      if (key === "prayerTimes") {
-        this._handlePrayerTimesPull(key, req, res);
-      } else {
-        this._handleRegularPull(key, res);
+      if (!storageService.hasItem(key)) {
+        res(
+          {
+            name: "KeyNotFoundError",
+            message: `Key "${key}" does not exist in storage`,
+          },
+          null
+        );
+        return;
       }
+
+      const value = storageService.getItem(key, { returnTimestamp: true });
+      res(null, value);
+      this._cleanupPendingPullIfUnchanged(key, value.data);
     } catch (err) {
       res(
         {
@@ -89,19 +98,14 @@ export class SyncManager {
   }
 
   getPendingPull() {
-    const pendingPull = storageService.getItem("pendingPull");
-    return pendingPull || [];
-  }
-
-  setPendingPull(pendingPull) {
-    storageService.setItem("pendingPull", pendingPull);
+    return storageService.getItem("pendingPull") || [];
   }
 
   addToPendingPull(key) {
     const pendingPull = this.getPendingPull();
     if (!pendingPull.includes(key)) {
       pendingPull.push(key);
-      this.setPendingPull(pendingPull);
+      storageService.setItem("pendingPull", pendingPull);
     }
   }
 
@@ -110,7 +114,7 @@ export class SyncManager {
     const index = pendingPull.indexOf(key);
     if (index > -1) {
       pendingPull.splice(index, 1);
-      this.setPendingPull(pendingPull);
+      storageService.setItem("pendingPull", pendingPull);
     }
   }
 
@@ -118,105 +122,15 @@ export class SyncManager {
     storageService.removeItem("pendingPull");
   }
 
-  removePendingPullIfUnchanged(key, originalValue) {
-    const currentStorageItem = storageService.getItem(key);
-    const currentValue = currentStorageItem;
-
+  _cleanupPendingPullIfUnchanged(key, originalValue) {
+    const currentValue = storageService.getItem(key);
     if (_.isEqual(originalValue, currentValue)) {
       this.removeFromPendingPull(key);
-      return true;
     }
-    return false;
-  }
-
-  _handlePrayerTimesPull(key, req, res, chunkSize = 1024 * 8) {
-    const value = storageService.getItem(key, {
-      returnTimestamp: true,
-      stringify: true,
-    });
-
-    const chunks = this._chunkString(value.data, chunkSize);
-    const totalChunks = chunks.length;
-    const chunkIndex = req?.params?.chunkIndex ?? 0;
-
-    // Metadata request
-    if (chunkIndex == -1) {
-      res(null, {
-        dataLength: value.data.length,
-        chunkIndex: -1,
-        totalChunks,
-        complete: false,
-        data: null,
-        timestamp: value.timestamp,
-      });
-      return;
-    }
-
-    if (req?.params?.complete === true) {
-      if (this.removePendingPullIfUnchanged(key, JSON.parse(value.data))) {
-        console.log("Prayer times pull completed for:", key);
-      }
-      res(null, {
-        dataLength: value.data.length,
-        chunkIndex: -1,
-        totalChunks,
-        complete: true,
-        data: null,
-        timestamp: value.timestamp,
-      });
-      return;
-    }
-
-    if (chunkIndex < 0 || chunkIndex >= totalChunks) {
-      res(
-        {
-          name: "InvalidChunkIndexError",
-          message: `Chunk index ${chunkIndex} is out of range (0-${
-            totalChunks - 1
-          })`,
-        },
-        null
-      );
-      return;
-    }
-
-    res(null, {
-      dataLength: value.data.length,
-      chunkIndex,
-      totalChunks,
-      complete: false,
-      data: chunks[chunkIndex],
-      timestamp: value.timestamp,
-    });
-  }
-
-  _handleRegularPull(key, res) {
-    if (!storageService.hasItem(key)) {
-      res(
-        {
-          name: "KeyNotFoundError",
-          message: `Key "${key}" does not exist in storage`,
-        },
-        null
-      );
-      return;
-    }
-
-    const value = storageService.getItem(key, { returnTimestamp: true });
-    res(null, value);
-    this.removePendingPullIfUnchanged(key, value.data);
   }
 
   isSyncing() {
     return this.activeRequestKeys.size > 0;
-  }
-
-  _chunkString(str, size) {
-    const results = [];
-    for (let i = 0; i < str.length; i += size) {
-      results.push(str.slice(i, i + size));
-    }
-    return results;
   }
 
   _isKeySyncing(key, res) {

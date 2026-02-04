@@ -48,11 +48,11 @@ export function prayersSettingsPage(navigateBackCallback, props) {
 
   // --- Build Methods ---
   function buildPrayerRow(prayer) {
-    const notifyKey = `notify:${prayer.name}`;
-    const displayKey = `display:${prayer.name}`;
+    const notifyKey = `notify:${prayer.id}`;
+    const displayKey = `display:${prayer.id}`;
 
-    const notifyValue = getNotifyValue(prayer.name);
-    const displayValue = getDisplayValue(prayer.name);
+    const notifyValue = getNotifyValue(prayer.id);
+    const displayValue = getDisplayValue(prayer.id);
 
     return View(
       {
