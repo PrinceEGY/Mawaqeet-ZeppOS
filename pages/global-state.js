@@ -43,6 +43,9 @@ export class GlobalState {
 
   _onStorageChange = (data) => {
     if (data.key?.startsWith("notify:") || data.key === "currentLocation" || data.key === "calculationMethod") {
+      if (data.key === "currentLocation" || data.key === "calculationMethod") {
+        PrayersService.clearCache();
+      }
       logger.debug(`Settings changed, rescheduling alarms`);
       AlarmScheduler.rescheduleAlarms({ force: true });
     }
