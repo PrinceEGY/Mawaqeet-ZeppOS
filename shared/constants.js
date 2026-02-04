@@ -1,17 +1,12 @@
-export const ALADHAN_URL = "https://api.aladhan.com/v1/calendar";
-
-export const ALADHAN_CALCULATION_METHODS_URL =
-  "https://api.aladhan.com/v1/methods";
-
 export const TIMINGS_LIST = [
-  { name: "fajr", label: "Fajr" },
-  { name: "sunrise", label: "Sunrise" },
-  { name: "dhuhr", label: "Dhuhr" },
-  { name: "asr", label: "Asr" },
-  { name: "maghrib", label: "Maghrib" },
-  { name: "isha", label: "Isha" },
-  { name: "midnight", label: "Midnight" },
-  { name: "lastthird", label: "Last Third" },
+  { id: "fajr", label: "Fajr" },
+  { id: "sunrise", label: "Sunrise" },
+  { id: "dhuhr", label: "Dhuhr" },
+  { id: "asr", label: "Asr" },
+  { id: "maghrib", label: "Maghrib" },
+  { id: "isha", label: "Isha" },
+  { id: "midnight", label: "Midnight" },
+  { id: "lastthird", label: "Last Third" },
 ];
 
 export const PRAYER_ICONS = {
@@ -26,17 +21,34 @@ export const PRAYER_ICONS = {
 };
 
 export const getPrayerLabel = (prayerName) => {
-  const timing = TIMINGS_LIST.find((t) => t.name === prayerName);
+  const timing = TIMINGS_LIST.find((t) => t.id === prayerName);
   return timing ? timing.label : prayerName;
 };
 
+/**
+ * Built-in calculation methods from the adhan package.
+ * Key maps directly to CalculationMethod[key]() in adhan.
+ */
+export const CALCULATION_METHODS = [
+  { id: "MuslimWorldLeague", label: "Muslim World League" },
+  { id: "Egyptian", label: "Egyptian General Authority of Survey" },
+  { id: "Karachi", label: "University of Islamic Sciences, Karachi" },
+  { id: "UmmAlQura", label: "Umm Al-Qura University, Makkah" },
+  { id: "Dubai", label: "Dubai" },
+  { id: "MoonsightingCommittee", label: "Moonsighting Committee" },
+  { id: "NorthAmerica", label: "Islamic Society of North America (ISNA)" },
+  { id: "Kuwait", label: "Kuwait" },
+  { id: "Qatar", label: "Qatar" },
+  { id: "Singapore", label: "Singapore" },
+  { id: "Tehran", label: "Institute of Geophysics, Tehran" },
+  { id: "Turkey", label: "Diyanet İşleri Başkanlığı, Turkey" },
+];
+
 export const SYNC_SETTINGS_LIST = [
-  "prayerTimes",
   "currentLocation",
   "calculationMethod",
-  "fetchMetaData",
-  ...TIMINGS_LIST.map((timing) => `display:${timing.name}`),
-  ...TIMINGS_LIST.map((timing) => `notify:${timing.name}`),
+  ...TIMINGS_LIST.map((timing) => `display:${timing.id}`),
+  ...TIMINGS_LIST.map((timing) => `notify:${timing.id}`),
 ];
 
 export const DEFAULT_SETTINGS = {
@@ -68,17 +80,7 @@ export const DEFAULT_SETTINGS = {
   },
 
   calculationMethod: {
-    id: -1,
-    label: "Auto",
-    name: "Auto (Recommended)",
-    params: {},
-  },
-
-  fetching: {
-    daysMax: 120,
-    daysMin: 1,
-    daysBefore: 7,
-    daysAfter: 21,
-    autoFetchInterval: 30,
+    id: "Egyptian",
+    label: "Egyptian General Authority of Survey",
   },
 };

@@ -1,13 +1,13 @@
 import { EventBus } from "@zos/utils";
 import { DeviceLogger } from "../utils/device-logger";
 import { PrayersService } from "../utils/prayers-service";
+import { StorageService } from "../utils/storage-service";
 
 const logger = new DeviceLogger("onboarding-state");
 
 export class OnboardingPageState {
   constructor(globalState) {
     this.globalState = globalState;
-    this.storage = globalState.storage;
     this.eventBus = new EventBus();
 
     this.state = {
@@ -103,7 +103,7 @@ export class OnboardingPageState {
 
   _validateLocation() {
     try {
-      const location = this.storage.getItem("currentLocation");
+      const location = StorageService.getItem("currentLocation");
       const isValid =
         location &&
         typeof location === "object" &&
@@ -124,9 +124,8 @@ export class OnboardingPageState {
 
   _validatePrayerTimes() {
     try {
-      const hasData = PrayersService.hasPrayerTimesData();
       const todayPrayers = PrayersService.getDayPrayerTimes(new Date());
-      const isValid = hasData && todayPrayers && todayPrayers.timings;
+      const isValid = todayPrayers && todayPrayers.timings;
 
       return {
         isValid,
@@ -138,13 +137,13 @@ export class OnboardingPageState {
     }
   }
 
+
   destroy() {
     this.globalState?.off("syncStateChanged", this._onGlobalSyncStateChange);
     this.eventBus?.clear();
     this.eventBus = null;
     this.state = null;
     this.globalState = null;
-    this.storage = null;
     logger.debug("OnboardingPageState destroyed");
   }
 }

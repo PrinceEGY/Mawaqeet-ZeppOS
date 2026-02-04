@@ -1,15 +1,14 @@
 import { DeviceLogger } from "./device-logger";
-import { PrayersService } from "./prayers-service";
+import { StorageService } from "./storage-service";
 
 const logger = new DeviceLogger("sync-manager");
 
 export class SyncManager {
-  constructor(request, call, storage) {
+  constructor(request, call) {
     this.request = request;
     this.call = call;
-    this.storage = storage;
-    this.activePullKeys = new Set(); // Keys currently being pulled
-    this.activePushKeys = new Set(); // Keys currently being pushed
+    this.activePullKeys = new Set();
+    this.activePushKeys = new Set();
     this.syncCheckInterval = null;
     this.onSyncStateChange = null;
   }
@@ -20,7 +19,7 @@ export class SyncManager {
    */
   pullFromSettingApp(keys) {
     if (!keys) {
-      this.getPendingPullKeys().then((pendingKeys) => {
+      this._getPendingPullKeys().then((pendingKeys) => {
         if (pendingKeys.length > 0) {
           logger.debug("Pulling pending keys from setting app:", pendingKeys);
           this._executePull(pendingKeys);
@@ -31,7 +30,7 @@ export class SyncManager {
       return;
     }
 
-    const syncKeys = this._normalizeKeys(keys);
+    const syncKeys = this._toArray(keys);
     if (syncKeys.length === 0) return;
 
     this._executePull(syncKeys);
@@ -39,7 +38,7 @@ export class SyncManager {
 
   _executePull(syncKeys) {
     const wasIdle = this.activePullKeys.size === 0 && this.activePushKeys.size === 0;
-    
+
     syncKeys.forEach((key) => {
       if (this.activePullKeys.has(key)) {
         logger.warn(`Already pulling key: ${key}`);
@@ -47,11 +46,7 @@ export class SyncManager {
       }
 
       this.activePullKeys.add(key);
-      if (key === "prayerTimes") {
-        this._pullPrayerTimes(key);
-      } else {
-        this._pullKey(key);
-      }
+      this._pullKey(key);
     });
 
     if (wasIdle && this.activePullKeys.size > 0) {
@@ -64,7 +59,7 @@ export class SyncManager {
    * @param {string|string[]} keys - Optional single key or array of keys to push. If not provided, pushes all pending keys.
    */
   pushToSettingApp(keys) {
-    const keysToSync = keys ? this._normalizeKeys(keys) : this.getPendingPush();
+    const keysToSync = keys ? this._toArray(keys) : this._getPendingPush();
 
     if (keysToSync.length === 0) return;
 
@@ -93,7 +88,7 @@ export class SyncManager {
    * Get pending pull keys from setting app
    * @returns {Promise<string[]>} Promise resolving to array of keys that need to be pulled
    */
-  getPendingPullKeys() {
+  _getPendingPullKeys() {
     return this.request({ method: "getPendingPull" })
       .then((res) => res.keys || [])
       .catch((error) => {
@@ -115,7 +110,6 @@ export class SyncManager {
       clearInterval(this.syncCheckInterval);
     }
 
-    // Wait for pull operations to complete
     this.syncCheckInterval = setInterval(() => {
       if (this.activePullKeys.size === 0) {
         clearInterval(this.syncCheckInterval);
@@ -126,38 +120,33 @@ export class SyncManager {
     }, 200);
   }
 
-  getPendingPush() {
-    const pendingPush = this.storage.getItem("pendingPush");
-    return pendingPush || [];
+  _getPendingPush() {
+    return StorageService.getItem("pendingPush") || [];
   }
 
-  setPendingPush(pendingPush) {
-    this.storage.setItem("pendingPush", pendingPush);
+  _setPendingPush(pendingPush) {
+    StorageService.setItem("pendingPush", pendingPush, { markForPush: false });
   }
 
-  addToPendingPush(key) {
-    const pendingPush = this.getPendingPush();
+  _addToPendingPush(key) {
+    const pendingPush = this._getPendingPush();
     if (!pendingPush.includes(key)) {
       pendingPush.push(key);
-      this.setPendingPush(pendingPush);
+      this._setPendingPush(pendingPush);
     }
   }
 
-  removeFromPendingPush(key) {
-    const pendingPush = this.getPendingPush();
+  _removeFromPendingPush(key) {
+    const pendingPush = this._getPendingPush();
     const index = pendingPush.indexOf(key);
     if (index > -1) {
       pendingPush.splice(index, 1);
-      this.setPendingPush(pendingPush);
+      this._setPendingPush(pendingPush);
     }
   }
 
-  clearPendingPush() {
-    this.storage.removeItem("pendingPush");
-  }
-
-  removePendingPushIfUnchanged(key, originalValue) {
-    const currentStorageItem = this.storage.getItem(key, {
+  _cleanupPendingPushIfUnchanged(key, originalValue) {
+    const currentStorageItem = StorageService.getItem(key, {
       returnTimestamp: true,
     });
     const currentValue = currentStorageItem?.data;
@@ -166,7 +155,7 @@ export class SyncManager {
     const currentStr = JSON.stringify(currentValue);
 
     if (originalStr === currentStr) {
-      this.removeFromPendingPush(key);
+      this._removeFromPendingPush(key);
       return true;
     }
     return false;
@@ -185,11 +174,10 @@ export class SyncManager {
     this.activePushKeys.clear();
     this.request = null;
     this.call = null;
-    this.storage = null;
     logger.debug("SyncManager destroyed");
   }
 
-  _normalizeKeys(keys) {
+  _toArray(keys) {
     if (!keys) return [];
     return Array.isArray(keys) ? keys : [keys];
   }
@@ -201,10 +189,10 @@ export class SyncManager {
   }
 
   _pushKey(key) {
-    const currentValue = this.storage.getItem(key, { returnTimestamp: true });
+    const currentValue = StorageService.getItem(key, { returnTimestamp: true });
     if (!currentValue || currentValue.data === undefined) {
       logger.debug(`No data found for key: ${key}, removing from pending push`);
-      this.removePendingPushIfUnchanged(key, currentValue?.data);
+      this._cleanupPendingPushIfUnchanged(key, currentValue?.data);
       this.activePushKeys.delete(key);
       return;
     }
@@ -217,12 +205,11 @@ export class SyncManager {
       },
     })
       .then((res) => {
-        if (res) this.removePendingPushIfUnchanged(key, currentValue.data);
+        if (res) this._cleanupPendingPushIfUnchanged(key, currentValue.data);
       })
       .catch((error) => {
         if (error && error.name === "NewerDataExistsError") {
           logger.info(`Setting app has newer data for ${key}.`);
-          // TODO: perform a pull?
         } else {
           logger.error(`Error pushing ${key} to setting app:`, error);
         }
@@ -236,23 +223,22 @@ export class SyncManager {
   _pullKey(key) {
     this.request({ method: `pull.${key}`, params: {} })
       .then((res) => {
-        const currentValue = this.storage.getItem(key, {
+        const currentValue = StorageService.getItem(key, {
           returnTimestamp: true,
         });
 
         if (!currentValue || currentValue.timestamp < res.timestamp) {
-          this.storage.setItem(key, res.data, {
+          StorageService.setItem(key, res.data, {
             timestamp: res.timestamp,
             markForPush: false,
           });
-          this.removeFromPendingPush(key);
+          this._removeFromPendingPush(key);
           logger.info(`Updated ${key} with newer data from setting app`);
         } else if (currentValue.timestamp > res.timestamp) {
           logger.info(`Local ${key} is newer, keeping for push`);
-          this.addToPendingPush(key);
+          this._addToPendingPush(key);
         } else {
-          // timestamps are equal (data is the same)
-          this.removeFromPendingPush(key);
+          this._removeFromPendingPush(key);
         }
       })
       .catch((error) => logger.error(`Error pulling ${key}:`, error))
@@ -260,102 +246,5 @@ export class SyncManager {
         this.activePullKeys.delete(key);
         this._checkSyncComplete();
       });
-  }
-
-  _pullPrayerTimes(key) {
-    this._getPrayerTimesPullMetadata(key)
-      .then(({ totalChunks, expectedDataLength, timestamp }) => {
-        if (totalChunks === 0 || expectedDataLength === 0) {
-          return;
-        }
-
-        const currentValue = this.storage.getItem(key, {
-          returnTimestamp: true,
-        });
-        if (currentValue && currentValue.timestamp >= timestamp) {
-          logger.info("Local prayer times is newer, skipping pull!");
-          return;
-        }
-
-        this._pullPrayerTimesChunks(key, totalChunks, expectedDataLength).then(
-          (chunks) => {
-            this._processPrayerTimesData(key, chunks, expectedDataLength);
-          }
-        );
-      })
-      .catch((error) => {
-        logger.error(`Error pulling prayer times for key: ${key}`, error);
-      })
-      .finally(() => {
-        this.activePullKeys.delete(key);
-        this._checkSyncComplete();
-      });
-  }
-
-  _getPrayerTimesPullMetadata(key) {
-    return this.request({
-      method: `pull.${key}`,
-      params: { chunkIndex: -1 },
-    }).then((res) => {
-      return {
-        totalChunks: res.totalChunks,
-        expectedDataLength: res.dataLength,
-        timestamp: res.timestamp,
-      };
-    });
-  }
-
-  _pullPrayerTimesChunks(key, totalChunks) {
-    const chunks = new Array(totalChunks).fill("");
-
-    const pullChunk = (index) => {
-      if (index >= totalChunks) {
-        return Promise.resolve(chunks);
-      }
-
-      return this.request({
-        method: `pull.${key}`,
-        params: { chunkIndex: index },
-      })
-        .then((chunkRes) => {
-          chunks[index] = chunkRes.data || "";
-          return this._delay(100);
-        })
-        .then(() => pullChunk(index + 1))
-        .catch((error) => {
-          logger.error(
-            `Error pulling prayer times chunk ${index + 1}: `,
-            error
-          );
-          throw error;
-        });
-    };
-
-    return pullChunk(0);
-  }
-
-  _delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  _processPrayerTimesData(key, chunks, expectedDataLength) {
-    const prayerTimesString = chunks.join("");
-
-    if (prayerTimesString.length !== expectedDataLength) {
-      logger.error(
-        `Prayer times data length mismatch: expected ${expectedDataLength}, got ${prayerTimesString.length}`
-      );
-      return;
-    }
-
-    const success = PrayersService.savePrayerTimes(prayerTimesString, false);
-
-    if (success) {
-      this.request({ method: `pull.${key}`, params: { complete: true } });
-      this.storage.emit("change", { key: "prayerTimes" });
-      logger.info("Prayer times pull completed successfully");
-    } else {
-      logger.error("Failed to save prayer times data");
-    }
   }
 }

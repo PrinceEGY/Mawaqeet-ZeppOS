@@ -1,5 +1,4 @@
 import { gettext } from "i18n";
-import { PrayersService } from "../shared/utils/prayers-service.js";
 import { SettingInitializer } from "../shared/utils/setting-init.js";
 import { StorageService } from "../shared/utils/storage-service.js";
 import { AppBar } from "./components/app_bar.js";
@@ -14,7 +13,6 @@ import { prayersSettingsPage } from "./pages/prayers/index";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 let storageService = null;
-let prayerService = null;
 
 function handleFirstRunInitialization() {
   const isFirstRun = !storageService.hasItem("__app_initialized__");
@@ -29,18 +27,12 @@ function handleFirstRunInitialization() {
       SettingInitializer.initDefaultSettings(storageService);
       storageService.setItem("__app_initialized__", true);
     }, 2000);
-    setTimeout(() => {
-      prayerService.updateOutdatedItems();
-    }, 4000);
-  } else if (storageService.getItem("__app_initialized__") === true) {
-    prayerService.updateOutdatedItems();
   }
 }
 
 AppSettingsPage({
   build(props) {
     storageService = new StorageService(props.settingsStorage);
-    prayerService = new PrayersService(storageService);
     props.storageService = storageService;
 
     handleFirstRunInitialization();

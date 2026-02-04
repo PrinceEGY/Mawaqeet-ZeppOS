@@ -117,7 +117,7 @@ export class DebugPage extends BasePage {
 
     getLastScheduleTime() {
         try {
-            const time = this.globalState.storage.getItem('lastAlarmScheduleTime');
+            const time = StorageService.getItem('lastAlarmScheduleTime');
 
             if (!time) return "Never";
 
@@ -176,10 +176,8 @@ export class DebugPage extends BasePage {
 
     localIncrement() {
         try {
-            const storage = new StorageService("file", "debug_fs");
-            const current = storage.getItem('debugAlarmCount') || 0;
-            storage.setItem('debugAlarmCount', current + 1);
-            storage.destroy();
+            const current = StorageService.getItem('debugAlarmCount') || 0;
+            StorageService.setItem('debugAlarmCount', current + 1, { markForPush: false });
 
             const newCount = this.getDebugCount();
             this.widgets.countText.update({ text: `Runs: ${newCount}` });
@@ -199,10 +197,8 @@ export class DebugPage extends BasePage {
 
     getDebugCount() {
         try {
-            const storage = new StorageService("file", "debug_fs");
-            const count = storage.getItem('debugAlarmCount') || 0;
+            const count = StorageService.getItem('debugAlarmCount') || 0;
             logger.debug(`[Page] Read Count: ${count}`);
-            storage.destroy();
             return count;
         } catch (e) {
             logger.error("Error reading debug count", e);

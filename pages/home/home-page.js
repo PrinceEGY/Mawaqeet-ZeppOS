@@ -4,7 +4,7 @@ import { BasePage } from "../shared/base_page";
 import { TextWidget } from "../shared/widgets";
 import { HomePageState } from "./home_state";
 import { LAYOUT } from "./index.r.layout";
-import { DateWidget, NoDataWidget, PrayerListWidget } from "./widgets";
+import { DateWidget, NoLocationWidget, PrayerListWidget } from "./widgets";
 
 export class HomePage extends BasePage {
   constructor(globalState) {
@@ -42,7 +42,7 @@ export class HomePage extends BasePage {
       prayerList: new PrayerListWidget({
         pageState: this.pageState,
       }),
-      noData: new NoDataWidget({
+      noLocation: new NoLocationWidget({
         pageState: this.pageState,
       }),
     };
@@ -57,6 +57,7 @@ export class HomePage extends BasePage {
     this.pageState.loadCurrentLocation();
     this.pageState.updateEnabledPrayers();
     this.pageState.loadPrayers();
+    this._updateContentVisibility();
   }
 
   onDestroy() {
@@ -74,7 +75,7 @@ export class HomePage extends BasePage {
     if (this.widgets.timeText) {
       this.widgets.timeText.update({ text: this.getCurrentTimeText(now) });
     }
-    if (this.widgets.prayerList && this.pageState.hasDataForCurrentDate()) {
+    if (this.widgets.prayerList && this.pageState.hasLocation()) {
       this.widgets.prayerList.updateRemainingTime(now);
     }
   }
@@ -85,6 +86,7 @@ export class HomePage extends BasePage {
 
   onLocationChange() {
     this.widgets.cityText?.update({ text: this.getCurrentCityText() });
+    this._updateContentVisibility();
   }
 
   _createScrollbar() {
@@ -96,17 +98,17 @@ export class HomePage extends BasePage {
   }
 
   _updateContentVisibility() {
-    const hasData = this.pageState.hasDataForCurrentDate();
+    const hasLocation = this.pageState.hasLocation();
 
-    if (hasData) {
-      this.widgets.noData?.hide();
+    if (hasLocation) {
+      this.widgets.noLocation?.hide();
       this.widgets.prayerList?.show();
       if (this.scrollbar) {
         this.scrollbar.setProperty(hmUI.prop.VISIBLE, true);
       }
     } else {
       this.widgets.prayerList?.hide();
-      this.widgets.noData?.show();
+      this.widgets.noLocation?.show();
       if (this.scrollbar) {
         this.scrollbar.setProperty(hmUI.prop.VISIBLE, false);
       }

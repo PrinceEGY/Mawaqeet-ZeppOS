@@ -35,7 +35,6 @@ export function aboutPage(navigateBackCallback, props) {
         buildInfoRow(gettext("description"), appInfo.description),
         buildInfoRow(gettext("homepage"), appInfo.homepage, true),
         buildInfoRow(gettext("email"), appInfo.email, true),
-        buildInfoRow(gettext("onlineProvider"), appInfo.onlineProvider, true),
       ],
     }),
   ]);

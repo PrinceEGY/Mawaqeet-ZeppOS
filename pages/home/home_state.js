@@ -1,15 +1,14 @@
 import { EventBus } from "@zos/utils";
-import { TIMINGS_LIST } from "../../shared/constants";
 import { DateUtils } from "../../shared/utils/date-utils";
 import { DeviceLogger } from "../utils/device-logger";
 import { PrayersService } from "../utils/prayers-service";
+import { StorageService } from "../utils/storage-service";
 
 const logger = new DeviceLogger("home-page-state");
 
 export class HomePageState {
   constructor(globalState) {
     this.globalState = globalState;
-    this.storage = globalState.storage;
     this.eventBus = new EventBus();
     this.state = {
       currentDate: new Date(),
@@ -17,10 +16,7 @@ export class HomePageState {
       enabledPrayers: [],
       cachedPrayers: null,
       lastCachedDate: null,
-      isDataLoaded: false,
       currentLocation: null,
-      hasDataForCurrentDate: true,
-      availableDateRange: null,
     };
   }
 
@@ -86,19 +82,11 @@ export class HomePageState {
         return this.state.prayers;
       }
 
-      this.state.availableDateRange =
-        PrayersService.getEffectiveAvailableDateRange();
-
-      const isDateValid = PrayersService.isDateInValidRange(
-        this.state.currentDate
-      );
-      const prayerTimes = isDateValid ? this.fetchPrayerTimes() : null;
+      const prayerTimes = this.fetchPrayerTimes();
 
       if (!prayerTimes?.timings) {
-        this.state.hasDataForCurrentDate = false;
         this.state.prayers = [];
       } else {
-        this.state.hasDataForCurrentDate = true;
         this.state.prayers = this._buildPrayersForCurrentDate(prayerTimes);
       }
 
@@ -168,12 +156,9 @@ export class HomePageState {
     return [...this.state.enabledPrayers];
   }
 
-  hasDataForCurrentDate() {
-    return this.state.hasDataForCurrentDate;
-  }
-
-  getAvailableDateRange() {
-    return this.state.availableDateRange;
+  hasLocation() {
+    const location = this.state.currentLocation;
+    return location && location.latitude && location.longitude;
   }
 
   getCurrentLocation() {
@@ -182,7 +167,7 @@ export class HomePageState {
 
   loadCurrentLocation() {
     try {
-      const location = this.storage.getItem("currentLocation");
+      const location = StorageService.getItem("currentLocation");
       const newLocation = location || "Unknown";
       const oldCity = this.state.currentLocation?.city;
       const newCity = newLocation?.city;
@@ -199,9 +184,7 @@ export class HomePageState {
   }
 
   updateEnabledPrayers() {
-    this.state.enabledPrayers = PrayersService.getDisplayEnabledPrayers(
-      this.storage
-    );
+    this.state.enabledPrayers = PrayersService.getDisplayEnabledPrayers();
     this.clearPrayersCache();
   }
 
@@ -226,7 +209,6 @@ export class HomePageState {
     this.clearPrayersCache();
     this.state = null;
     this.globalState = null;
-    this.storage = null;
     logger.debug("HomePageState destroyed");
   }
 }

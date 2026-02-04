@@ -11,10 +11,8 @@ const logger = new DeviceLogger("global-state");
 
 export class GlobalState {
   constructor(request, call) {
-    this.storage = new StorageService();
     this.eventBus = new EventBus();
-    this.syncManager = new SyncManager(request, call, this.storage);
-    this.alarmScheduler = new AlarmScheduler(this.storage);
+    this.syncManager = new SyncManager(request, call);
     this.currentPage = null;
     this.pages = {};
 
@@ -24,8 +22,8 @@ export class GlobalState {
   }
 
   init() {
-    this.storage.on("change", this._onStorageChange);
-    this.alarmScheduler.rescheduleAlarms();
+    StorageService.on("change", this._onStorageChange);
+    AlarmScheduler.rescheduleAlarms();
     RefreshManager.setRefreshCallback(() => {
       this.currentPage?.refresh?.();
     });
@@ -44,11 +42,9 @@ export class GlobalState {
   }
 
   _onStorageChange = (data) => {
-    this.emit("settingsChange", data);
-
-    if (data.key === "prayerTimes" || data.key?.startsWith("notify:")) {
-      logger.debug(`Prayer times changed, rescheduling alarms`);
-      this.alarmScheduler.rescheduleAlarms({ force: true });
+    if (data.key?.startsWith("notify:") || data.key === "currentLocation" || data.key === "calculationMethod") {
+      logger.debug(`Settings changed, rescheduling alarms`);
+      AlarmScheduler.rescheduleAlarms({ force: true });
     }
   };
 
@@ -144,11 +140,11 @@ export class GlobalState {
   }
 
   getConnectionRequirement() {
-    return this.storage.getItem("connectionRequired");
+    return StorageService.getItem("connectionRequired");
   }
 
   setConnectionRequirement(reason, returnPage) {
-    this.storage.setItem(
+    StorageService.setItem(
       "connectionRequired",
       { reason, returnPage },
       { markForPush: false }
@@ -156,7 +152,7 @@ export class GlobalState {
   }
 
   clearConnectionRequirement() {
-    this.storage.removeItem("connectionRequired");
+    StorageService.removeItem("connectionRequired");
   }
 
   getCurrentPageName() {
@@ -167,11 +163,11 @@ export class GlobalState {
   }
 
   isOnboardingCompleted() {
-    return this.storage.hasItem("onboarding_completed");
+    return StorageService.hasItem("onboarding_completed");
   }
 
   completeOnboarding() {
-    this.storage.setItem("onboarding_completed", true, { markForPush: false });
+    StorageService.setItem("onboarding_completed", true, { markForPush: false });
   }
 
   on(eventName, listener) {
@@ -190,7 +186,7 @@ export class GlobalState {
     RefreshManager.clear();
     this._stopConnectionMonitoring();
 
-    this.storage?.off("change", this._onStorageChange);
+    StorageService.off("change", this._onStorageChange);
     this.eventBus?.clear();
 
     Object.values(this.pages).forEach((page) => {
@@ -200,10 +196,9 @@ export class GlobalState {
     this.syncManager?.destroy();
     this.syncManager = null;
 
-    PrayersService.destroy();
+    PrayersService.clearCache();
 
-    this.storage?.destroy();
-    this.storage = null;
+    StorageService.destroy();
 
     this.pages = {};
     this.currentPage = null;
