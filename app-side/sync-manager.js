@@ -82,7 +82,7 @@ export class SyncManager {
         res(null, { updated: false, reason: "Current data is up-to-date" });
       }
 
-      this.removeFromPendingPull(key);
+      this._cleanupPendingPullIfUnchanged(key, data);
     } catch (err) {
       console.error(`Error handling push from device for key: ${key}`, err);
       res(

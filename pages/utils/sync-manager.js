@@ -232,13 +232,13 @@ export class SyncManager {
             timestamp: res.timestamp,
             markForPush: false,
           });
-          this._removeFromPendingPush(key);
+          this._cleanupPendingPushIfUnchanged(key, res.data);
           logger.info(`Updated ${key} with newer data from setting app`);
         } else if (currentValue.timestamp > res.timestamp) {
           logger.info(`Local ${key} is newer, keeping for push`);
           this._addToPendingPush(key);
         } else {
-          this._removeFromPendingPush(key);
+          this._cleanupPendingPushIfUnchanged(key, res.data);
         }
       })
       .catch((error) => logger.error(`Error pulling ${key}:`, error))
