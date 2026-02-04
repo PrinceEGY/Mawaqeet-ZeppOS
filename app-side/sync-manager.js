@@ -64,7 +64,7 @@ export class SyncManager {
       });
 
       if (currentValue && currentValue.timestamp > timestamp) {
-        this._addToPendingPull(key);
+        this.addToPendingPull(key);
         res(
           {
             name: "NewerDataExistsError",
@@ -82,7 +82,7 @@ export class SyncManager {
         res(null, { updated: false, reason: "Current data is up-to-date" });
       }
 
-      this._removeFromPendingPull(key);
+      this.removeFromPendingPull(key);
     } catch (err) {
       console.error(`Error handling push from device for key: ${key}`, err);
       res(
@@ -101,7 +101,7 @@ export class SyncManager {
     return storageService.getItem("pendingPull") || [];
   }
 
-  _addToPendingPull(key) {
+  addToPendingPull(key) {
     const pendingPull = this.getPendingPull();
     if (!pendingPull.includes(key)) {
       pendingPull.push(key);
@@ -109,7 +109,7 @@ export class SyncManager {
     }
   }
 
-  _removeFromPendingPull(key) {
+  removeFromPendingPull(key) {
     const pendingPull = this.getPendingPull();
     const index = pendingPull.indexOf(key);
     if (index > -1) {
@@ -125,7 +125,7 @@ export class SyncManager {
   _cleanupPendingPullIfUnchanged(key, originalValue) {
     const currentValue = storageService.getItem(key);
     if (_.isEqual(originalValue, currentValue)) {
-      this._removeFromPendingPull(key);
+      this.removeFromPendingPull(key);
     }
   }
 
