@@ -38,6 +38,21 @@ export const TYPOGRAPHY = {
   BODY_SECONDARY: { size: 20, lineHeight: 25 },
 };
 
+export const LAYOUT = {
+  SYNC_INDICATOR: {
+    x: (DEVICE_WIDTH - px(100)) / 2,
+    y: px(45),
+    w: px(100),
+    h: px(50),
+    text: "Sync",
+    text_size: TYPOGRAPHY.BODY_SECONDARY.size,
+    color: COLORS.TITLE,
+    normal_color: COLORS.PRIMARY,
+    press_color: COLORS.PRIMARY_PRESSED,
+    radius: px(8),
+  },
+};
+
 export const SHARED_UI_BUILDERS = {
   createText: ({
     parentWidget = hmUI,

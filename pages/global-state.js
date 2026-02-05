@@ -6,6 +6,7 @@ import { RefreshManager } from "./utils/refresh-manager";
 import { StorageService } from "./utils/storage-service";
 import { SyncManager } from "./utils/sync-manager";
 import { AlarmScheduler } from "./utils/alarm-scheduler";
+import { debounce } from "../shared/helpers";
 
 const logger = new DeviceLogger("global-state");
 
@@ -19,6 +20,12 @@ export class GlobalState {
     this._isConnected = false;
     this._onConnectionChange = this._onConnectionChange.bind(this);
     this._isNavigating = false;
+    this.syncPending = false;
+
+    this.debouncedReschedule = debounce(() => {
+      logger.debug(`Executing debounced alarm reschedule`);
+      AlarmScheduler.rescheduleAlarms({ force: true });
+    }, 3000);
   }
 
   init() {
@@ -29,6 +36,9 @@ export class GlobalState {
     });
 
     this.syncManager.onSyncStateChange = (isSyncing) => {
+      if (!isSyncing) {
+        this.resetSyncPending();
+      }
       this.emit("syncStateChanged", isSyncing);
     };
 
@@ -38,6 +48,7 @@ export class GlobalState {
     setTimeout(() => {
       this.syncManager.triggerFullSync();
     }, 3000);
+
     logger.debug("GlobalState initialized");
   }
 
@@ -47,8 +58,10 @@ export class GlobalState {
         PrayersService.clearCache();
       }
       logger.debug(`Settings changed, rescheduling alarms`);
-      AlarmScheduler.rescheduleAlarms({ force: true });
+      this.debouncedReschedule();
     }
+
+    this.emit("settingsChange", data);
   };
 
   registerPage(name, pageInstance) {
@@ -159,6 +172,21 @@ export class GlobalState {
     StorageService.setItem("onboarding_completed", true, { markForPush: false });
   }
 
+  setSyncPending() {
+    this.syncPending = true;
+    this.emit("syncPendingChanged", true);
+  }
+
+  resetSyncPending() {
+    this.syncPending = false;
+    this.emit("syncPendingChanged", false);
+  }
+
+  startSync() {
+    this.syncManager.triggerFullSync();
+  }
+
+
   on(eventName, listener) {
     this.eventBus.on(eventName, listener);
   }
@@ -174,6 +202,8 @@ export class GlobalState {
   destroy() {
     RefreshManager.clear();
     this._stopConnectionMonitoring();
+
+    this.debouncedReschedule?.cancel();
 
     StorageService.off("change", this._onStorageChange);
     this.eventBus?.clear();

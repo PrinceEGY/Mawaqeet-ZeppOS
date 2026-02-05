@@ -7,6 +7,7 @@ import { DebugPage } from "./debug/debug-page";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
 import { OnboardingPage } from "./onboarding/onboarding-page";
+import { SyncIndicatorWidget } from "./home/widgets/sync_indicator_widget";
 import { COLORS, DEVICE_WIDTH, TYPOGRAPHY } from "./shared/index.r.layout";
 import { DeviceLogger } from "./utils/device-logger";
 const logger = new DeviceLogger("main-page");
@@ -15,6 +16,7 @@ let globalState = null;
 let debugButtons = [];
 let originalAutoBrightness = null;
 let originalBrightness = null;
+let syncIndicatorWidget = null;
 
 
 Page(
@@ -34,6 +36,7 @@ Page(
       logger.debug("Building main page");
       this.initializePages();
       this.createDebugButtons();
+      this.createSyncIndicator();
       this.navigateToInitialPage();
     },
 
@@ -45,6 +48,14 @@ Page(
       globalState.registerPage("debug", new DebugPage(globalState));
       globalState.registerPage("home", new HomePage(globalState));
       globalState.registerPage("onboarding", new OnboardingPage(globalState));
+    },
+
+    createSyncIndicator() {
+      syncIndicatorWidget = new SyncIndicatorWidget({
+        parentWidget: hmUI,
+        globalState: globalState,
+      });
+      syncIndicatorWidget.build();
     },
 
     createDebugButtons() {
@@ -97,12 +108,8 @@ Page(
 
     onCall(req) {
       logger.debug("onCall invoked", req.method);
-      if (req.method === "pull.trigger") {
-        logger.debug("Triggering pull from setting app");
-        globalState.syncManager.pullFromSettingApp(req.keys);
-      } else if (req.method === "sync.triggerFullSync") {
-        logger.debug("Triggering full sync from setting app");
-        globalState.syncManager.triggerFullSync();
+      if (req.method === "sync.pending") {
+        globalState.setSyncPending();
       }
     },
 
@@ -114,6 +121,11 @@ Page(
         hmUI.deleteWidget(btn);
       });
       debugButtons = [];
+
+      if (syncIndicatorWidget) {
+        syncIndicatorWidget.destroy();
+        syncIndicatorWidget = null;
+      }
 
       globalState?.off("settingsChange", this.onSettingsChange);
       globalState?.destroy();

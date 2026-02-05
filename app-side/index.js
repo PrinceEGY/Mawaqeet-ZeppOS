@@ -70,7 +70,9 @@ AppSideService(
       console.debug("Settings changed:", { key, newValue, oldValue });
 
       if (key === "triggerFullSync") {
-        this.call({ method: "sync.triggerFullSync" });
+        if (syncManager.getPendingPull().length > 0) {
+          this.call({ method: "sync.pending" });
+        }
       }
 
       if (
@@ -80,18 +82,11 @@ AppSideService(
       ) {
         console.debug(`Syncing setting change for key: ${key}`);
         syncManager.addToPendingPull(key);
-        this.triggerPull([key]);
+
+        this.call({ method: "sync.pending" });
       }
     },
 
-    triggerPull(keys) {
-      const pullKeys = keys || syncManager.getPendingPull();
-      if (!pullKeys || pullKeys.length === 0) {
-        console.log("No pending pull keys to trigger.");
-        return;
-      }
-      console.log("Triggering pull with keys:", pullKeys);
-      this.call({ method: "pull.trigger", keys: pullKeys });
-    },
+
   })
 );
