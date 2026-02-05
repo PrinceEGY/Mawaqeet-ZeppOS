@@ -13,6 +13,7 @@ import { prayersSettingsPage } from "./pages/prayers/index";
 import { LAYOUT_STYLES, SPACING, TEXT_STYLES } from "./utils/styles.js";
 
 let storageService = null;
+let hasResetNavState = false;
 
 function handleFirstRunInitialization() {
   const isFirstRun = !storageService.hasItem("__app_initialized__");
@@ -36,6 +37,11 @@ AppSettingsPage({
     props.storageService = storageService;
 
     handleFirstRunInitialization();
+
+    if (!hasResetNavState) {
+      hasResetNavState = true;
+      this.resetNavState();
+    }
 
     const navState = this.getNavState();
 
@@ -102,6 +108,10 @@ AppSettingsPage({
 
   saveNavState(navState) {
     storageService.setItem("navState", navState);
+  },
+
+  resetNavState() {
+    storageService.setItem("navState", { currentPage: "main", history: [] });
   },
 
   navigateTo(page) {
@@ -193,12 +203,12 @@ AppSettingsPage({
       ),
       currentLocation
         ? Text(
-            { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
-            gettext("latitude") +
-              `: ${currentLocation.latitude}°, ` +
-              gettext("longitude") +
-              `: ${currentLocation.longitude}°`
-          )
+          { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
+          gettext("latitude") +
+          `: ${currentLocation.latitude}°, ` +
+          gettext("longitude") +
+          `: ${currentLocation.longitude}°`
+        )
         : null,
     ];
   },
