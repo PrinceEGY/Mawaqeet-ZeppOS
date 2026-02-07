@@ -2,8 +2,6 @@ import { AlarmPage } from "./alarm-page";
 import { Wear } from "@zos/sensor";
 import { exit } from "@zos/app-service";
 
-import { AlarmScheduler } from "../utils/alarm-scheduler";
-
 let alarmPage = null;
 
 Page({

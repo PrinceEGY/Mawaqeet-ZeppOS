@@ -6,7 +6,7 @@ import { RefreshManager } from "./utils/refresh-manager";
 import { StorageService } from "./utils/storage-service";
 import { SyncManager } from "./utils/sync-manager";
 import { AlarmScheduler } from "./utils/alarm-scheduler";
-import { debounce } from "../shared/helpers";
+
 
 const logger = new DeviceLogger("global-state");
 
@@ -22,15 +22,13 @@ export class GlobalState {
     this._isNavigating = false;
     this.syncPending = false;
 
-    this.debouncedReschedule = debounce(() => {
-      logger.debug(`Executing debounced alarm reschedule`);
-      AlarmScheduler.rescheduleAlarms({ force: true });
-    }, 3000);
+
   }
 
   init() {
     StorageService.on("change", this._onStorageChange);
-    AlarmScheduler.rescheduleAlarms();
+    AlarmScheduler.setupPrayerScheduler();
+
     RefreshManager.setRefreshCallback(() => {
       this.currentPage?.refresh?.();
     });
@@ -58,7 +56,7 @@ export class GlobalState {
         PrayersService.clearCache();
       }
       logger.debug(`Settings changed, rescheduling alarms`);
-      this.debouncedReschedule();
+      AlarmScheduler.scheduleNextPrayer();
     }
 
     this.emit("settingsChange", data);
@@ -202,8 +200,6 @@ export class GlobalState {
   destroy() {
     RefreshManager.clear();
     this._stopConnectionMonitoring();
-
-    this.debouncedReschedule?.cancel();
 
     StorageService.off("change", this._onStorageChange);
     this.eventBus?.clear();

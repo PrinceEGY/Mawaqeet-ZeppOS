@@ -1,88 +1,75 @@
-import { set, cancel, getAllAlarms, REPEAT_ONCE } from "@zos/alarm";
+import { set, cancel, getAllAlarms, REPEAT_ONCE, REPEAT_HOUR } from "@zos/alarm";
 import { DeviceLogger } from "./device-logger";
 import { PrayersService } from "./prayers-service";
 import { StorageService } from "./storage-service";
 
 const logger = new DeviceLogger("alarm-scheduler");
 
-const THROTTLE_DURATION = 3 * 24 * 60 * 60 * 1000; // 3 days
-const SCHEDULE_WINDOW = 7; // days
-
 export class AlarmScheduler {
-    static rescheduleAlarms({ force = false } = {}) {
+    static setupPrayerScheduler() {
         try {
-            const lastTime = StorageService.getItem('lastAlarmScheduleTime') || 0;
-            const now = Date.now();
-
-            if (!force && (now - lastTime < THROTTLE_DURATION)) {
-                logger.debug('Skipping reschedule (throttled)');
-                return;
+            const existingId = StorageService.getItem('schedulerHeartbeatId');
+            if (existingId) {
+                cancel(existingId);
             }
 
-            logger.info(`Rescheduling alarms (Force: ${force})...`);
-            this.cancelAllAlarms();
-
-            for (let i = 0; i < SCHEDULE_WINDOW; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() + i);
-                this.scheduleAlarmsForDay(date);
-            }
-
-            StorageService.setItem('lastAlarmScheduleTime', now, { markForPush: false });
-            logger.info('Alarm rescheduling complete');
-
-        } catch (error) {
-            logger.error(`Error in rescheduleAlarms: ${error}`);
-        }
-    }
-
-    static cancelAllAlarms() {
-        try {
-            const alarms = getAllAlarms();
-            alarms.forEach((id) => cancel(id));
-            logger.debug(`Cancelled ${alarms.length} existing alarms`);
-        } catch (error) {
-            logger.error(`Error cancelling alarms: ${error}`);
-        }
-    }
-
-    static scheduleAlarmsForDay(date = new Date()) {
-        const prayers = PrayersService.getNotifyEnabledPrayers();
-        const times = PrayersService.getEffectiveDayPrayerTimes(date);
-
-        if (!times?.timings) {
-            logger.debug(`No prayer times found for date: ${date.toDateString()}`);
-            return;
-        }
-
-        const now = new Date();
-        const nowTimestamp = now.getTime();
-
-        prayers.forEach((prayer) => {
-            const timeStr = times.timings[prayer];
-            if (!timeStr) return;
-
-            const alarmTime = new Date(timeStr);
-
-            // Only schedule future alarms
-            if (alarmTime.getTime() > nowTimestamp) {
-                this._scheduleAlarm(prayer, alarmTime);
-            }
-        });
-    }
-
-    static _scheduleAlarm(prayerName, time) {
-        try {
-            set({
-                url: "pages/alarm/index",
-                time: Math.floor(time.getTime() / 1000),
-                param: JSON.stringify({ type: "alarm", prayerName, prayerTime: time.toISOString() }),
+            const newId = set({
+                url: "app-service/scheduler-service",
+                delay: 3,
+                param: "",
                 store: true,
-                repeat_type: REPEAT_ONCE,
+                repeat_type: REPEAT_HOUR,
             });
-            logger.debug(`Scheduled ${prayerName} at ${time.toLocaleString()}`);
+
+            StorageService.setItem('schedulerHeartbeatId', newId, { markForPush: false });
+            logger.info(`Scheduled hourly heartbeat starting in 3s (ID: ${newId})`);
         } catch (error) {
-            logger.error(`Failed to schedule alarm for ${prayerName}: ${error}`);
+            logger.error(`Error in setupPrayerScheduler: ${error}`);
+        }
+    }
+
+    static scheduleNextPrayer() {
+        try {
+            // Cancel previous prayer alarm
+            const prevId = StorageService.getItem('nextPrayerAlarmId');
+            if (prevId) {
+                cancel(prevId);
+                StorageService.removeItem('nextPrayerAlarmId');
+            }
+
+            const now = new Date();
+            const enabledPrayers = PrayersService.getNotifyEnabledPrayers();
+
+            // 1. Try to find next prayer today
+            let nextPrayer = PrayersService.getNextPrayerTime(now, now, enabledPrayers);
+
+            // 2. If none today, check tomorrow
+            if (!nextPrayer) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                nextPrayer = PrayersService.getNextPrayerTime(tomorrow, now, enabledPrayers);
+            }
+
+            if (nextPrayer) {
+                const { prayer, time } = nextPrayer;
+                const alarmTime = new Date(time);
+
+                const newId = set({
+                    url: "pages/alarm/index",
+                    time: Math.floor(alarmTime.getTime() / 1000),
+                    param: JSON.stringify({ type: "alarm", prayerName: prayer, prayerTime: alarmTime.toISOString() }),
+                    store: true,
+                    repeat_type: REPEAT_ONCE,
+                });
+
+                StorageService.setItem('nextPrayerAlarmId', newId, { markForPush: false });
+                logger.info(`Scheduled ${prayer} at ${alarmTime.toLocaleString()} (ID: ${newId})`);
+            } else {
+                logger.warn("No next prayer found to schedule.");
+            }
+
+        } catch (error) {
+            logger.error(`Error in scheduleNextPrayer: ${error}`);
         }
     }
 }
