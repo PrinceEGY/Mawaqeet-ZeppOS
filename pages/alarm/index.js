@@ -1,4 +1,6 @@
 import { AlarmPage } from "./alarm-page";
+import { Wear } from "@zos/sensor";
+import { exit } from "@zos/app-service";
 
 import { AlarmScheduler } from "../utils/alarm-scheduler";
 
@@ -6,7 +8,11 @@ let alarmPage = null;
 
 Page({
     onInit() {
-        AlarmScheduler.rescheduleAlarms();
+        if (!this.isWearing()) {
+            console.log("Not wearing watch, skipping alarm");
+            exit();
+            return;
+        }
 
         alarmPage = new AlarmPage();
         alarmPage.init();
@@ -20,5 +26,11 @@ Page({
     onDestroy() {
         alarmPage?.destroy();
         alarmPage = null;
+    },
+
+    isWearing() {
+        const wear = new Wear();
+        const status = wear.getStatus();
+        return status !== 0;
     },
 });
