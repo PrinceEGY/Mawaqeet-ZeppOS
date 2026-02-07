@@ -45,6 +45,7 @@
         },
         "app-service": {
           "services": [
+            "app-service/scheduler-service",
             "app-service/debug-service"
           ]
         }
