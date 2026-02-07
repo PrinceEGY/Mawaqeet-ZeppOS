@@ -19,18 +19,15 @@ export class SyncIndicatorWidget extends ButtonWidget {
     onBuild() {
         super.onBuild();
 
-        this.hide();
 
         this.syncStateListener = () => {
-            this._checkSyncState();
+            this.update();
         };
 
         this.globalState.on("syncPendingChanged", this.syncStateListener);
-
-        this._checkSyncState();
     }
 
-    _checkSyncState() {
+    onUpdate() {
         const isSyncing = this.globalState.syncManager.isSyncing();
         const isPending = this.globalState.syncPending;
 

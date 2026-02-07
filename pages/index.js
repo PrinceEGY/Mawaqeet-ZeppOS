@@ -56,6 +56,7 @@ Page(
         globalState: globalState,
       });
       syncIndicatorWidget.build();
+      syncIndicatorWidget.update();
     },
 
     createDebugButtons() {
