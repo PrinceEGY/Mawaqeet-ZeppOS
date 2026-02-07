@@ -1,29 +1,41 @@
-import { exit } from "@zos/router";
+import { exit } from "@zos/app-service";
 import { BasePage } from "../shared/base_page";
-import { ButtonWidget, TextWidget } from "../shared/widgets";
+import { ButtonWidget, TextWidget, ImageWidget } from "../shared/widgets";
 import { DeviceLogger } from "../utils/device-logger";
 import { AlarmPageState } from "./alarm-page-state";
 import { LAYOUT } from "./index.r.layout";
+import { getPrayerLabel, PRAYER_ICONS } from "../../shared/constants";
+import { RefreshManager } from "../utils/refresh-manager";
 
 const logger = new DeviceLogger("alarm-page");
 
 export class AlarmPage extends BasePage {
     constructor() {
-        super(null); // No globalState needed for alarm page
+        super(null);
         this._dismiss = this._dismiss.bind(this);
+        this.lastSeconds = -1;
     }
 
     onInit() {
         this.pageState = new AlarmPageState();
         this.pageState.loadFromGlobalData();
-        logger.debug("AlarmPage initialized");
+        RefreshManager.setRefreshCallback(this.onRefresh.bind(this));
+        logger.debug("AlarmPage initialized & RefreshCallback set");
     }
 
     onBuild() {
+        const prayerName = this.pageState.state.prayerName;
+        const iconSrc = PRAYER_ICONS[prayerName] || PRAYER_ICONS.fajr;
+
         this.widgets = {
+            prayerIcon: new ImageWidget({
+                pageState: this.pageState,
+                src: iconSrc,
+                layout: LAYOUT.PRAYER_ICON,
+            }),
             prayerName: new TextWidget({
                 pageState: this.pageState,
-                text: this.pageState.getPrayerName(),
+                text: getPrayerLabel(prayerName),
                 layout: LAYOUT.PRAYER_NAME,
             }),
             prayerTime: new TextWidget({
@@ -37,6 +49,11 @@ export class AlarmPage extends BasePage {
                 layout: LAYOUT.DISMISS_BUTTON,
                 clickHandler: this._dismiss,
             }),
+            autoDismissText: new TextWidget({
+                pageState: this.pageState,
+                text: "Auto dismiss in 30",
+                layout: LAYOUT.AUTO_DISMISS_TEXT,
+            }),
         };
         logger.debug("AlarmPage widgets built");
     }
@@ -44,18 +61,35 @@ export class AlarmPage extends BasePage {
     onShow() {
         this.pageState.startVibration();
         this.pageState.startSound();
-        this.pageState.startAutoDismiss(this._dismiss);
         logger.debug("AlarmPage shown, vibration, sound, and auto-dismiss started");
     }
 
+    onRefresh() {
+        if (!this.pageState) return;
+
+        if (this.pageState.checkAutoDismiss()) {
+            logger.debug("Auto-dismiss expired in onRefresh");
+            this._dismiss();
+            return;
+        }
+
+        const seconds = this.pageState.getRemainingSeconds();
+        if (seconds !== this.lastSeconds) {
+            this.lastSeconds = seconds;
+            this.widgets?.autoDismissText?.update({ text: `Auto dismiss in ${seconds}` });
+        }
+    }
+
     onDestroy() {
-        this.pageState?.cleanup();
+        RefreshManager.clearRefreshCallback();
+        this.pageState?.destroy();
         logger.debug("AlarmPage destroyed");
     }
 
     _dismiss() {
         logger.debug("Dismissing alarm page");
-        this.pageState?.cleanup();
+        RefreshManager.clearRefreshCallback();
+        this.pageState?.destroy();
         exit();
     }
 }

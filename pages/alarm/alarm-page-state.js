@@ -1,12 +1,11 @@
 import { Vibrator, VIBRATOR_SCENE_CALL } from "@zos/sensor";
 import { create, id } from "@zos/media";
 import { DeviceLogger } from "../utils/device-logger";
-import { getPrayerLabel } from "../../shared/constants";
 import { DateUtils } from "../../shared/utils/date-utils";
 
 const logger = new DeviceLogger("alarm-page-state");
 
-const AUTO_DISMISS_MS = 10000;
+const AUTO_DISMISS_SECONDS = 30;
 
 export class AlarmPageState {
     constructor() {
@@ -16,8 +15,7 @@ export class AlarmPageState {
         };
         this.vibrator = null;
         this.player = null;
-        this.dismissTimer = null;
-        this.dismissCallback = null;
+        this.dismissExpiry = Date.now() + AUTO_DISMISS_SECONDS * 1000;
     }
 
     loadFromGlobalData() {
@@ -31,10 +29,6 @@ export class AlarmPageState {
         } else {
             logger.warn("No alarm context found in globalData");
         }
-    }
-
-    getPrayerName() {
-        return getPrayerLabel(this.state.prayerName);
     }
 
     getPrayerTime() {
@@ -55,7 +49,7 @@ export class AlarmPageState {
 
         this.vibrationTimer = setTimeout(() => {
             this.stopVibration();
-        }, 1000);
+        }, 2000);
     }
 
     stopVibration() {
@@ -102,32 +96,21 @@ export class AlarmPageState {
         }
     }
 
-    startAutoDismiss(callback) {
-        this.dismissCallback = callback;
-        this.dismissTimer = setTimeout(() => {
-            logger.debug("Auto-dismiss timer triggered");
-            this.dismissCallback?.();
-        }, AUTO_DISMISS_MS);
-        logger.debug(`Auto-dismiss timer started (${AUTO_DISMISS_MS}ms)`);
+
+
+    checkAutoDismiss() {
+        if (this.dismissExpiry <= 0) return false;
+        return Date.now() >= this.dismissExpiry;
     }
 
-    clearAutoDismiss() {
-        if (this.dismissTimer) {
-            clearTimeout(this.dismissTimer);
-            this.dismissTimer = null;
-        }
-        this.dismissCallback = null;
-    }
-
-    cleanup() {
-        this.stopVibration();
-        this.stopSound();
-        this.clearAutoDismiss();
-        logger.debug("AlarmPageState cleanup complete");
+    getRemainingSeconds() {
+        const remainingMs = Math.max(0, this.dismissExpiry - Date.now());
+        return Math.ceil(remainingMs / 1000);
     }
 
     destroy() {
-        this.cleanup();
+        this.stopVibration();
+        this.stopSound();
         this.state = null;
         logger.debug("AlarmPageState destroyed");
     }
