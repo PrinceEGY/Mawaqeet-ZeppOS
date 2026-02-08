@@ -6,10 +6,13 @@ import { StorageService } from "./storage-service";
 const logger = new DeviceLogger("alarm-scheduler");
 
 export class AlarmScheduler {
-    static setupPrayerScheduler() {
+    static setupPrayerScheduler(force = false) {
         try {
             const existingId = StorageService.getItem('schedulerHeartbeatId');
-            if (existingId) {
+
+            if (existingId && this.isAlarmExist(existingId)) {
+                if (!force) return;
+
                 cancel(existingId);
             }
 
@@ -57,7 +60,7 @@ export class AlarmScheduler {
                 const newId = set({
                     url: "pages/alarm/index",
                     time: Math.floor(alarmTime.getTime() / 1000),
-                    param: JSON.stringify({ type: "alarm", prayerName: prayer, prayerTime: alarmTime.toISOString() }),
+                    param: JSON.stringify({ type: "alarm", prayerName: prayer.toLowerCase(), prayerTime: alarmTime.toISOString() }),
                     store: true,
                     repeat_type: REPEAT_ONCE,
                 });
@@ -70,6 +73,28 @@ export class AlarmScheduler {
 
         } catch (error) {
             logger.error(`Error in scheduleNextPrayer: ${error}`);
+        }
+    }
+
+    static isAlarmExist(id) {
+        try {
+            const alarms = getAllAlarms();
+            return alarms.includes(id);
+        } catch (error) {
+            logger.error(`Error in isAlarmExist: ${error}`);
+            return false;
+        }
+    }
+
+    static cancelAllAlarms() {
+        try {
+            getAllAlarms().forEach(id => {
+                cancel(id);
+            });
+            StorageService.removeItem('nextPrayerAlarmId');
+            StorageService.removeItem('schedulerHeartbeatId');
+        } catch (error) {
+            logger.error(`Error in cancelAllAlarms: ${error}`);
         }
     }
 }
