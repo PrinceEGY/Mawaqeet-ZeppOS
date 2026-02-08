@@ -200,6 +200,24 @@ export class GlobalState {
     this.eventBus.emit(eventName, ...args);
   }
 
+  resetApp() {
+    logger.info("Resetting app...");
+
+    StorageService.clear();
+    PrayersService.clearCache();
+    AlarmScheduler.cancelAllAlarms();
+    this.syncManager.reset();
+    this.resetSyncPending();
+
+    this.navigate("onboarding");
+
+    Object.values(this.pages).forEach((page) => {
+      if (page !== this.currentPage) {
+        page?.destroy?.();
+      }
+    });
+  }
+
   destroy() {
     RefreshManager.clear();
     this._stopConnectionMonitoring();

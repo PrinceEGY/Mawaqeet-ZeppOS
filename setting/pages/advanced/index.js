@@ -84,12 +84,14 @@ export function advancedSettingsPage(navigateBackCallback, props) {
         ),
         Button({
           label: gettext("reset_settings_btn"),
-          style: { ...BUTTON_STYLES.primary },
+          style: { ...BUTTON_STYLES.primary, backgroundColor: "#d32f2f" },
           onClick: () => {
+            props.storageService.setItem("triggerAppReset", true);
+            console.log("Settings reset triggered. Device reset signal sent.");
             props.storageService.clear();
+
             SettingInitializer.resetSessionFlag();
             SettingInitializer.initNavState(props.storageService);
-            console.log("Settings reset to default.");
           },
         }),
       ],

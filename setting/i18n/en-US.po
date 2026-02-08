@@ -158,7 +158,7 @@ msgid "reset_settings_btn"
 msgstr "Reset"
 
 msgid "reset_settings_desc"
-msgstr "This will restore all application settings to their original defaults. This cannot be undone."
+msgstr "This will reset all settings on both the phone and the watch app. All data and settings will be set to their original defaults. This cannot be undone!"
 
 
 #########################

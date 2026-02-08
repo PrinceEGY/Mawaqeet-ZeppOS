@@ -104,7 +104,14 @@ Page(
 
     onRequest(req, res) {
       logger.debug("onRequest invoked", req.method);
-      res(null, { status: "success" });
+      if (req.method === "app.reset") {
+        logger.info("Device received app.reset request");
+        res(null, { status: "resetting" });
+
+        globalState.resetApp();
+      } else {
+        res(null, { status: "success" });
+      }
     },
 
     onCall(req) {

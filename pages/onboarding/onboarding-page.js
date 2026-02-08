@@ -206,7 +206,6 @@ export class OnboardingPage extends BasePage {
     swipeToIndex({ index: 0, animation: "SCROLL_ANIMATION_NONE" });
     this._clearScrollMode();
     this.destroy();
-    delete this.globalState.pages["onboarding"];
     this.globalState.navigate("home");
     logger.debug("Onboarding completed, navigating to home");
   }

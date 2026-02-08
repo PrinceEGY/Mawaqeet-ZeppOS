@@ -36,6 +36,19 @@ AppSideService(
             break;
           }
           case "getPendingPull": {
+            const resetTrigger = storageService.getItem("triggerAppReset");
+            if (resetTrigger) {
+              console.debug("Found pending app reset trigger during sync check");
+              this.request({ method: "app.reset" })
+                .then(() => {
+                  console.log("Device reset confirmed. Removing trigger.");
+                  storageService.removeItem("triggerAppReset");
+                })
+                .catch((err) => {
+                  console.warn("Reset request failed. Trigger retained.", err);
+                });
+            }
+
             const keys = syncManager.getPendingPull();
             res(null, { keys });
             break;
@@ -73,6 +86,19 @@ AppSideService(
         if (syncManager.getPendingPull().length > 0) {
           this.call({ method: "sync.pending" });
         }
+      }
+
+      if (key === "triggerAppReset") {
+        console.debug("App side service received reset trigger");
+        this.request({ method: "app.reset" })
+          .then(() => {
+            console.log("Device reset confirmed. Removing trigger.");
+            storageService.removeItem("triggerAppReset");
+          })
+          .catch((err) => {
+            console.warn("Reset request failed (device likely offline). Trigger retained for next sync.", err);
+          });
+        return;
       }
 
       if (

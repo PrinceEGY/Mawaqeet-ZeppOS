@@ -13,6 +13,16 @@ export class SyncManager {
     this.onSyncStateChange = null;
   }
 
+  reset() {
+    if (this.syncCheckInterval) {
+      clearInterval(this.syncCheckInterval);
+      this.syncCheckInterval = null;
+    }
+    this.activePullKeys.clear();
+    this.activePushKeys.clear();
+    this.onSyncStateChange?.(false);
+  }
+
   /**
    * Pull data from setting app for specified keys
    * @param {string|string[]} keys - Optional single key or array of keys to pull. If not provided, fetches pending pull keys from setting app.
@@ -166,12 +176,7 @@ export class SyncManager {
   }
 
   destroy() {
-    if (this.syncCheckInterval) {
-      clearInterval(this.syncCheckInterval);
-      this.syncCheckInterval = null;
-    }
-    this.activePullKeys.clear();
-    this.activePushKeys.clear();
+    this.reset();
     this.request = null;
     this.call = null;
     logger.debug("SyncManager destroyed");
