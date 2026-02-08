@@ -1,6 +1,6 @@
 import * as hmUI from "@zos/ui";
 
-import { set, REPEAT_ONCE } from "@zos/alarm";
+import { set, REPEAT_ONCE, getAllAlarms } from "@zos/alarm";
 import { push } from "@zos/router";
 import { px } from "@zos/utils";
 import { BasePage } from "../shared/base_page";
@@ -8,6 +8,7 @@ import { TextWidget, ButtonWidget } from "../shared/widgets";
 import { LAYOUT } from "./index.r.layout";
 import { DeviceLogger } from "../utils/device-logger";
 import { StorageService } from "../utils/storage-service";
+import { AlarmScheduler } from "../utils/alarm-scheduler";
 
 const logger = new DeviceLogger("debug-page");
 
@@ -29,10 +30,11 @@ export class DebugPage extends BasePage {
             { text: "Home Page", handler: () => this.debugNavigate("home") },
             { text: "Onboarding", handler: () => this.debugNavigate("onboarding") },
             { text: "Connection Req", handler: () => this.debugNavigate("connectionRequirement") },
-            { text: "Test Alarm", handler: () => this._scheduleTestAlarm() },
-            { text: "Test Service (5s)", handler: () => this._scheduleService() },
+            { text: "Test Alarm Page", handler: () => this._scheduleTestAlarm() },
+            { text: "Sched Alarm (15s)", handler: () => this._scheduleRealAlarm() },
+            { text: "Clear Alarms", handler: () => AlarmScheduler.cancelAllAlarms() },
+            { text: "Reschedule", handler: () => AlarmScheduler.setupPrayerScheduler({ force: true }) },
             { text: "Local Inc", handler: () => this.localIncrement() },
-
         ];
     }
 
@@ -65,13 +67,23 @@ export class DebugPage extends BasePage {
 
         const lastBtnY = LAYOUT.getButtonY(this.actions.length);
 
+        this.widgets.alarmCountText = new TextWidget({
+            parentWidget: container,
+            pageState: null,
+            text: `Alarms: ${getAllAlarms().length}`,
+            layout: {
+                ...LAYOUT.COUNT_TEXT,
+                y: lastBtnY + px(15),
+            },
+        });
+
         this.widgets.countText = new TextWidget({
             parentWidget: container,
             pageState: null,
             text: `Runs: ${this.getDebugCount()}`,
             layout: {
                 ...LAYOUT.COUNT_TEXT,
-                y: lastBtnY + px(15),
+                y: lastBtnY + px(45),
             },
         });
 
@@ -83,7 +95,7 @@ export class DebugPage extends BasePage {
             text: `Last Sched: ${this.getLastScheduleTime()}`,
             layout: {
                 ...LAYOUT.LAST_SCHEDULED_TEXT,
-                y: lastBtnY + px(45),
+                y: lastBtnY + px(75),
             },
         });
 
@@ -93,7 +105,7 @@ export class DebugPage extends BasePage {
             text: "Last Key: -",
             layout: {
                 ...LAYOUT.LAST_KEY_TEXT,
-                y: lastBtnY + px(75),
+                y: lastBtnY + px(105),
             },
         });
 
@@ -105,6 +117,7 @@ export class DebugPage extends BasePage {
         if (key === 'lastAlarmScheduleTime') {
             this.widgets.schedulerStatus.update({ text: `Last Sched: ${this.getLastScheduleTime()}` });
         }
+        this._updateAlarmCount();
     }
 
     getLastScheduleTime() {
@@ -125,23 +138,37 @@ export class DebugPage extends BasePage {
         logger.debug("Debug: Opening Alarm page");
         getApp().globalData.alarmContext = {
             type: "alarm",
-            prayerName: "Fajr",
+            prayerId: "fajr",
             prayerTime: "05:23 AM",
         };
         push({ url: "pages/alarm/index" });
     }
 
-    _scheduleService() {
-        logger.debug("Debug: Scheduling service in 5s");
+    _scheduleRealAlarm() {
+        logger.debug("Debug: Scheduling real alarm in 15s");
+        const time = new Date();
+        time.setSeconds(time.getSeconds() + 15);
+
         set({
-            url: "app-service/debug-service",
-            delay: 5,
-            store: false,
-            repeat_type: REPEAT_ONCE
+            url: "pages/alarm/index",
+            time: Math.floor(time.getTime() / 1000),
+            param: JSON.stringify({ type: "alarm", prayerId: "isha", prayerTime: time.toISOString() }),
+            store: true,
+            repeat_type: REPEAT_ONCE,
         });
+
+        this._updateAlarmCount();
     }
 
 
+    _updateAlarmCount() {
+        try {
+            const count = getAllAlarms().length;
+            this.widgets.alarmCountText?.update({ text: `Alarms: ${count}` });
+        } catch (e) {
+            logger.error("Error updating alarm count", e);
+        }
+    }
 
     localIncrement() {
         try {
