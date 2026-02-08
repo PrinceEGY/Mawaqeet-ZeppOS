@@ -1,8 +1,9 @@
-import { exit } from "@zos/app-service";
+import { exit } from "@zos/app";
+import { setPageBrightTime, setBrightness, getBrightness, pauseDropWristScreenOff, resetDropWristScreenOff } from "@zos/display";
 import { BasePage } from "../shared/base_page";
 import { ButtonWidget, TextWidget, ImageWidget } from "../shared/widgets";
 import { DeviceLogger } from "../utils/device-logger";
-import { AlarmPageState } from "./alarm-page-state";
+import { AlarmPageState, AUTO_DISMISS_SECONDS } from "./alarm-page-state";
 import { LAYOUT } from "./index.r.layout";
 import { getPrayerLabel, PRAYER_ICONS } from "../../shared/constants";
 import { RefreshManager } from "../utils/refresh-manager";
@@ -59,6 +60,11 @@ export class AlarmPage extends BasePage {
     }
 
     onShow() {
+        this.originalBrightness = getBrightness();
+        setBrightness(100);
+        setPageBrightTime({ brightTime: AUTO_DISMISS_SECONDS * 1000 });
+        pauseDropWristScreenOff({ duration: AUTO_DISMISS_SECONDS * 500 }); // Half of auto dismiss duration
+
         this.pageState.startVibration();
         this.pageState.startSound();
         logger.debug("AlarmPage shown, vibration, sound, and auto-dismiss started");
@@ -81,6 +87,11 @@ export class AlarmPage extends BasePage {
     }
 
     onDestroy() {
+        if (this.originalBrightness !== undefined && this.originalBrightness >= 0) {
+            setBrightness(this.originalBrightness);
+        }
+        resetDropWristScreenOff();
+
         RefreshManager.clearRefreshCallback();
         this.pageState?.destroy();
         logger.debug("AlarmPage destroyed");

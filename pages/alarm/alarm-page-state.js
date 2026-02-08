@@ -5,7 +5,7 @@ import { DateUtils } from "../../shared/utils/date-utils";
 
 const logger = new DeviceLogger("alarm-page-state");
 
-const AUTO_DISMISS_SECONDS = 30;
+export const AUTO_DISMISS_SECONDS = 30;
 
 export class AlarmPageState {
     constructor() {
