@@ -1,4 +1,4 @@
-import { exit } from "@zos/app";
+import { exit } from "@zos/app-service";
 import { setPageBrightTime, setBrightness, getBrightness, pauseDropWristScreenOff, resetDropWristScreenOff } from "@zos/display";
 import { BasePage } from "../shared/base_page";
 import { ButtonWidget, TextWidget, ImageWidget } from "../shared/widgets";

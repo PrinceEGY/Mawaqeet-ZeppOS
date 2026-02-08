@@ -2,6 +2,7 @@ import { Vibrator, VIBRATOR_SCENE_CALL } from "@zos/sensor";
 import { create, id } from "@zos/media";
 import { DeviceLogger } from "../utils/device-logger";
 import { DateUtils } from "../../shared/utils/date-utils";
+import { StorageService } from "../utils/storage-service";
 
 const logger = new DeviceLogger("alarm-page-state");
 
@@ -65,6 +66,14 @@ export class AlarmPageState {
     }
 
     startSound() {
+        const prayerName = this.state.prayerName;
+        const soundEnabled = StorageService.getItem(`sound:${prayerName}`);
+
+        if (soundEnabled === false) {
+            logger.debug(`Sound disabled for ${prayerName}`);
+            return;
+        }
+
         try {
             this.player = create(id.PLAYER);
             this.player.addEventListener(this.player.event.PREPARE, (result) => {
@@ -95,8 +104,6 @@ export class AlarmPageState {
             this.player = null;
         }
     }
-
-
 
     checkAutoDismiss() {
         if (this.dismissExpiry <= 0) return false;

@@ -74,7 +74,7 @@ msgstr "Select Location Manually"
 # Prayer Settings
 #########################
 msgid "prayers_settings_description"
-msgstr "Manage prayer display and notifications in the Watch Device. Use toggles to show/hide prayers, and tap the notification icon to enable/disable alerts."
+msgstr "Manage prayer display, notifications, and sound in the Watch Device. Use toggles to show/hide prayers, tap the notification icon to enable/disable alerts, and tap the sound icon to mute/unmute."
 
 msgid "last_update"
 msgstr "Last Prayer Times Update"

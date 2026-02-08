@@ -72,6 +72,12 @@ export class SettingInitializer {
       if (notifyValue === undefined || notifyValue === null) {
         storageService.setItem(notifyKey, DEFAULT_SETTINGS.notify[prayer]);
       }
+
+      const soundKey = `sound:${prayer}`;
+      const soundValue = storageService.getItem(soundKey);
+      if (soundValue === undefined || soundValue === null) {
+        storageService.setItem(soundKey, DEFAULT_SETTINGS.sound[prayer]);
+      }
     });
   }
 

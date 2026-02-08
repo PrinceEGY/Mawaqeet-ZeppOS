@@ -49,6 +49,7 @@ export const SYNC_SETTINGS_LIST = [
   "calculationMethod",
   ...TIMINGS_LIST.map((timing) => `display:${timing.id}`),
   ...TIMINGS_LIST.map((timing) => `notify:${timing.id}`),
+  ...TIMINGS_LIST.map((timing) => `sound:${timing.id}`),
 ];
 
 export const DEFAULT_SETTINGS = {
@@ -69,6 +70,17 @@ export const DEFAULT_SETTINGS = {
   },
 
   notify: {
+    fajr: true,
+    sunrise: false,
+    dhuhr: true,
+    asr: true,
+    maghrib: true,
+    isha: true,
+    midnight: false,
+    lastthird: false,
+  },
+
+  sound: {
     fajr: true,
     sunrise: false,
     dhuhr: true,
