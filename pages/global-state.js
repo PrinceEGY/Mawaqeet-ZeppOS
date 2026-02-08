@@ -59,8 +59,7 @@ export class GlobalState {
       if (data.key === "currentLocation" || data.key === "calculationMethod") {
         PrayersService.clearCache();
       }
-      logger.debug(`Settings changed, rescheduling alarms`);
-      AlarmScheduler.scheduleNextPrayer();
+      this.scheduleNextPrayerDebounced();
     }
 
     this.emit("settingsChange", data);
