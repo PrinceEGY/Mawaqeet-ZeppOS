@@ -10,7 +10,7 @@ export class PrayerItemWidget extends BaseWidget {
     this.yOffset = yOffset;
 
     this.icon = null;
-    this.nameText = null;
+    this.labelText = null;
     this.timeText = null;
     this.remainingText = null;
   }
@@ -35,11 +35,11 @@ export class PrayerItemWidget extends BaseWidget {
 
     this.icon.setProperty(
       hmUI.prop.SRC,
-      PRAYER_ICONS[this.prayer.name] || PRAYER_ICONS.fajr
+      PRAYER_ICONS[this.prayer.id] || PRAYER_ICONS.fajr
     );
 
-    this.nameText.update({
-      text: getPrayerLabel(this.prayer.name),
+    this.labelText.update({
+      text: getPrayerLabel(this.prayer.id),
       color: colors.name,
     });
 
@@ -55,14 +55,14 @@ export class PrayerItemWidget extends BaseWidget {
   }
 
   onDestroy() {
-    this.nameText?.destroy();
+    this.labelText?.destroy();
     this.timeText?.destroy();
     this.remainingText?.destroy();
 
     if (this.icon) hmUI.deleteWidget(this.icon);
 
     this.icon = null;
-    this.nameText = null;
+    this.labelText = null;
     this.timeText = null;
     this.remainingText = null;
   }
@@ -83,17 +83,17 @@ export class PrayerItemWidget extends BaseWidget {
 
     this.icon = this.widget.createWidget(hmUI.widget.IMG, {
       ...LAYOUT.PRAYER_ITEM.ICON,
-      src: PRAYER_ICONS[this.prayer.name] || PRAYER_ICONS.fajr,
+      src: PRAYER_ICONS[this.prayer.id] || PRAYER_ICONS.fajr,
     });
 
-    this.nameText = new TextWidget({
+    this.labelText = new TextWidget({
       parentWidget: this.widget,
       pageState: this.pageState,
-      layout: LAYOUT.PRAYER_ITEM.NAME,
-      text: getPrayerLabel(this.prayer.name),
+      layout: LAYOUT.PRAYER_ITEM.LABEL,
+      text: getPrayerLabel(this.prayer.id),
       color: colors.name,
     });
-    this.nameText.build();
+    this.labelText.build();
 
     this.timeText = new TextWidget({
       parentWidget: this.widget,

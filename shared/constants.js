@@ -20,9 +20,9 @@ export const PRAYER_ICONS = {
   lastthird: "prayer icons/lastthird.png",
 };
 
-export const getPrayerLabel = (prayerName) => {
-  const timing = TIMINGS_LIST.find((t) => t.id === prayerName);
-  return timing ? timing.label : prayerName;
+export const getPrayerLabel = (prayerId) => {
+  const timing = TIMINGS_LIST.find((t) => t.id === prayerId);
+  return timing ? timing.label : prayerId;
 };
 
 /**

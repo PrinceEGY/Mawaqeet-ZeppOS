@@ -19,7 +19,7 @@ export const LAYOUT = {
         h: ICON_SIZE,
     },
 
-    PRAYER_NAME: {
+    PRAYER_LABEL: {
         x: 0,
         y: px(40) + ICON_SIZE + px(16),
         w: DEVICE_WIDTH,

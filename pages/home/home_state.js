@@ -119,8 +119,8 @@ export class HomePageState {
   buildPrayersList(timings, now, nextPrayer) {
     const prayers = [];
 
-    Object.entries(timings).forEach(([prayerName, prayerTime]) => {
-      if (!this.state.enabledPrayers.includes(prayerName)) return;
+    Object.entries(timings).forEach(([prayerId, prayerTime]) => {
+      if (!this.state.enabledPrayers.includes(prayerId)) return;
       if (!prayerTime) return;
 
       const prayerTimestamp = new Date(prayerTime);
@@ -132,7 +132,7 @@ export class HomePageState {
       );
 
       prayers.push({
-        name: prayerName,
+        id: prayerId,
         time: DateUtils.formatCurrentTime(prayerTimestamp, false),
         timestamp: prayerTimestamp,
         status,

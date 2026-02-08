@@ -30,36 +30,36 @@ export function prayersSettingsPage(navigateBackCallback, props) {
           },
           gettext("prayers_settings_description")
         ),
-        ...TIMINGS_LIST.map((prayer) => buildPrayerRow(prayer)),
+        ...TIMINGS_LIST.map((prayerTiming) => buildPrayerRow(prayerTiming)),
       ],
     }),
   ]);
 
   // --- Helper Methods ---
-  function getNotifyValue(prayerName) {
-    const notifyKey = `notify:${prayerName}`;
+  function getNotifyValue(prayerId) {
+    const notifyKey = `notify:${prayerId}`;
     return props.storageService.getItem(notifyKey);
   }
 
-  function getDisplayValue(prayerName) {
-    const displayKey = `display:${prayerName}`;
+  function getDisplayValue(prayerId) {
+    const displayKey = `display:${prayerId}`;
     return props.storageService.getItem(displayKey);
   }
 
-  function getSoundValue(prayerName) {
-    const soundKey = `sound:${prayerName}`;
+  function getSoundValue(prayerId) {
+    const soundKey = `sound:${prayerId}`;
     return props.storageService.getItem(soundKey);
   }
 
   // --- Build Methods ---
-  function buildPrayerRow(prayer) {
-    const notifyKey = `notify:${prayer.id}`;
-    const displayKey = `display:${prayer.id}`;
-    const soundKey = `sound:${prayer.id}`;
+  function buildPrayerRow(prayerTiming) {
+    const notifyKey = `notify:${prayerTiming.id}`;
+    const displayKey = `display:${prayerTiming.id}`;
+    const soundKey = `sound:${prayerTiming.id}`;
 
-    const notifyValue = getNotifyValue(prayer.id);
-    const displayValue = getDisplayValue(prayer.id);
-    const soundValue = getSoundValue(prayer.id);
+    const notifyValue = getNotifyValue(prayerTiming.id);
+    const displayValue = getDisplayValue(prayerTiming.id);
+    const soundValue = getSoundValue(prayerTiming.id);
 
     return View(
       {
@@ -123,7 +123,7 @@ export function prayersSettingsPage(navigateBackCallback, props) {
 
         View({ style: { flex: 1 } }, [
           ToggleItem({
-            label: prayer.label,
+            label: prayerTiming.label,
             value: displayValue,
             onChange: (newDisplayValue) => {
               props.storageService.setItem(displayKey, newDisplayValue);

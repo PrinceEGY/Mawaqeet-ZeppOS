@@ -138,7 +138,7 @@ export const LAYOUT = {
       auto_scale: true,
     },
 
-    NAME: {
+    LABEL: {
       x: px(80),
       y: px(30),
       w: px(160),

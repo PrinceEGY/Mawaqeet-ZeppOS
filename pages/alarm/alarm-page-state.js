@@ -11,7 +11,7 @@ export const AUTO_DISMISS_SECONDS = 30;
 export class AlarmPageState {
     constructor() {
         this.state = {
-            prayerName: "Prayer",
+            prayerId: "prayer",
             prayerTime: "--:--",
         };
         this.vibrator = null;
@@ -22,10 +22,10 @@ export class AlarmPageState {
     loadFromGlobalData() {
         const context = getApp()?.globalData?.alarmContext;
         if (context) {
-            this.state.prayerName = context.prayerName || "Prayer";
+            this.state.prayerId = context.prayerId || "prayer";
             this.state.prayerTime = context.prayerTime || "--:--";
             logger.debug(
-                `Loaded alarm context: ${this.state.prayerName} at ${this.state.prayerTime}`
+                `Loaded alarm context: ${this.state.prayerId} at ${this.state.prayerTime}`
             );
         } else {
             logger.warn("No alarm context found in globalData");
@@ -66,11 +66,11 @@ export class AlarmPageState {
     }
 
     startSound() {
-        const prayerName = this.state.prayerName;
-        const soundEnabled = StorageService.getItem(`sound:${prayerName}`);
+        const prayerId = this.state.prayerId;
+        const soundEnabled = StorageService.getItem(`sound:${prayerId}`);
 
         if (soundEnabled === false) {
-            logger.debug(`Sound disabled for ${prayerName}`);
+            logger.debug(`Sound disabled for ${prayerId}`);
             return;
         }
 

@@ -25,8 +25,8 @@ export class AlarmPage extends BasePage {
     }
 
     onBuild() {
-        const prayerName = this.pageState.state.prayerName;
-        const iconSrc = PRAYER_ICONS[prayerName] || PRAYER_ICONS.fajr;
+        const prayerId = this.pageState.state.prayerId;
+        const iconSrc = PRAYER_ICONS[prayerId] || PRAYER_ICONS.fajr;
 
         this.widgets = {
             prayerIcon: new ImageWidget({
@@ -34,10 +34,10 @@ export class AlarmPage extends BasePage {
                 src: iconSrc,
                 layout: LAYOUT.PRAYER_ICON,
             }),
-            prayerName: new TextWidget({
+            prayerLabel: new TextWidget({
                 pageState: this.pageState,
-                text: getPrayerLabel(prayerName),
-                layout: LAYOUT.PRAYER_NAME,
+                text: getPrayerLabel(prayerId),
+                layout: LAYOUT.PRAYER_LABEL,
             }),
             prayerTime: new TextWidget({
                 pageState: this.pageState,

@@ -60,10 +60,10 @@ export class PrayersService {
     const effectiveTimings = { ...todayPrayerTimes.timings };
 
     if (yesterdayPrayerTimes?.timings) {
-      for (const [prayer, timestamp] of Object.entries(yesterdayPrayerTimes.timings)) {
+      for (const [prayerId, timestamp] of Object.entries(yesterdayPrayerTimes.timings)) {
         const yesterdayPrayerTime = new Date(timestamp);
         if (yesterdayPrayerTime > now) {
-          effectiveTimings[prayer] = timestamp;
+          effectiveTimings[prayerId] = timestamp;
         }
       }
     }
@@ -83,17 +83,17 @@ export class PrayersService {
    * @param {Date} date
    * @param {Date} now
    * @param {string[]|null} enabledPrayers - Filter to only these prayers
-   * @returns {{ prayer: string, time: string } | null}
+   * @returns {{ prayerId: string, time: string } | null}
    */
   static getNextPrayerTime(date = new Date(), now = new Date(), enabledPrayers = null) {
     const effectiveTimes = this.getEffectiveDayPrayerTimes(date, now);
     if (!effectiveTimes?.timings) return null;
 
-    for (const [prayer, time] of Object.entries(effectiveTimes.timings)) {
-      if (enabledPrayers && !enabledPrayers.includes(prayer)) continue;
+    for (const [prayerId, time] of Object.entries(effectiveTimes.timings)) {
+      if (enabledPrayers && !enabledPrayers.includes(prayerId)) continue;
 
       if (new Date(time) > now) {
-        return { prayer, time };
+        return { prayerId, time };
       }
     }
 

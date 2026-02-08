@@ -54,19 +54,19 @@ export class AlarmScheduler {
             }
 
             if (nextPrayer) {
-                const { prayer, time } = nextPrayer;
+                const { prayerId, time } = nextPrayer;
                 const alarmTime = new Date(time);
 
                 const newId = set({
                     url: "pages/alarm/index",
                     time: Math.floor(alarmTime.getTime() / 1000),
-                    param: JSON.stringify({ type: "alarm", prayerName: prayer.toLowerCase(), prayerTime: alarmTime.toISOString() }),
+                    param: JSON.stringify({ type: "alarm", prayerId: prayerId, prayerTime: alarmTime.toISOString() }),
                     store: true,
                     repeat_type: REPEAT_ONCE,
                 });
 
                 StorageService.setItem('nextPrayerAlarmId', newId, { markForPush: false });
-                logger.info(`Scheduled ${prayer} at ${alarmTime.toLocaleString()} (ID: ${newId})`);
+                logger.info(`Scheduled ${prayerId} at ${alarmTime.toLocaleString()} (ID: ${newId})`);
             } else {
                 logger.warn("No next prayer found to schedule.");
             }
