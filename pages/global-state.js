@@ -6,6 +6,7 @@ import { RefreshManager } from "./utils/refresh-manager";
 import { StorageService } from "./utils/storage-service";
 import { SyncManager } from "./utils/sync-manager";
 import { AlarmScheduler } from "./utils/alarm-scheduler";
+import { debounce } from "../shared/helpers";
 
 
 const logger = new DeviceLogger("global-state");
@@ -22,7 +23,10 @@ export class GlobalState {
     this._isNavigating = false;
     this.syncPending = false;
 
-
+    this.scheduleNextPrayerDebounced = debounce(() => {
+      logger.debug(`Settings changed, rescheduling alarms`);
+      AlarmScheduler.scheduleNextPrayer();
+    }, 2000);
   }
 
   init() {
