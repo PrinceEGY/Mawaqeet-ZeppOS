@@ -1,7 +1,7 @@
 import { Theme } from "../utils/theme";
 import { SPACING } from "../utils/styles";
 
-export function ToggleItem({ label, settingsKey, value, onChange }) {
+export function ToggleItem({ label, value, onChange }) {
   return View(
     {
       style: {
@@ -25,7 +25,6 @@ export function ToggleItem({ label, settingsKey, value, onChange }) {
         label
       ),
       Toggle({
-        settingsKey: settingsKey,
         value: value,
         onChange: onChange,
       }),
