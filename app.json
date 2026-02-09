@@ -12,11 +12,11 @@
     "vender": "Ahmed Mohsen (PrinceEGY)",
     "description": "Mawaqeet is a prayer time application that provides accurate prayer times based on your location.",
     "homepage": "https://github.com/PrinceEGY/Mawaqeet-ZeppOS",
-    "email": "ahmedmoh25004@gmail.com",
-    "onlineProvider": "https://aladhan.com"
+    "email": "ahmedmoh25004@gmail.com"
   },
   "permissions": [
     "data:os.device.info",
+    "data:user.hd.sleep",
     "device:os.local_storage",
     "device:os.alarm",
     "device:os.bg_service"
