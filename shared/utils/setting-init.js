@@ -19,7 +19,9 @@ export class SettingInitializer {
       this.initLocationSettings(storageService);
       this.initPrayerSettings(storageService);
       this.initCalculationMethod(storageService);
+      this.initSleepSettings(storageService);
       this._initDoneThisSession = true;
+
       console.debug("Default settings initialization completed.");
     } catch (error) {
       console.error("Error during settings initialization:", error);
@@ -92,6 +94,12 @@ export class SettingInitializer {
           DEFAULT_SETTINGS.calculationMethod
         )}`
       );
+    }
+  }
+  static initSleepSettings(storageService) {
+    const allowAlarmOnSleep = storageService.getItem("allowAlarmOnSleep");
+    if (allowAlarmOnSleep === undefined || allowAlarmOnSleep === null) {
+      storageService.setItem("allowAlarmOnSleep", DEFAULT_SETTINGS.allowAlarmOnSleep);
     }
   }
 }

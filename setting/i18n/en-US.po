@@ -199,3 +199,16 @@ msgstr "Manually trigger syncing of pending settings with your Watch Device."
 
 msgid "manual_sync_btn"
 msgstr "Sync Now"
+
+
+#########################
+# Sleep Alarm Settings
+#########################
+msgid "allow_alarm_on_sleep"
+msgstr "Allow Alarms While Sleeping"
+
+msgid "allow_alarm_on_sleep_desc"
+msgstr "When disabled, prayer alarms will not trigger while you are detected as sleeping."
+
+msgid "enabled"
+msgstr "Enabled"

@@ -1,8 +1,10 @@
 import { gettext } from "i18n";
+import { DEFAULT_SETTINGS } from "../../../shared/constants.js";
 import { SettingInitializer } from "../../../shared/utils/setting-init.js";
 import { AppBar } from "../../components/app_bar";
 import { Panel } from "../../components/panel";
 import { Spacer } from "../../components/spacer";
+import { ToggleItem } from "../../components/toggle_item";
 import {
   BUTTON_STYLES,
   LAYOUT_STYLES,
@@ -24,10 +26,28 @@ export function advancedSettingsPage(navigateBackCallback, props) {
 
     Spacer({ height: SPACING.xs }),
 
+    buildSleepAlarmPanel(props),
+
+    Spacer({ height: SPACING.xs }),
+
     buildResetSettingsPanel(props),
 
     Spacer({ height: SPACING.md }),
   ]);
+
+  function buildSleepAlarmPanel(props) {
+    return Panel({
+      children: [
+        ToggleItem({
+          label: gettext("allow_alarm_on_sleep"),
+          value: props.storageService.getItem("allowAlarmOnSleep") ?? DEFAULT_SETTINGS.allowAlarmOnSleep,
+          onChange: (val) => {
+            props.storageService.setItem("allowAlarmOnSleep", val);
+          },
+        }),
+      ],
+    });
+  }
 
   function buildManualSyncPanel(props) {
     return Panel({
