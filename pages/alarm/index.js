@@ -26,8 +26,8 @@ Page({
     },
 
     build() {
-        alarmPage.build();
-        alarmPage.show();
+        alarmPage?.build();
+        alarmPage?.show();
     },
 
     onDestroy() {
