@@ -99,7 +99,6 @@ export class GlobalState {
     logger.debug(`Navigated to: ${pageName}`);
 
     this.emit("pageChanged", pageName);
-    this._checkConnectionRequirement();
   }
 
   isConnected() {
@@ -115,47 +114,7 @@ export class GlobalState {
       this._isConnected = status;
       logger.debug(`Connection status changed: ${this._isConnected}`);
       this.emit("connectionChanged", this._isConnected);
-      this._checkConnectionRequirement();
     }
-  }
-
-
-
-  _checkConnectionRequirement() {
-    if (this._isNavigating) return;
-
-    const requirement = this.getConnectionRequirement();
-    const currentPage = this.getCurrentPageName();
-
-    if (!requirement) return;
-
-    if (currentPage === "debug") return;
-
-    if (this._isConnected && currentPage === "connectionRequirement") {
-      logger.debug(
-        `Connection restored, returning to: ${requirement.returnPage}`
-      );
-      this._navigateToPage(requirement.returnPage);
-    } else if (!this._isConnected && currentPage !== "connectionRequirement") {
-      logger.debug(`Connection required, showing connection requirement page`);
-      this._navigateToPage("connectionRequirement");
-    }
-  }
-
-  getConnectionRequirement() {
-    return StorageService.getItem("connectionRequired");
-  }
-
-  setConnectionRequirement(reason, returnPage) {
-    StorageService.setItem(
-      "connectionRequired",
-      { reason, returnPage },
-      { markForPush: false }
-    );
-  }
-
-  clearConnectionRequirement() {
-    StorageService.removeItem("connectionRequired");
   }
 
   getCurrentPageName() {
@@ -163,14 +122,6 @@ export class GlobalState {
       if (page === this.currentPage) return name;
     }
     return null;
-  }
-
-  isOnboardingCompleted() {
-    return StorageService.hasItem("onboarding_completed");
-  }
-
-  completeOnboarding() {
-    StorageService.setItem("onboarding_completed", true, { markForPush: false });
   }
 
   setSyncPending() {
@@ -209,7 +160,7 @@ export class GlobalState {
     this.syncManager.reset();
     this.resetSyncPending();
 
-    this.navigate("onboarding");
+    this.navigate("home");
 
     Object.values(this.pages).forEach((page) => {
       if (page !== this.currentPage) {

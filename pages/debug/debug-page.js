@@ -28,8 +28,6 @@ export class DebugPage extends BasePage {
     _initActions() {
         this.actions = [
             { text: "Home Page", handler: () => this.debugNavigate("home") },
-            { text: "Onboarding", handler: () => this.debugNavigate("onboarding") },
-            { text: "Connection Req", handler: () => this.debugNavigate("connectionRequirement") },
             { text: "Test Alarm Page", handler: () => this._scheduleTestAlarm() },
             { text: "Sched Alarm (15s)", handler: () => this._scheduleRealAlarm() },
             { text: "Clear Alarms", handler: () => AlarmScheduler.cancelAllAlarms() },

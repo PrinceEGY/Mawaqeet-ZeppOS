@@ -2,11 +2,9 @@ import { BasePage } from "@zeppos/zml/base-page";
 import * as display from "@zos/display";
 import * as hmUI from "@zos/ui";
 import { px } from "@zos/utils";
-import { ConnectionRequirementPage } from "./connection-requirement/connection-requirement-page";
 import { DebugPage } from "./debug/debug-page";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
-import { OnboardingPage } from "./onboarding/onboarding-page";
 import { SyncIndicatorWidget } from "./home/widgets/sync_indicator_widget";
 import { COLORS, DEVICE_WIDTH, TYPOGRAPHY } from "./shared/index.r.layout";
 import { DeviceLogger } from "./utils/device-logger";
@@ -41,13 +39,8 @@ Page(
     },
 
     initializePages() {
-      globalState.registerPage(
-        "connectionRequirement",
-        new ConnectionRequirementPage(globalState)
-      );
       globalState.registerPage("debug", new DebugPage(globalState));
       globalState.registerPage("home", new HomePage(globalState));
-      globalState.registerPage("onboarding", new OnboardingPage(globalState));
     },
 
     createSyncIndicator() {
@@ -90,9 +83,7 @@ Page(
     },
 
     navigateToInitialPage() {
-      const initialPage = globalState.isOnboardingCompleted()
-        ? "home"
-        : "onboarding";
+      const initialPage = "home";
       logger.debug(`Initial page: ${initialPage}`);
 
       if (globalState.pages[initialPage]) {
