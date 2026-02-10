@@ -19,6 +19,7 @@ export class GlobalState {
     this.syncManager = new SyncManager(request, call);
     this.currentPage = null;
     this.pages = {};
+    this._navigationStack = [];
 
     this._isConnected = false;
     this._onConnectionChange = this._onConnectionChange.bind(this);
@@ -83,7 +84,27 @@ export class GlobalState {
       logger.error(`Page not found: ${pageName}`);
       return;
     }
+
+    const currentPageName = this.getCurrentPageName();
+    if (currentPageName && currentPageName !== pageName) {
+      this._navigationStack.push(currentPageName);
+      logger.debug(`Pushed to stack: ${currentPageName}. Stack size: ${this._navigationStack.length}`);
+    }
+
     this._navigateToPage(pageName);
+  }
+
+  goBack() {
+    if (this._navigationStack.length === 0) {
+      logger.debug("Navigation stack empty, allowing default back behavior");
+      return false;
+    }
+
+    const previousPage = this._navigationStack.pop();
+    logger.debug(`Popped from stack: ${previousPage}. Stack size: ${this._navigationStack.length}`);
+
+    this._navigateToPage(previousPage);
+    return true;
   }
 
   _navigateToPage(pageName) {
@@ -167,6 +188,8 @@ export class GlobalState {
     AlarmScheduler.cancelAllAlarms();
     this.syncManager.reset();
     this.resetSyncPending();
+    this._navigationStack = [];
+    this.currentPage = null;
 
     this.navigate("home");
 

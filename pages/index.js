@@ -2,6 +2,7 @@ import { BasePage } from "@zeppos/zml/base-page";
 import * as display from "@zos/display";
 import * as hmUI from "@zos/ui";
 import { px } from "@zos/utils";
+import { onKey, offKey, KEY_BACK, KEY_EVENT_CLICK } from "@zos/interaction";
 import { DebugPage } from "./debug/debug-page";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
@@ -12,7 +13,6 @@ import { DeviceLogger } from "./utils/device-logger";
 const logger = new DeviceLogger("main-page");
 
 let globalState = null;
-let debugButtons = [];
 let originalAutoBrightness = null;
 let originalBrightness = null;
 let syncIndicatorWidget = null;
@@ -35,7 +35,20 @@ Page(
       logger.debug("Building main page");
       this.initializePages();
       this.createSyncIndicator();
+      this.setupPhysicalBackButton();
       this.navigateToInitialPage();
+    },
+
+    setupPhysicalBackButton() {
+      onKey({
+        callback: (key, keyEvent) => {
+          if (key === KEY_BACK && keyEvent === KEY_EVENT_CLICK) {
+            logger.debug("Back key pressed");
+            return globalState.goBack();
+          }
+          return false;
+        },
+      });
     },
 
     initializePages() {
@@ -93,6 +106,7 @@ Page(
       }
 
       globalState?.off("settingsChange", this.onSettingsChange);
+      offKey();
       globalState?.destroy();
       globalState = null;
 
