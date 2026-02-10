@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@silver-zepp/easy-storage": "^1.6.7-b",
-    "@zeppos/zml": "^0.0.39"
+    "@zeppos/zml": "^0.0.39",
+    "adhan": "^4.4.3"
   }
 }
