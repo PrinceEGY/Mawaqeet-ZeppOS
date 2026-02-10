@@ -60,9 +60,9 @@ export const LAYOUT = {
     },
 
     TIME_TEXT: {
-      x: px(60),
+      x: px(120),
       y: px(125),
-      w: DEVICE_WIDTH - px(120),
+      w: DEVICE_WIDTH - px(240),
       h: TYPOGRAPHY.TITLE.lineHeight,
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
@@ -94,7 +94,7 @@ export const LAYOUT = {
     y: DEVICE_HEIGHT - px(64),
     w: DEVICE_WIDTH,
     h: px(64),
-    color: 0x3b3b3b,
+    color: COLORS.GREY_BACKGROUND,
   },
 
   SETTINGS_BUTTON: {
@@ -108,18 +108,18 @@ export const LAYOUT = {
 
   PRAYERS_CONTAINER: {
     x: px(0),
-    y: px(170),
+    y: px(180),
     w: DEVICE_WIDTH,
-    h: DEVICE_HEIGHT - 230,
+    h: DEVICE_HEIGHT - px(240),
     scroll_enable: 1,
   },
 
   NO_DATA: {
     CONTAINER: {
       x: px(0),
-      y: px(165),
+      y: px(175),
       w: DEVICE_WIDTH,
-      h: DEVICE_HEIGHT - 230,
+      h: DEVICE_HEIGHT - px(240),
     },
     TITLE: {
       x: px(20),

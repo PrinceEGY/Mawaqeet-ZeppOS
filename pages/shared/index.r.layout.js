@@ -24,6 +24,8 @@ export const COLORS = {
   // Link/Button colors
   LINK: 0x059af7,
   LINK_PRESSED: 0x047ac4,
+
+  GREY_BACKGROUND: 0x3b3b3b,
 };
 
 /**
@@ -40,16 +42,23 @@ export const TYPOGRAPHY = {
 
 export const LAYOUT = {
   SYNC_INDICATOR: {
-    x: (DEVICE_WIDTH - px(100)) / 2,
-    y: px(45),
-    w: px(100),
-    h: px(50),
-    text: "Sync",
-    text_size: TYPOGRAPHY.BODY_SECONDARY.size,
-    color: COLORS.TITLE,
-    normal_color: COLORS.PRIMARY,
-    press_color: COLORS.PRIMARY_PRESSED,
-    radius: px(8),
+    BACKGROUND: {
+      x: DEVICE_WIDTH - px(120),
+      y: px(110),
+      w: px(60),
+      h: px(60),
+      radius: px(30),
+      color: COLORS.PRIMARY,
+    },
+    ICON: {
+      x: DEVICE_WIDTH - px(120),
+      y: px(110),
+      w: px(60),
+      h: px(60),
+      text: "",
+      normal_src: "sync.png",
+      press_src: "sync.png",
+    },
   },
 };
 
