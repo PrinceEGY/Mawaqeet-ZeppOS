@@ -61,19 +61,20 @@ export class PrayerListWidget extends BaseWidget {
 
   _buildPrayerItems() {
     const prayers = this.pageState.getPrayers();
+    const itemSpacing = LAYOUT.PRAYER_ITEM.SPACING;
 
     this.prayerItemWidgets = prayers.map((prayer, index) => {
       const item = new PrayerItemWidget({
         parentWidget: this.widget,
         pageState: this.pageState,
         prayer,
-        yOffset: index * 80,
+        yOffset: index * itemSpacing,
       });
       item.build();
       return item;
     });
 
-    const yOffset = this.prayerItemWidgets.length * 80;
+    const yOffset = this.prayerItemWidgets.length * itemSpacing;
     this.spacerWidget = UI_BUILDERS.createSpacer({
       parentWidget: this.widget,
       yOffset: yOffset,

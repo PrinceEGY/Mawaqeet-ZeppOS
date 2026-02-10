@@ -97,9 +97,9 @@ export const LAYOUT = {
   },
 
   SETTINGS_BUTTON: {
-    x: (DEVICE_WIDTH - px(60)) / 2,
+    x: 0,
     y: DEVICE_HEIGHT - px(64),
-    w: px(60),
+    w: DEVICE_WIDTH,
     h: px(60),
     normal_src: "settings-icon.png",
     press_src: "settings-icon.png",
@@ -145,47 +145,50 @@ export const LAYOUT = {
   PRAYER_ITEM: {
     x: px(10),
     w: DEVICE_WIDTH - px(20),
-    h: px(110),
+    h: px(85),
 
     ICON: {
-      x: px(15),
-      y: px(30),
+      x: px(35),
+      y: px(22),
       w: px(40),
       h: px(40),
       auto_scale: true,
     },
 
     LABEL: {
-      x: px(80),
-      y: px(30),
-      w: px(160),
-      h: TYPOGRAPHY.BODY.lineHeight,
-      text_size: TYPOGRAPHY.BODY.size,
+      x: px(90),
+      y: px(25),
+      w: DEVICE_WIDTH - px(260),
+      h: TYPOGRAPHY.SUBTITLE.lineHeight,
+      text_size: TYPOGRAPHY.SUBTITLE.size,
       color: COLORS.TITLE,
+      align_h: hmUI.align.LEFT,
       align_v: hmUI.align.CENTER_V,
     },
 
     TIME: {
-      x: DEVICE_WIDTH - px(190),
-      y: px(20),
+      x: DEVICE_WIDTH - px(205),
+      y: px(12),
       w: px(160),
-      h: TYPOGRAPHY.BODY.lineHeight,
-      text_size: TYPOGRAPHY.BODY.size,
+      h: TYPOGRAPHY.SUBTITLE.lineHeight,
+      text_size: TYPOGRAPHY.SUBTITLE.size,
       color: COLORS.TITLE,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
     },
 
     REMAINING: {
-      x: DEVICE_WIDTH - px(190),
-      y: px(55),
+      x: DEVICE_WIDTH - px(205),
+      y: px(50),
       w: px(160),
-      h: TYPOGRAPHY.BODY_SECONDARY.lineHeight,
-      text_size: TYPOGRAPHY.BODY_SECONDARY.size,
+      h: TYPOGRAPHY.BODY.lineHeight,
+      text_size: TYPOGRAPHY.BODY.size,
       color: COLORS.BODY,
       align_h: hmUI.align.RIGHT,
       align_v: hmUI.align.CENTER_V,
     },
+
+    SPACING: px(80),
   },
 
   DATE_PICKER: {
