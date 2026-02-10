@@ -49,7 +49,7 @@ export function locationSettingsPage(navigateBackCallback, props) {
       city: city.city,
       latitude: city.latitude,
       longitude: city.longitude,
-    });
+    }, { markForSync: true });
 
     props.storageService.removeItem("tempLatitude");
     props.storageService.removeItem("tempLongitude");
@@ -89,12 +89,12 @@ export function locationSettingsPage(navigateBackCallback, props) {
       ),
       currentLocation
         ? Text(
-            { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
-            gettext("latitude") +
-              `: ${currentLocation.latitude}°, ` +
-              gettext("longitude") +
-              `: ${currentLocation.longitude}°`
-          )
+          { style: { ...TEXT_STYLES.small, marginTop: SPACING.sm } },
+          gettext("latitude") +
+          `: ${currentLocation.latitude}°, ` +
+          gettext("longitude") +
+          `: ${currentLocation.longitude}°`
+        )
         : null,
     ]);
   }

@@ -18,13 +18,13 @@ export class AlarmScheduler {
 
             const newId = set({
                 url: "app-service/scheduler-service",
-                delay: 3,
+                delay: 30,
                 param: "",
                 store: true,
                 repeat_type: REPEAT_HOUR,
             });
 
-            StorageService.setItem('schedulerHeartbeatId', newId, { markForPush: false });
+            StorageService.setItem('schedulerHeartbeatId', newId);
             logger.info(`Scheduled hourly heartbeat starting in 3s (ID: ${newId})`);
         } catch (error) {
             logger.error(`Error in setupPrayerScheduler: ${error}`);
@@ -65,7 +65,7 @@ export class AlarmScheduler {
                     repeat_type: REPEAT_ONCE,
                 });
 
-                StorageService.setItem('nextPrayerAlarmId', newId, { markForPush: false });
+                StorageService.setItem('nextPrayerAlarmId', newId);
                 logger.info(`Scheduled ${prayerId} at ${alarmTime.toLocaleString()} (ID: ${newId})`);
             } else {
                 logger.warn("No next prayer found to schedule.");

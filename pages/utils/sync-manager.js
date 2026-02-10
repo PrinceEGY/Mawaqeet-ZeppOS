@@ -135,7 +135,7 @@ export class SyncManager {
   }
 
   _setPendingPush(pendingPush) {
-    StorageService.setItem("pendingPush", pendingPush, { markForPush: false });
+    StorageService.setItem("pendingPush", pendingPush);
   }
 
   _addToPendingPush(key) {
@@ -235,7 +235,6 @@ export class SyncManager {
         if (!currentValue || currentValue.timestamp < res.timestamp) {
           StorageService.setItem(key, res.data, {
             timestamp: res.timestamp,
-            markForPush: false,
           });
           this._cleanupPendingPushIfUnchanged(key, res.data);
           logger.info(`Updated ${key} with newer data from setting app`);

@@ -12,6 +12,11 @@ export class SettingInitializer {
   static initDefaultSettings(storageService) {
     if (this.isInitializing || this._initDoneThisSession) return;
 
+    if (storageService.getItem("__app_initialized__")) {
+      this._initDoneThisSession = true;
+      return;
+    }
+
     this.isInitializing = true;
 
     try {
@@ -20,11 +25,13 @@ export class SettingInitializer {
       this.initPrayerSettings(storageService);
       this.initCalculationMethod(storageService);
       this.initSleepSettings(storageService);
+
+      storageService.setItem("__app_initialized__", true);
       this._initDoneThisSession = true;
 
-      console.debug("Default settings initialization completed.");
     } catch (error) {
-      console.error("Error during settings initialization:", error);
+      // FIX: device side doesn't support console logging
+      // console.error("Error during settings initialization:", error);
     } finally {
       this.isInitializing = false;
     }
@@ -88,11 +95,6 @@ export class SettingInitializer {
       storageService.setItem(
         "calculationMethod",
         DEFAULT_SETTINGS.calculationMethod
-      );
-      console.debug(
-        `Default calculation method set to ${JSON.stringify(
-          DEFAULT_SETTINGS.calculationMethod
-        )}`
       );
     }
   }

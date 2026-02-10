@@ -106,10 +106,18 @@ AppSideService(
         newValue !== oldValue &&
         SYNC_SETTINGS_LIST.includes(key)
       ) {
-        console.debug(`Syncing setting change for key: ${key}`);
-        syncManager.addToPendingPull(key);
-
-        this.call({ method: "sync.pending" });
+        try {
+          const parsedValue = JSON.parse(newValue);
+          if (parsedValue && parsedValue.markForSync === true) {
+            console.debug(`Syncing setting change for key: ${key}`);
+            syncManager.addToPendingPull(key);
+            this.call({ method: "sync.pending" });
+          } else {
+            console.debug(`Skipping sync for key: ${key} (markForSync not true)`);
+          }
+        } catch (e) {
+          console.warn(`Failed to parse settings value for key: ${key}`, e);
+        }
       }
     },
 

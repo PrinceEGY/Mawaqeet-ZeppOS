@@ -171,7 +171,7 @@ export class DebugPage extends BasePage {
     localIncrement() {
         try {
             const current = StorageService.getItem('debugAlarmCount') || 0;
-            StorageService.setItem('debugAlarmCount', current + 1, { markForPush: false });
+            StorageService.setItem('debugAlarmCount', current + 1);
 
             const newCount = this.getDebugCount();
             this.widgets.countText.update({ text: `Runs: ${newCount}` });

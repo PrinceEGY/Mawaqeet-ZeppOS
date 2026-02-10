@@ -83,7 +83,7 @@ export function calculationSettingsPage(navigateBackCallback, props) {
               }
 
               props.storageService.setItem(TEMP_VISIBILITY_STATE_KEY, visibilityState);
-              props.storageService.setItem("calculationMethod", method);
+              props.storageService.setItem("calculationMethod", method, { markForSync: true });
             },
             onToggleDetails: () => {
               toggleDetails(method.id);

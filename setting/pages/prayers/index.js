@@ -91,7 +91,7 @@ export function prayersSettingsPage(navigateBackCallback, props) {
           }),
           onClick: () => {
             if (displayValue) {
-              props.storageService.setItem(notifyKey, !notifyValue);
+              props.storageService.setItem(notifyKey, !notifyValue, { markForSync: true });
             }
           },
         }),
@@ -116,7 +116,7 @@ export function prayersSettingsPage(navigateBackCallback, props) {
           }),
           onClick: () => {
             if (displayValue) {
-              props.storageService.setItem(soundKey, !soundValue);
+              props.storageService.setItem(soundKey, !soundValue, { markForSync: true });
             }
           },
         }),
@@ -126,13 +126,13 @@ export function prayersSettingsPage(navigateBackCallback, props) {
             label: prayerTiming.label,
             value: displayValue,
             onChange: (newDisplayValue) => {
-              props.storageService.setItem(displayKey, newDisplayValue);
+              props.storageService.setItem(displayKey, newDisplayValue, { markForSync: true });
               if (!newDisplayValue) {
-                if (notifyValue) props.storageService.setItem(notifyKey, false);
-                if (soundValue) props.storageService.setItem(soundKey, false);
+                if (notifyValue) props.storageService.setItem(notifyKey, false, { markForSync: true });
+                if (soundValue) props.storageService.setItem(soundKey, false, { markForSync: true });
               } else {
-                props.storageService.setItem(notifyKey, true);
-                props.storageService.setItem(soundKey, true);
+                props.storageService.setItem(notifyKey, true, { markForSync: true });
+                props.storageService.setItem(soundKey, true, { markForSync: true });
               }
             },
           }),

@@ -26,7 +26,6 @@ function handleFirstRunInitialization() {
 
     setTimeout(() => {
       SettingInitializer.initDefaultSettings(storageService);
-      storageService.setItem("__app_initialized__", true);
     }, 2000);
   }
 }

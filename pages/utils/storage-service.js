@@ -51,7 +51,7 @@ export class StorageService {
     return returnTimestamp ? value : value.data;
   }
 
-  static setItem(key, value, { timestamp = Date.now(), markForPush = true } = {}) {
+  static setItem(key, value, { timestamp = Date.now(), markForSync = false } = {}) {
     if (value === undefined) {
       logger.warn(`Attempted to set undefined value for key "${key}".`);
       return;
@@ -63,7 +63,7 @@ export class StorageService {
 
       this.emit("change", { key, value, timestamp });
 
-      if (markForPush) {
+      if (markForSync) {
         this._addKeyToPendingPush(key);
       }
     } catch (error) {
@@ -79,7 +79,7 @@ export class StorageService {
       if (!Array.isArray(pending)) pending = [];
       if (!pending.includes(key)) {
         pending.push(key);
-        this.setItem("pendingPush", pending, { markForPush: false });
+        this.setItem("pendingPush", pending);
       }
     } catch (err) {
       logger.error(`Error adding key "${key}" to pendingPush:`, err);

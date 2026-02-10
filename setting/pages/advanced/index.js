@@ -42,7 +42,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("allow_alarm_on_sleep"),
           value: props.storageService.getItem("allowAlarmOnSleep") ?? DEFAULT_SETTINGS.allowAlarmOnSleep,
           onChange: (val) => {
-            props.storageService.setItem("allowAlarmOnSleep", val);
+            props.storageService.setItem("allowAlarmOnSleep", val, { markForSync: true });
           },
         }),
       ],
@@ -74,7 +74,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("manual_sync_btn"),
           style: { ...BUTTON_STYLES.primary },
           onClick: () => {
-            props.storageService.setItem("triggerFullSync", true);
+            props.storageService.setItem("triggerFullSync", true, { markForSync: true });
           },
         }),
       ],
@@ -106,7 +106,7 @@ export function advancedSettingsPage(navigateBackCallback, props) {
           label: gettext("reset_settings_btn"),
           style: { ...BUTTON_STYLES.primary, backgroundColor: "#d32f2f" },
           onClick: () => {
-            props.storageService.setItem("triggerAppReset", true);
+            props.storageService.setItem("triggerAppReset", true, { markForSync: true });
             console.log("Settings reset triggered. Device reset signal sent.");
             props.storageService.clear();
 

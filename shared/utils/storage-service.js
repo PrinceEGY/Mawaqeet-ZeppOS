@@ -24,7 +24,7 @@ export class StorageService {
     }
   }
 
-  setItem(key, value, { timestamp = Date.now() } = {}) {
+  setItem(key, value, { timestamp = Date.now(), markForSync = false } = {}) {
     if (value === undefined) {
       console.warn(`Attempted to set undefined value for key "${key}".`);
       return;
@@ -34,6 +34,7 @@ export class StorageService {
       const wrappedValue = {
         data: value,
         timestamp,
+        markForSync,
       };
       this.storage.setItem(key, JSON.stringify(wrappedValue));
       console.debug(`Set item for key "${key}":`, wrappedValue);

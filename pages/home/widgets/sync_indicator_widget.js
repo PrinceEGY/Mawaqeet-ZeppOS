@@ -9,7 +9,7 @@ export class SyncIndicatorWidget extends ButtonWidget {
             pageState: null,
             layout: LAYOUT.SYNC_INDICATOR,
             clickHandler: () => {
-                this.globalState.startSync();
+                this.globalState.triggerFullSync();
             },
         });
         this.globalState = globalState;

@@ -9,6 +9,8 @@ import { AlarmScheduler } from "./utils/alarm-scheduler";
 import { debounce } from "../shared/helpers";
 
 
+import { SettingInitializer } from "../shared/utils/setting-init";
+
 const logger = new DeviceLogger("global-state");
 
 export class GlobalState {
@@ -31,6 +33,12 @@ export class GlobalState {
 
   init() {
     StorageService.on("change", this._onStorageChange);
+
+    // A small delay to mitigate the slow startup on the first app run
+    setTimeout(() => {
+      SettingInitializer.initDefaultSettings(StorageService, logger);
+    }, 1000);
+
     AlarmScheduler.setupPrayerScheduler();
 
     RefreshManager.setRefreshCallback(() => {
@@ -48,7 +56,7 @@ export class GlobalState {
     addListener(this._onConnectionChange);
 
     setTimeout(() => {
-      this.syncManager.triggerFullSync();
+      this.triggerFullSync();
     }, 3000);
 
     logger.debug("GlobalState initialized");
@@ -134,7 +142,7 @@ export class GlobalState {
     this.emit("syncPendingChanged", false);
   }
 
-  startSync() {
+  triggerFullSync() {
     this.syncManager.triggerFullSync();
   }
 
@@ -167,6 +175,11 @@ export class GlobalState {
         page?.destroy?.();
       }
     });
+  }
+
+
+  isAppInitialized() {
+    return StorageService.getItem("__app_initialized__");
   }
 
   destroy() {
