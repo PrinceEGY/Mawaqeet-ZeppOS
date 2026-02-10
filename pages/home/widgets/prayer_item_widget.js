@@ -145,6 +145,6 @@ export class PrayerItemWidget extends BaseWidget {
     const minutesStr = minutes.toString().padStart(2, "0");
     const secondsStr = seconds.toString().padStart(2, "0");
 
-    return `${hoursStr}:${minutesStr}:${secondsStr}`;
+    return `-${hoursStr}:${minutesStr}:${secondsStr}`;
   }
 }
