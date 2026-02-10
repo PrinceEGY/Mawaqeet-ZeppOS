@@ -57,8 +57,12 @@ export const DEFAULT_SETTINGS = {
   allowAlarmOnSleep: true,
 
   location: {
-    country: "Egypt",
     city: "Cairo",
+    latitude: 30.0444,
+    longitude: 31.2358,
+    country: "Egypt",
+    iso2: "EG",
+    iso3: "EGY",
   },
 
   display: {

@@ -29,10 +29,10 @@ export function locationSettingsPage(navigateBackCallback, props) {
     return state
       ? state
       : {
-          step: "country",
-          selectedCountry: null,
-          selectedCity: null,
-        };
+        step: "country",
+        selectedCountry: null,
+        selectedCity: null,
+      };
   }
 
   function updatePageState(state) {

@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS } from "../constants.js";
-import { GeoService } from "./geo-service.js";
+
 
 export class SettingInitializer {
   static isInitializing = false;
@@ -46,25 +46,7 @@ export class SettingInitializer {
 
   static initLocationSettings(storageService) {
     if (!storageService.getItem("currentLocation")) {
-      const defaultLocation = GeoService.getCityByName(
-        DEFAULT_SETTINGS.location.city
-      );
-
-      if (defaultLocation) {
-        storageService.setItem("currentLocation", {
-          country: defaultLocation.country,
-          city: defaultLocation.city,
-          latitude: defaultLocation.latitude,
-          longitude: defaultLocation.longitude,
-        });
-        console.debug(
-          `Default location set to ${DEFAULT_SETTINGS.location.city}`
-        );
-      } else {
-        console.debug(
-          `Default location (${DEFAULT_SETTINGS.location.city}) not found in GEO_DATA`
-        );
-      }
+      storageService.setItem("currentLocation", DEFAULT_SETTINGS.location);
     }
   }
 
