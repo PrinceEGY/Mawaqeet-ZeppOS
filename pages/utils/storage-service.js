@@ -2,15 +2,21 @@ import EasyStorage from "@silver-zepp/easy-storage";
 import { EventBus } from "@zos/utils";
 import { SYNC_SETTINGS_LIST } from "../../shared/constants";
 import { DeviceLogger } from "./device-logger";
+import { debounce } from "../../shared/helpers";
 
 const logger = new DeviceLogger("storage-service");
 
 let storage = null;
 let eventBus = null;
+const SAVE_DELAY = 3000;
+const debouncedSave = debounce(() => {
+  getStorage().saveAll();
+}, SAVE_DELAY);
 
 function getStorage() {
   if (!storage) {
     storage = new EasyStorage();
+    storage.SetAutosaveEnable(false);
   }
   return storage;
 }
@@ -66,6 +72,8 @@ export class StorageService {
       if (markForSync) {
         this._addKeyToPendingPush(key);
       }
+
+      debouncedSave();
     } catch (error) {
       logger.error(`Error setting item for key "${key}":`, error);
     }
@@ -112,5 +120,8 @@ export class StorageService {
     getStorage()?.saveAll();
     storage = null;
     eventBus = null;
+    if (debouncedSave && debouncedSave.cancel) {
+      debouncedSave.cancel();
+    }
   }
 }
