@@ -16,9 +16,10 @@ export const PRAYER_STATUS_COLORS = {
     remaining: COLORS.BODY,
   },
   next: {
-    name: COLORS.PRIMARY,
-    time: COLORS.PRIMARY,
-    remaining: COLORS.PRIMARY_PRESSED,
+    name: COLORS.TITLE,
+    time: COLORS.TITLE,
+    remaining: COLORS.TITLE,
+    background: COLORS.PRIMARY,
   },
   upcoming: {
     name: COLORS.TITLE,
@@ -107,7 +108,7 @@ export const LAYOUT = {
 
   PRAYERS_CONTAINER: {
     x: px(0),
-    y: px(165),
+    y: px(170),
     w: DEVICE_WIDTH,
     h: DEVICE_HEIGHT - 230,
     scroll_enable: 1,
@@ -146,9 +147,10 @@ export const LAYOUT = {
     x: px(10),
     w: DEVICE_WIDTH - px(20),
     h: px(85),
+    radius: px(30),
 
     ICON: {
-      x: px(35),
+      x: px(30),
       y: px(22),
       w: px(40),
       h: px(40),
@@ -156,7 +158,7 @@ export const LAYOUT = {
     },
 
     LABEL: {
-      x: px(90),
+      x: px(80),
       y: px(25),
       w: DEVICE_WIDTH - px(260),
       h: TYPOGRAPHY.SUBTITLE.lineHeight,

@@ -13,6 +13,7 @@ export class PrayerItemWidget extends BaseWidget {
     this.labelText = null;
     this.timeText = null;
     this.remainingText = null;
+    this.background = null;
   }
 
   onBuild() {
@@ -32,6 +33,10 @@ export class PrayerItemWidget extends BaseWidget {
   onUpdateView() {
     const colors =
       PRAYER_STATUS_COLORS[this.prayer.status] || PRAYER_STATUS_COLORS.upcoming;
+
+    if (this.background) {
+      this.background.setProperty(hmUI.prop.VISIBLE, this.prayer.status === "next");
+    }
 
     this.icon.setProperty(
       hmUI.prop.SRC,
@@ -58,6 +63,7 @@ export class PrayerItemWidget extends BaseWidget {
     this.labelText?.destroy();
     this.timeText?.destroy();
     this.remainingText?.destroy();
+    if (this.background) hmUI.deleteWidget(this.background);
 
     if (this.icon) hmUI.deleteWidget(this.icon);
 
@@ -65,6 +71,7 @@ export class PrayerItemWidget extends BaseWidget {
     this.labelText = null;
     this.timeText = null;
     this.remainingText = null;
+    this.background = null;
   }
 
   updateRemainingTime(now = new Date()) {
@@ -80,6 +87,16 @@ export class PrayerItemWidget extends BaseWidget {
   _buildChildWidgets() {
     const colors =
       PRAYER_STATUS_COLORS[this.prayer.status] || PRAYER_STATUS_COLORS.upcoming;
+
+    this.background = this.widget.createWidget(hmUI.widget.FILL_RECT, {
+      x: 0,
+      y: 0,
+      w: LAYOUT.PRAYER_ITEM.w,
+      h: LAYOUT.PRAYER_ITEM.h,
+      color: PRAYER_STATUS_COLORS.next.background,
+      radius: LAYOUT.PRAYER_ITEM.radius,
+    });
+    this.background.setProperty(hmUI.prop.VISIBLE, false);
 
     this.icon = this.widget.createWidget(hmUI.widget.IMG, {
       ...LAYOUT.PRAYER_ITEM.ICON,
