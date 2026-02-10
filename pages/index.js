@@ -92,7 +92,7 @@ Page(
     onCall(req) {
       logger.debug("onCall invoked", req.method);
       if (req.method === "sync.pending") {
-        globalState.setSyncPending();
+        globalState.setPendingSyncFlag();
       }
     },
 
@@ -136,7 +136,7 @@ function setupDisplay() {
   display.setPageBrightTime({ brightTime: 30000 });
   display.setAutoBrightness({ autoBright: false });
   display.setBrightness({ brightness: 100 });
-  display.pauseDropWristScreenOff({ duration: 15000 });
+  display.pauseDropWristScreenOff({ duration: 20000 });
 }
 
 function restoreDisplay() {

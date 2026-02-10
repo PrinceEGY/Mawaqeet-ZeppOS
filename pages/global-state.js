@@ -24,7 +24,7 @@ export class GlobalState {
     this._isConnected = false;
     this._onConnectionChange = this._onConnectionChange.bind(this);
     this._isNavigating = false;
-    this.syncPending = false;
+    this.pendingSyncFlag = false;
 
     this.scheduleNextPrayerDebounced = debounce(() => {
       logger.debug(`Settings changed, rescheduling alarms`);
@@ -47,10 +47,10 @@ export class GlobalState {
     });
 
     this.syncManager.onSyncStateChange = (isSyncing) => {
-      if (!isSyncing) {
-        this.resetSyncPending();
-      }
       this.emit("syncStateChanged", isSyncing);
+      if (!isSyncing) {
+        this.resetPendingSyncFlag();
+      }
     };
 
     this._isConnected = connectStatus();
@@ -153,14 +153,14 @@ export class GlobalState {
     return null;
   }
 
-  setSyncPending() {
-    this.syncPending = true;
-    this.emit("syncPendingChanged", true);
+  setPendingSyncFlag() {
+    this.pendingSyncFlag = true;
+    this.emit("syncPendingFlagChanged", true);
   }
 
-  resetSyncPending() {
-    this.syncPending = false;
-    this.emit("syncPendingChanged", false);
+  resetPendingSyncFlag() {
+    this.pendingSyncFlag = false;
+    this.emit("syncPendingFlagChanged", false);
   }
 
   triggerFullSync() {
@@ -187,7 +187,7 @@ export class GlobalState {
     PrayersService.clearCache();
     AlarmScheduler.cancelAllAlarms();
     this.syncManager.reset();
-    this.resetSyncPending();
+    this.resetPendingSyncFlag();
     this._navigationStack = [];
     this.currentPage = null;
 
