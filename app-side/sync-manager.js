@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { deepEqual } from "../shared/helpers";
 import { StorageService } from "../shared/utils/storage-service";
 
 const storageService = new StorageService(settings.settingsStorage);
@@ -124,7 +124,7 @@ export class SyncManager {
 
   _cleanupPendingPullIfUnchanged(key, originalValue) {
     const currentValue = storageService.getItem(key);
-    if (_.isEqual(originalValue, currentValue)) {
+    if (deepEqual(originalValue, currentValue)) {
       this.removeFromPendingPull(key);
     }
   }
