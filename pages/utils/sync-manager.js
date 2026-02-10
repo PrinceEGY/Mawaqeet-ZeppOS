@@ -47,21 +47,21 @@ export class SyncManager {
   }
 
   _executePull(syncKeys) {
-    const wasIdle = this.activePullKeys.size === 0 && this.activePushKeys.size === 0;
+    const wasIdle = !this.isSyncing();
 
-    syncKeys.forEach((key) => {
+    const newKeys = syncKeys.filter((key) => {
       if (this.activePullKeys.has(key)) {
         logger.warn(`Already pulling key: ${key}`);
-        return;
+        return false;
       }
-
       this.activePullKeys.add(key);
-      this._pullKey(key);
+      return true;
     });
 
-    if (wasIdle && this.activePullKeys.size > 0) {
-      this.onSyncStateChange?.(true);
-    }
+    if (newKeys.length === 0) return;
+    if (wasIdle) this.onSyncStateChange?.(true);
+
+    newKeys.forEach((key) => this._pullKey(key));
   }
 
   /**
@@ -78,20 +78,21 @@ export class SyncManager {
   }
 
   _executePush(syncKeys) {
-    const wasIdle = this.activePullKeys.size === 0 && this.activePushKeys.size === 0;
+    const wasIdle = !this.isSyncing();
 
-    syncKeys.forEach((key) => {
+    const newKeys = syncKeys.filter((key) => {
       if (this.activePushKeys.has(key)) {
         logger.warn(`Already pushing key: ${key}`);
-        return;
+        return false;
       }
       this.activePushKeys.add(key);
-      this._pushKey(key);
+      return true;
     });
 
-    if (wasIdle && this.activePushKeys.size > 0) {
-      this.onSyncStateChange?.(true);
-    }
+    if (newKeys.length === 0) return;
+    if (wasIdle) this.onSyncStateChange?.(true);
+
+    newKeys.forEach((key) => this._pushKey(key));
   }
 
   /**
