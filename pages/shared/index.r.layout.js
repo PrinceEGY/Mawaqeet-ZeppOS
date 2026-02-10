@@ -9,7 +9,7 @@ export const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = getDeviceInfo();
  */
 export const COLORS = {
   // Primary app color
-  PRIMARY: 0x399e5a,
+  PRIMARY: 0x2e7e48,
   PRIMARY_PRESSED: 0x1b5e32,
 
   // Warning/Error colors
