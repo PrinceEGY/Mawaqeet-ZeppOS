@@ -6,6 +6,7 @@ import { DebugPage } from "./debug/debug-page";
 import { GlobalState } from "./global-state";
 import { HomePage } from "./home/home-page";
 import { SyncIndicatorWidget } from "./home/widgets/sync_indicator_widget";
+import { SettingsPage } from "./settings/settings-page";
 import { COLORS, DEVICE_WIDTH, TYPOGRAPHY } from "./shared/index.r.layout";
 import { DeviceLogger } from "./utils/device-logger";
 const logger = new DeviceLogger("main-page");
@@ -33,7 +34,6 @@ Page(
     build() {
       logger.debug("Building main page");
       this.initializePages();
-      this.createDebugButtons();
       this.createSyncIndicator();
       this.navigateToInitialPage();
     },
@@ -41,6 +41,7 @@ Page(
     initializePages() {
       globalState.registerPage("debug", new DebugPage(globalState));
       globalState.registerPage("home", new HomePage(globalState));
+      globalState.registerPage("settings", new SettingsPage(globalState));
     },
 
     createSyncIndicator() {
@@ -50,36 +51,6 @@ Page(
       });
       syncIndicatorWidget.build();
       syncIndicatorWidget.update();
-    },
-
-    createDebugButtons() {
-      const debugBtn = hmUI.createWidget(hmUI.widget.BUTTON, {
-        x: px(10),
-        y: px(10),
-        w: DEVICE_WIDTH - px(20),
-        h: px(80),
-        text: "Debug",
-        text_size: TYPOGRAPHY.SUBTITLE.size,
-        color: COLORS.TITLE,
-        normal_color: COLORS.PRIMARY,
-        press_color: COLORS.PRIMARY_PRESSED,
-        radius: px(12),
-      });
-      debugBtn.addEventListener(hmUI.event.CLICK_UP, () => {
-        logger.debug("Opening Debug page");
-        debugBtn.setProperty(hmUI.prop.VISIBLE, false);
-        globalState?.currentPage?.destroy();
-        if (globalState) {
-          globalState.currentPage = null;
-          globalState.navigate("debug");
-        }
-      });
-      debugButtons.push(debugBtn);
-
-      globalState.on("pageChanged", (pageName) => {
-        const isDebugPage = pageName === "debug";
-        debugBtn.setProperty(hmUI.prop.VISIBLE, !isDebugPage);
-      });
     },
 
     navigateToInitialPage() {
@@ -115,11 +86,6 @@ Page(
     onDestroy() {
       logger.debug("Destroying main page");
       restoreDisplay();
-
-      debugButtons.forEach((btn) => {
-        hmUI.deleteWidget(btn);
-      });
-      debugButtons = [];
 
       if (syncIndicatorWidget) {
         syncIndicatorWidget.destroy();

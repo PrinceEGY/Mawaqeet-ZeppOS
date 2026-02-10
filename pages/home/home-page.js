@@ -1,7 +1,7 @@
 import * as hmUI from "@zos/ui";
 import { DateUtils } from "../../shared/utils/date-utils";
 import { BasePage } from "../shared/base_page";
-import { TextWidget } from "../shared/widgets";
+import { TextWidget, ButtonWidget } from "../shared/widgets";
 import { HomePageState } from "./home_state";
 import { LAYOUT } from "./index.r.layout";
 import { DateWidget, NoLocationWidget, PrayerListWidget } from "./widgets";
@@ -45,12 +45,25 @@ export class HomePage extends BasePage {
       noLocation: new NoLocationWidget({
         pageState: this.pageState,
       }),
+      settingsButton: new ButtonWidget({
+        pageState: this.pageState,
+        layout: LAYOUT.SETTINGS_BUTTON,
+        clickHandler: () => {
+          this.globalState.navigate("settings");
+        },
+      }),
     };
+    this.settingsFooter = hmUI.createWidget(hmUI.widget.FILL_RECT, LAYOUT.SETTINGS_FOOTER);
   }
 
   onShow() {
+    this.settingsFooter?.setProperty(hmUI.prop.VISIBLE, true);
     this._createScrollbar();
     this._updateContentVisibility();
+  }
+
+  onHide() {
+    this.settingsFooter?.setProperty(hmUI.prop.VISIBLE, false);
   }
 
   onUpdate() {
@@ -63,6 +76,11 @@ export class HomePage extends BasePage {
   onDestroy() {
     this.pageState?.off("dateChange", this.onDateChange);
     this.pageState?.off("locationChange", this.onLocationChange);
+
+    if (this.settingsFooter) {
+      hmUI.deleteWidget(this.settingsFooter);
+      this.settingsFooter = null;
+    }
 
     if (this.scrollbar) {
       hmUI.deleteWidget(this.scrollbar);

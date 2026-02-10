@@ -77,7 +77,7 @@ export class PrayerListWidget extends BaseWidget {
     this.spacerWidget = UI_BUILDERS.createSpacer({
       parentWidget: this.widget,
       yOffset: yOffset,
-      height: px(150),
+      height: px(100),
     });
   }
 

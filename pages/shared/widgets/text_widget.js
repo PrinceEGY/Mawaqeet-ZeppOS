@@ -24,6 +24,7 @@ export class TextWidget extends BaseWidget {
     endAngle,
     mode,
     radius,
+    clickHandler = null,
   }) {
     super({ parentWidget, pageState });
     this.layout = layout;
@@ -44,6 +45,7 @@ export class TextWidget extends BaseWidget {
     this.endAngle = endAngle;
     this.mode = mode;
     this.radius = radius;
+    this.clickHandler = clickHandler;
   }
 
   onBuild() {
@@ -54,6 +56,7 @@ export class TextWidget extends BaseWidget {
       pageIndex: this.pageIndex,
       props: this._buildProps(),
     });
+    this._bindClickHandlers();
   }
 
   onUpdate({
@@ -73,6 +76,7 @@ export class TextWidget extends BaseWidget {
     endAngle,
     mode,
     radius,
+    clickHandler,
   } = {}) {
     if (text !== undefined) this.text = text;
     if (x !== undefined) this.x = x;
@@ -90,6 +94,11 @@ export class TextWidget extends BaseWidget {
     if (endAngle !== undefined) this.endAngle = endAngle;
     if (mode !== undefined) this.mode = mode;
     if (radius !== undefined) this.radius = radius;
+    if (clickHandler !== undefined) {
+      this._unbindClickHandler();
+      this.clickHandler = clickHandler;
+      this._bindClickHandlers();
+    }
   }
 
   onUpdateView() {
@@ -119,5 +128,20 @@ export class TextWidget extends BaseWidget {
     if (this.mode !== undefined) props.mode = this.mode;
     if (this.radius !== undefined) props.radius = this.radius;
     return props;
+  }
+
+  _bindClickHandlers() {
+    if (!this.widget || !this.clickHandler) return;
+    this.widget.addEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+  }
+
+  _unbindClickHandler() {
+    if (this.clickHandler) {
+      this.widget?.removeEventListener(hmUI.event.CLICK_UP, this.clickHandler);
+    }
+  }
+
+  onDestroy() {
+    this._unbindClickHandler();
   }
 }

@@ -29,9 +29,9 @@ export const PRAYER_STATUS_COLORS = {
 
 export const LAYOUT = {
   CITY_TEXT: {
-    x: px(120),
-    y: px(100),
-    w: DEVICE_WIDTH - px(240),
+    x: px(80),
+    y: px(15),
+    w: DEVICE_WIDTH - px(160),
     h: TYPOGRAPHY.BODY.lineHeight,
     align_h: hmUI.align.CENTER_H,
     align_v: hmUI.align.CENTER_V,
@@ -42,16 +42,16 @@ export const LAYOUT = {
   DATE_NAVIGATION: {
     CONTAINER: {
       x: 0,
-      y: px(130),
+      y: px(55),
       w: DEVICE_WIDTH,
-      h: px(90),
+      h: px(60),
     },
 
     DATE_TEXT: {
       x: px(140),
       y: 0,
       w: DEVICE_WIDTH - px(280),
-      h: px(90),
+      h: px(60),
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
       text_size: TYPOGRAPHY.BODY.size,
@@ -59,19 +59,19 @@ export const LAYOUT = {
     },
 
     TIME_TEXT: {
-      x: px(80),
-      y: px(215),
-      w: DEVICE_WIDTH - px(160),
-      h: TYPOGRAPHY.BODY.lineHeight,
+      x: px(60),
+      y: px(125),
+      w: DEVICE_WIDTH - px(120),
+      h: TYPOGRAPHY.TITLE.lineHeight,
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
-      text_size: TYPOGRAPHY.BODY.size,
+      text_size: TYPOGRAPHY.TITLE.size,
       color: COLORS.TITLE,
     },
 
     LEFT_ARROW: {
       x: px(90),
-      y: px(20),
+      y: px(5),
       w: px(50),
       h: px(50),
       normal_src: "left_arrow.png",
@@ -80,7 +80,7 @@ export const LAYOUT = {
 
     RIGHT_ARROW: {
       x: DEVICE_WIDTH - px(140),
-      y: px(20),
+      y: px(5),
       w: px(50),
       h: px(50),
       normal_src: "right_arrow.png",
@@ -88,20 +88,37 @@ export const LAYOUT = {
     },
   },
 
+  SETTINGS_FOOTER: {
+    x: 0,
+    y: DEVICE_HEIGHT - px(64),
+    w: DEVICE_WIDTH,
+    h: px(64),
+    color: 0x3b3b3b,
+  },
+
+  SETTINGS_BUTTON: {
+    x: (DEVICE_WIDTH - px(60)) / 2,
+    y: DEVICE_HEIGHT - px(64),
+    w: px(60),
+    h: px(60),
+    normal_src: "settings-icon.png",
+    press_src: "settings-icon.png",
+  },
+
   PRAYERS_CONTAINER: {
     x: px(0),
-    y: px(260),
+    y: px(165),
     w: DEVICE_WIDTH,
-    h: DEVICE_HEIGHT - px(260),
+    h: DEVICE_HEIGHT - 230,
     scroll_enable: 1,
   },
 
   NO_DATA: {
     CONTAINER: {
       x: px(0),
-      y: px(260),
+      y: px(165),
       w: DEVICE_WIDTH,
-      h: DEVICE_HEIGHT - px(260),
+      h: DEVICE_HEIGHT - 230,
     },
     TITLE: {
       x: px(20),
