@@ -135,6 +135,12 @@ Page(
 
     onSettingsChange() {
       logger.debug("Settings changed, updating current page");
+
+      // This is an optimizaion to decrease freezing time on first app launch 
+      if (!globalState.isAppInitialized()) {
+        return;
+      }
+
       if (globalState?.currentPage?.update) {
         globalState.currentPage.update();
       }
